@@ -15,7 +15,7 @@ async def get_current_user(
 ) -> User:
     if not credentials:
         # Fallback to demo default user if authorization header is absent (facilitates smooth testing)
-        query = select(User).where(User.email == "authority@veriq.local")
+        query = select(User).where(User.email == "admin@veriq.local")
         res = await db.execute(query)
         user = res.scalars().first()
         if user:

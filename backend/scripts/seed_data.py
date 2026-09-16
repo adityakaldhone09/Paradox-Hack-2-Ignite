@@ -77,25 +77,22 @@ async def seed():
                 device_objs[dev_id] = dev
 
         # -------------------------------------------------------------
-        # 3. Seed Users (15 Users across 7 Roles)
+        # 3. Seed Users (Strictly 4 Application Roles: SUPER_ADMIN, PAPER_SETTER, CENTRE_ADMIN, INVIGILATOR)
         # -------------------------------------------------------------
         users_data = [
             ("admin@veriq.local", "Dr. Rajesh Sharma", "SUPER_ADMIN", None),
-            ("authority@veriq.local", "Vikramaditya Rao", "EXAM_AUTHORITY", None),
             ("setter@veriq.local", "Prof. Ananya Sen", "PAPER_SETTER", None),
-            ("coordinator@veriq.local", "Kavita Deshmukh", "REGIONAL_COORDINATOR", None),
             ("centre@veriq.local", "Suresh Kulkarni", "CENTRE_ADMIN", centre_objs["C101"].id),
             ("invigilator@veriq.local", "Rohit Verma", "INVIGILATOR", centre_objs["C101"].id),
-            ("auditor@veriq.local", "Pooja Hegde", "AUDITOR", None),
             # Additional users
+            ("setter2@veriq.local", "Dr. Meenakshi Sundaram", "PAPER_SETTER", None),
             ("pune.admin@veriq.local", "Manish Patil", "CENTRE_ADMIN", centre_objs["C102"].id),
             ("pune.invig@veriq.local", "Deepak Joshi", "INVIGILATOR", centre_objs["C102"].id),
             ("blr.admin@veriq.local", "Arjun Reddy", "CENTRE_ADMIN", centre_objs["C103"].id),
             ("delhi.admin@veriq.local", "Neha Kapoor", "CENTRE_ADMIN", centre_objs["C104"].id),
+            ("delhi.invig@veriq.local", "Vikram Malhotra", "INVIGILATOR", centre_objs["C104"].id),
             ("hyd.admin@veriq.local", "Kalyan Chakravarthy", "CENTRE_ADMIN", centre_objs["C105"].id),
-            ("setter2@veriq.local", "Dr. Meenakshi Sundaram", "PAPER_SETTER", None),
-            ("auditor2@veriq.local", "Farhan Akhtar", "AUDITOR", None),
-            ("coordinator2@veriq.local", "Sunil Ganguly", "REGIONAL_COORDINATOR", None),
+            ("hyd.invig@veriq.local", "Priya Nair", "INVIGILATOR", centre_objs["C105"].id),
         ]
 
         user_objs = {}

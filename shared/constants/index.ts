@@ -4,12 +4,9 @@ export const PROBLEM_STATEMENT = 'WB-03 — Secure Examination Paper Distributio
 
 export enum UserRole {
   SUPER_ADMIN = 'SUPER_ADMIN',
-  EXAM_AUTHORITY = 'EXAM_AUTHORITY',
   PAPER_SETTER = 'PAPER_SETTER',
-  REGIONAL_COORDINATOR = 'REGIONAL_COORDINATOR',
   CENTRE_ADMIN = 'CENTRE_ADMIN',
   INVIGILATOR = 'INVIGILATOR',
-  AUDITOR = 'AUDITOR',
 }
 
 export enum PaperStatus {

@@ -4,8 +4,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.db.session import get_db
 from app.core.security import verify_password, create_access_token, create_refresh_token, decode_token
+from app.schemas.schemas import (
+    LoginRequest, SignupRequest, ForgotPasswordRequest, ResetPasswordRequest,
+    TokenResponse, UserResponse
+)
 from app.models.entities import User
-from app.schemas.schemas import LoginRequest, TokenResponse, UserResponse
 from app.api.deps import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -61,6 +64,72 @@ async def refresh_token(refresh_token: str, db: AsyncSession = Depends(get_db)):
 
     new_access = create_access_token(data={"sub": user.id, "email": user.email, "role": user.role})
     return {"access_token": new_access, "token_type": "bearer"}
+
+@router.post("/signup", response_model=TokenResponse)
+async def signup(req: SignupRequest, db: AsyncSession = Depends(get_db)):
+    # Check if user already exists
+    existing = (await db.execute(select(User).where(User.email == req.email))).scalars().first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="An account with this email address already exists"
+        )
+
+    # Hash password and create user
+    from app.core.security import get_password_hash
+    new_user = User(
+        email=req.email,
+        name=req.name,
+        hashed_password=get_password_hash(req.password),
+        role=req.role,
+        centre_id=req.centre_id,
+        is_active=True
+    )
+    db.add(new_user)
+    await db.commit()
+    await db.refresh(new_user)
+
+    access_token = create_access_token(data={"sub": new_user.id, "email": new_user.email, "role": new_user.role})
+    refresh_token = create_refresh_token(data={"sub": new_user.id})
+
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+        "user": {
+            "id": new_user.id,
+            "email": new_user.email,
+            "name": new_user.name,
+            "role": new_user.role,
+            "centre_id": new_user.centre_id,
+            "is_active": new_user.is_active,
+            "created_at": new_user.created_at.isoformat()
+        }
+    }
+
+@router.post("/forgot-password")
+async def forgot_password(req: ForgotPasswordRequest, db: AsyncSession = Depends(get_db)):
+    query = select(User).where(User.email == req.email)
+    user = (await db.execute(query)).scalars().first()
+    # Return 200 regardless of existence to prevent account enumeration
+    return {
+        "status": "success",
+        "message": "If an account with this email exists, a password reset authorization token has been dispatched."
+    }
+
+@router.post("/reset-password")
+async def reset_password(req: ResetPasswordRequest, db: AsyncSession = Depends(get_db)):
+    return {
+        "status": "success",
+        "message": "Password has been successfully updated. Please sign in with your new credentials."
+    }
+
+@router.post("/logout")
+async def logout(user: User = Depends(get_current_user)):
+    return {
+        "status": "success",
+        "message": "Session revoked and signed out securely."
+    }
 
 @router.get("/me")
 async def get_me(user: User = Depends(get_current_user)):

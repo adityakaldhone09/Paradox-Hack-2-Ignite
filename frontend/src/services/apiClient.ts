@@ -30,6 +30,10 @@ apiClient.interceptors.response.use(
 // Domain API Services
 export const authApi = {
   login: (data: any) => apiClient.post('/auth/login', data),
+  signup: (data: any) => apiClient.post('/auth/signup', data),
+  forgotPassword: (data: any) => apiClient.post('/auth/forgot-password', data),
+  resetPassword: (data: any) => apiClient.post('/auth/reset-password', data),
+  logout: () => apiClient.post('/auth/logout'),
   getMe: () => apiClient.get('/auth/me'),
   getDemoUsers: () => apiClient.get('/auth/demo-users'),
 };
@@ -92,6 +96,7 @@ export const securityApi = {
 
 export const incidentApi = {
   list: (params?: any) => apiClient.get('/incidents', { params }),
+  create: (data: any) => apiClient.post('/incidents', data),
   get: (id: string) => apiClient.get(`/incidents/${id}`),
   acknowledge: (id: string) => apiClient.post(`/incidents/${id}/acknowledge`),
   resolve: (id: string, data: { resolution_notes: string }) => apiClient.post(`/incidents/${id}/resolve`, data),
@@ -103,4 +108,5 @@ export const auditApi = {
 
 export const demoApi = {
   simulate: (eventType: string) => apiClient.post('/demo/simulate', { event_type: eventType }),
+  simulateEvent: (eventType: string) => apiClient.post('/demo/simulate', { event_type: eventType }),
 };

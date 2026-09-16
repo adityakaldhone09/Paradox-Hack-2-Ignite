@@ -2,11 +2,30 @@ from datetime import datetime
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, EmailStr, Field
 
+from typing import Literal
+
+VALID_ROLES = ("SUPER_ADMIN", "PAPER_SETTER", "CENTRE_ADMIN", "INVIGILATOR")
+RoleType = Literal["SUPER_ADMIN", "PAPER_SETTER", "CENTRE_ADMIN", "INVIGILATOR"]
+
 # Auth
 class LoginRequest(BaseModel):
     email: str
     password: str
     remember_me: bool = False
+
+class SignupRequest(BaseModel):
+    email: str
+    password: str
+    name: str
+    role: RoleType = "INVIGILATOR"
+    centre_id: Optional[str] = None
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
 
 class TokenResponse(BaseModel):
     access_token: str

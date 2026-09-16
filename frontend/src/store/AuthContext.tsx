@@ -1,29 +1,58 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { authApi } from '../services/apiClient';
 
-interface User {
+export type UserRole = 'SUPER_ADMIN' | 'PAPER_SETTER' | 'CENTRE_ADMIN' | 'INVIGILATOR';
+
+export interface User {
   id: string;
   email: string;
   name: string;
-  role: string;
+  role: UserRole;
   centre_id?: string;
   is_active: boolean;
+  created_at?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
   isLoading: boolean;
-  login: (email: string, password?: string) => Promise<void>;
-  logout: () => void;
-  switchRole: (email: string) => Promise<void>;
+  isAuthenticated: boolean;
+  login: (email: string, password?: string) => Promise<User>;
+  signup: (data: { email: string; password: string; name: string; role: UserRole; centre_id?: string }) => Promise<User>;
+  logout: (showToast?: boolean) => void;
+  switchRole: (role: UserRole) => Promise<void>;
+  getDashboardUrl: (role?: UserRole) => string;
 }
+
+const DEMO_ROLE_CREDENTIALS: Record<UserRole, { email: string; name: string }> = {
+  SUPER_ADMIN: { email: 'admin@veriq.local', name: 'Dr. Rajesh Sharma' },
+  PAPER_SETTER: { email: 'setter@veriq.local', name: 'Prof. Ananya Sen' },
+  CENTRE_ADMIN: { email: 'centre@veriq.local', name: 'Suresh Kulkarni' },
+  INVIGILATOR: { email: 'invigilator@veriq.local', name: 'Rohit Verma' },
+};
+
+export const getRoleDashboardUrl = (role?: string): string => {
+  switch (role) {
+    case 'SUPER_ADMIN':
+      return '/dashboard/admin';
+    case 'PAPER_SETTER':
+      return '/dashboard/paper-setter';
+    case 'CENTRE_ADMIN':
+      return '/dashboard/centre';
+    case 'INVIGILATOR':
+      return '/dashboard/invigilator';
+    default:
+      return '/dashboard/admin';
+  }
+};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('veriq_access_token'));
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('veriq_access_token'));
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const fetchUser = async () => {
@@ -43,12 +72,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (token) {
       fetchUser();
     } else {
-      // Auto login as default Authority for immediate frictionless hackathon preview
-      login('authority@veriq.local', 'password123');
+      setIsLoading(false);
     }
   }, [token]);
 
-  const login = async (email: string, password = 'password123') => {
+  const login = async (email: string, password = 'password123'): Promise<User> => {
     setIsLoading(true);
     try {
       const res = await authApi.login({ email, password });
@@ -56,26 +84,74 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('veriq_access_token', access_token);
       setToken(access_token);
       setUser(userData);
-    } catch (err) {
-      console.error('Login error', err);
-      throw err;
+      return userData;
+    } catch (err: any) {
+      console.error('Login failed', err);
+      const msg = err.response?.data?.detail || 'The email or password is incorrect.';
+      throw new Error(msg);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const switchRole = async (email: string) => {
-    await login(email, 'password123');
+  const signup = async (data: { email: string; password: string; name: string; role: UserRole; centre_id?: string }): Promise<User> => {
+    setIsLoading(true);
+    try {
+      const res = await authApi.signup(data);
+      const { access_token, user: userData } = res.data;
+      localStorage.setItem('veriq_access_token', access_token);
+      setToken(access_token);
+      setUser(userData);
+      toast.success('Account created and verified securely.');
+      return userData;
+    } catch (err: any) {
+      console.error('Signup failed', err);
+      const msg = err.response?.data?.detail || 'Account registration failed. Please try again.';
+      throw new Error(msg);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const logout = () => {
+  const switchRole = async (role: UserRole) => {
+    const creds = DEMO_ROLE_CREDENTIALS[role];
+    if (creds) {
+      try {
+        const u = await login(creds.email, 'password123');
+        toast.success(`Switched persona to ${role.replace('_', ' ')} (${u.name})`);
+      } catch (e: any) {
+        toast.error(`Unable to switch to ${role}: ${e.message}`);
+      }
+    }
+  };
+
+  const logout = (showToast = true) => {
     localStorage.removeItem('veriq_access_token');
     setToken(null);
     setUser(null);
+    if (showToast) {
+      toast.success('Signed out securely.');
+    }
+  };
+
+  const getDashboardUrl = (role?: UserRole): string => {
+    return getRoleDashboardUrl(role || user?.role);
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, logout, switchRole }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        isLoading,
+        isAuthenticated: !!user && !!token,
+        login,
+        signup,
+        logout,
+        switchRole,
+        getDashboardUrl,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
