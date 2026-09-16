@@ -37,16 +37,16 @@ export const HashViewer: React.FC<HashViewerProps> = ({
 
   return (
     <div className={`inline-flex items-center gap-2 group ${className}`}>
-      {label && <span className="text-xs text-slate-400 font-medium">{label}:</span>}
-      <code className="font-mono text-xs px-2 py-0.5 rounded bg-slate-800/80 text-brand-400 border border-brand-500/20 tracking-wider">
+      {label && <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{label}:</span>}
+      <code className="font-mono text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800/80 text-cyan-800 dark:text-brand-400 border border-cyan-200 dark:border-brand-500/20 tracking-wider">
         {displayHash}
       </code>
       <button
         onClick={copyToClipboard}
-        className="text-slate-400 hover:text-brand-400 p-1 rounded hover:bg-slate-800 transition-colors"
+        className="text-slate-400 hover:text-cyan-600 dark:hover:text-brand-400 p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
         title="Copy full cryptographic hash"
       >
-        {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+        {copied ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
       </button>
     </div>
   );

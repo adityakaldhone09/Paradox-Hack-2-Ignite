@@ -28,7 +28,7 @@ async def seed():
 
     async with AsyncSessionLocal() as session:
         default_pwd = get_password_hash("password123")
-        now = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
 
         # -------------------------------------------------------------
         # 1. Seed Centres (10 Centres)

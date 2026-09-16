@@ -189,33 +189,33 @@ export const PaperDetailPage: React.FC = () => {
       {/* Top Grid: Cryptographic Specs & Time-Lock */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Cryptographic Specifications */}
-        <Card className="lg:col-span-2 p-5 border-slate-800 space-y-4">
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <KeyRound className="w-4 h-4 text-brand-400" />
+        <Card className="lg:col-span-2 p-5 border border-slate-200 dark:border-slate-800 space-y-4">
+          <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <KeyRound className="w-4 h-4 text-brand-600 dark:text-brand-400" />
             Cryptographic Integrity Specifications
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-            <div className="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
+            <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
               <span className="text-slate-500">SHA-256 Digest (Plaintext Proof):</span>
               <div className="mt-1">
                 <HashViewer hash={paper.sha256_hash} truncate={false} />
               </div>
             </div>
 
-            <div className="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
+            <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
               <span className="text-slate-500">Encryption Standard:</span>
-              <p className="font-mono text-slate-200 mt-1 font-semibold">AES-256-GCM (Authenticated AEAD)</p>
+              <p className="font-mono text-slate-800 dark:text-slate-200 mt-1 font-semibold">AES-256-GCM (Authenticated AEAD)</p>
             </div>
 
-            <div className="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
+            <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
               <span className="text-slate-500">Initialization Vector (IV - 96 bit):</span>
               <div className="mt-1">
                 <HashViewer hash={paper.iv} truncate={false} />
               </div>
             </div>
 
-            <div className="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
+            <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
               <span className="text-slate-500">Authentication Tag (128 bit):</span>
               <div className="mt-1">
                 <HashViewer hash={paper.tag} truncate={false} />
@@ -224,10 +224,10 @@ export const PaperDetailPage: React.FC = () => {
           </div>
 
           {/* Digital Signature */}
-          <div className="p-3 rounded-lg bg-slate-900/80 border border-slate-800 text-xs">
+          <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-xs">
             <div className="flex items-center justify-between">
               <span className="text-slate-500">Authority Digital Signature:</span>
-              <span className="text-emerald-400 text-[11px] font-semibold flex items-center gap-1">
+              <span className="text-emerald-600 dark:text-emerald-400 text-[11px] font-semibold flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" /> Verified
               </span>
             </div>
@@ -238,25 +238,25 @@ export const PaperDetailPage: React.FC = () => {
         </Card>
 
         {/* Time-Lock Countdown */}
-        <Card className="p-5 border-slate-800 flex flex-col justify-between">
+        <Card className="p-5 border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
           <div>
-            <h3 className="text-base font-bold text-white flex items-center gap-2 mb-3">
-              <Clock className="w-4 h-4 text-purple-400" />
+            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-3">
+              <Clock className="w-4 h-4 text-purple-600 dark:text-purple-400" />
               Time-Lock Schedule
             </h3>
             {paper.release_time ? (
               <CountdownTimer targetDate={paper.release_time} />
             ) : (
-              <div className="p-6 text-center border border-dashed border-slate-800 rounded-xl text-xs text-slate-500">
+              <div className="p-6 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-xl text-xs text-slate-500">
                 Release schedule not yet assigned.
               </div>
             )}
           </div>
 
-          <div className="pt-4 border-t border-slate-800 mt-4">
+          <div className="pt-4 border-t border-slate-200 dark:border-slate-800 mt-4">
             {paper.status !== 'RELEASED' && paper.status !== 'REVOKED' && (
               <Button variant="secondary" size="sm" onClick={handleRelease} className="w-full">
-                <Unlock className="w-4 h-4 text-emerald-400" /> Force Release Key
+                <Unlock className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> Force Release Key
               </Button>
             )}
           </div>
@@ -264,10 +264,10 @@ export const PaperDetailPage: React.FC = () => {
       </div>
 
       {/* Assigned Centres Table */}
-      <Card className="p-5 border-slate-800">
+      <Card className="p-5 border border-slate-200 dark:border-slate-800">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-brand-400" />
+          <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <Building2 className="w-4 h-4 text-brand-600 dark:text-brand-400" />
             Assigned Examination Centres ({paper.assigned_centres?.length || 0})
           </h3>
           <Button variant="outline" size="sm" onClick={() => setIsAssignOpen(true)}>
@@ -278,7 +278,7 @@ export const PaperDetailPage: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 uppercase font-semibold">
+              <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase font-semibold">
                 <th className="pb-2.5">Centre Code</th>
                 <th className="pb-2.5">Centre Name</th>
                 <th className="pb-2.5">City</th>
@@ -287,19 +287,19 @@ export const PaperDetailPage: React.FC = () => {
                 <th className="pb-2.5">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-800/60">
               {paper.assigned_centres?.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-6 text-center text-slate-500">No centres assigned yet.</td>
                 </tr>
               ) : (
                 paper.assigned_centres.map((a: any) => (
-                  <tr key={a.assignment_id} className="hover:bg-slate-900/50">
-                    <td className="py-3 font-mono text-brand-400 font-bold">{a.centre_code}</td>
-                    <td className="py-3 font-medium text-slate-200">{a.centre_name}</td>
-                    <td className="py-3 text-slate-400">{a.city}</td>
-                    <td className="py-3 text-slate-300">{new Date(a.release_window_start).toLocaleString()}</td>
-                    <td className="py-3 text-slate-300">{new Date(a.release_window_end).toLocaleString()}</td>
+                  <tr key={a.assignment_id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50">
+                    <td className="py-3 font-mono text-brand-600 dark:text-brand-400 font-bold">{a.centre_code}</td>
+                    <td className="py-3 font-medium text-slate-900 dark:text-slate-200">{a.centre_name}</td>
+                    <td className="py-3 text-slate-500 dark:text-slate-400">{a.city}</td>
+                    <td className="py-3 text-slate-700 dark:text-slate-300">{new Date(a.release_window_start).toLocaleString()}</td>
+                    <td className="py-3 text-slate-700 dark:text-slate-300">{new Date(a.release_window_end).toLocaleString()}</td>
                     <td className="py-3">
                       <StatusBadge status={a.status} />
                     </td>
@@ -315,12 +315,12 @@ export const PaperDetailPage: React.FC = () => {
       <Modal isOpen={isAssignOpen} onClose={() => setIsAssignOpen(false)} title="Assign Examination Centre">
         <form onSubmit={handleAssignCentre} className="space-y-4 text-xs">
           <div>
-            <label className="block font-semibold text-slate-300 mb-1">Select Centre *</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Select Centre *</label>
             <select
               value={selectedCentreId}
               onChange={(e) => setSelectedCentreId(e.target.value)}
               required
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-brand-500"
+              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-2 text-slate-900 dark:text-slate-200 focus:outline-none focus:border-brand-500"
             >
               {centres.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -331,28 +331,28 @@ export const PaperDetailPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-300 mb-1">Release Window Start (Time-Lock Release) *</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Release Window Start (Time-Lock Release) *</label>
             <input
               type="datetime-local"
               required
               value={releaseStart}
               onChange={(e) => setReleaseStart(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-brand-500"
+              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-2 text-slate-900 dark:text-slate-200 focus:outline-none focus:border-brand-500"
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-300 mb-1">Release Window End (Expiration) *</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Release Window End (Expiration) *</label>
             <input
               type="datetime-local"
               required
               value={releaseEnd}
               onChange={(e) => setReleaseEnd(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-brand-500"
+              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-2 text-slate-900 dark:text-slate-200 focus:outline-none focus:border-brand-500"
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-slate-800">
+          <div className="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
             <Button variant="ghost" type="button" onClick={() => setIsAssignOpen(false)}>Cancel</Button>
             <Button type="submit">Assign & Record On-Chain</Button>
           </div>
@@ -362,21 +362,21 @@ export const PaperDetailPage: React.FC = () => {
       {/* Revoke Modal */}
       <Modal isOpen={isRevokeOpen} onClose={() => setIsRevokeOpen(false)} title="Revoke Examination Paper">
         <form onSubmit={handleRevoke} className="space-y-4 text-xs">
-          <p className="text-slate-400">
+          <p className="text-slate-500 dark:text-slate-400">
             Revoking this question paper is an immutable blockchain action. All future access requests across all examination centres will be rejected.
           </p>
           <div>
-            <label className="block font-semibold text-slate-300 mb-1">Reason for Revocation *</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Reason for Revocation *</label>
             <textarea
               required
               rows={3}
               placeholder="e.g. Integrity breach reported or version superseded..."
               value={revokeReason}
               onChange={(e) => setRevokeReason(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-rose-500"
+              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 text-slate-900 dark:text-slate-200 focus:outline-none focus:border-rose-500"
             />
           </div>
-          <div className="flex justify-end gap-2 pt-3 border-t border-slate-800">
+          <div className="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
             <Button variant="ghost" type="button" onClick={() => setIsRevokeOpen(false)}>Cancel</Button>
             <Button variant="danger" type="submit">Confirm Revocation</Button>
           </div>
@@ -386,14 +386,14 @@ export const PaperDetailPage: React.FC = () => {
       {/* QR Code Modal for Public / Auditor Verification (Section 30) */}
       <Modal isOpen={isQROpen} onClose={() => setIsQROpen(false)} title="Auditor Cryptographic QR Verification" maxWidth="max-w-md">
         <div className="flex flex-col items-center text-center space-y-4 py-2">
-          <div className="p-4 bg-white rounded-2xl shadow-xl">
+          <div className="p-4 bg-white rounded-2xl shadow-xl border border-slate-200 dark:border-transparent">
             <QRCodeSVG value={verificationUrl} size={180} />
           </div>
           <div className="space-y-1 text-xs">
-            <span className="font-mono text-brand-400 font-bold block">{paper.paper_id}</span>
-            <p className="text-slate-400">Scan to verify cryptographic SHA-256 anchor against the proof ledger.</p>
+            <span className="font-mono text-brand-600 dark:text-brand-400 font-bold block">{paper.paper_id}</span>
+            <p className="text-slate-500 dark:text-slate-400">Scan to verify cryptographic SHA-256 anchor against the proof ledger.</p>
           </div>
-          <div className="w-full p-2.5 rounded-lg bg-slate-950 border border-slate-800 text-[10px] font-mono text-slate-400 break-all text-left">
+          <div className="w-full p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-[10px] font-mono text-slate-600 dark:text-slate-400 break-all text-left">
             {verificationUrl}
           </div>
         </div>

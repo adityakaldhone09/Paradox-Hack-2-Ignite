@@ -51,6 +51,15 @@ export const LandingPage: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
+  const scrollToAnchor = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault();
+    const targetElement = document.getElementById(targetId);
+    if (targetElement) {
+      targetElement.scrollIntoView({ behavior: 'smooth' });
+      window.history.pushState(null, '', `#${targetId}`);
+    }
+  };
+
   const workflowSteps = [
     { label: 'Paper Created', icon: FileText, desc: 'Drafted in isolated air-gapped environment' },
     { label: 'AES-256 Encrypted', icon: Lock, desc: 'Ephemeral 256-bit envelope encryption' },
@@ -168,19 +177,39 @@ export const LandingPage: React.FC = () => {
           </Link>
 
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600 dark:text-slate-300">
-            <a href="#product" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            <a
+              href="#product"
+              onClick={(e) => scrollToAnchor(e, 'product')}
+              className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer"
+            >
               Product
             </a>
-            <a href="#features" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            <a
+              href="#features"
+              onClick={(e) => scrollToAnchor(e, 'features')}
+              className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer"
+            >
               Features
             </a>
-            <a href="#how-it-works" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            <a
+              href="#how-it-works"
+              onClick={(e) => scrollToAnchor(e, 'how-it-works')}
+              className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer"
+            >
               How It Works
             </a>
-            <a href="#security" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            <a
+              href="#security"
+              onClick={(e) => scrollToAnchor(e, 'security')}
+              className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer"
+            >
               Security
             </a>
-            <a href="#custody" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            <a
+              href="#custody"
+              onClick={(e) => scrollToAnchor(e, 'custody')}
+              className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer"
+            >
               Custody
             </a>
           </nav>
@@ -196,12 +225,19 @@ export const LandingPage: React.FC = () => {
             </button>
 
             {isAuthenticated ? (
-              <Link to={getDashboardUrl(user?.role)}>
-                <Button variant="primary" size="sm" className="shadow-sm">
-                  <span>Open Console</span>
-                  <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-                </Button>
-              </Link>
+              <div className="flex items-center gap-2.5">
+                <Link to="/signin">
+                  <Button variant="outline" size="sm">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link to={getDashboardUrl(user?.role)}>
+                  <Button variant="primary" size="sm" className="shadow-sm">
+                    <span>Open Console</span>
+                    <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                  </Button>
+                </Link>
+              </div>
             ) : (
               <>
                 <Link to="/signin">
@@ -221,19 +257,9 @@ export const LandingPage: React.FC = () => {
       </header>
 
       {/* 2. HERO SECTION */}
-      <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50/50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      <section id="product" className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50/50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-3xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/70 mb-6 shadow-2xs"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-              <span>Problem Statement WB-03 — Blockchain Question Paper Distribution</span>
-            </motion.div>
-
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -442,7 +468,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* 5. SIX CORE FEATURES SECTION */}
-      <section id="features" className="py-24 bg-white dark:bg-slate-950">
+      <section id="features" className="py-24 bg-white dark:bg-slate-950 scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
@@ -494,7 +520,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* 6. HOW VERIQ WORKS (7 STAGES) */}
-      <section id="how-it-works" className="py-24 bg-slate-50 dark:bg-slate-900/60 border-t border-slate-200 dark:border-slate-800">
+      <section id="how-it-works" className="py-24 bg-slate-50 dark:bg-slate-900/60 border-t border-slate-200 dark:border-slate-800 scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
@@ -536,7 +562,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* 7. LAYERED SECURITY ARCHITECTURE */}
-      <section id="security" className="py-24 bg-white dark:bg-slate-950">
+      <section id="security" className="py-24 bg-white dark:bg-slate-950 scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
@@ -599,20 +625,20 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 8. TAMPER DETECTION SHOWCASE */}
-      <section className="py-24 bg-slate-50 dark:bg-slate-900/40 border-t border-slate-200 dark:border-slate-800">
+      {/* 8. CUSTODY & TAMPER DETECTION SHOWCASE */}
+      <section id="custody" className="py-24 bg-slate-50 dark:bg-slate-900/40 border-t border-slate-200 dark:border-slate-800 scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto bg-white dark:bg-slate-900 p-8 sm:p-10 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl">
             <div className="text-center max-w-xl mx-auto mb-10">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-900 mb-3">
-                <AlertTriangle className="w-3.5 h-3.5" />
-                Live Cryptographic Tamper Simulation
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900 mb-3">
+                <Boxes className="w-3.5 h-3.5" />
+                Blockchain Chain of Custody & Tamper Defense
               </div>
               <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
-                Instant Hash Mismatch Detection
+                Cryptographic Custody & Instant Tamper Detection
               </h3>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Any bit-level alteration in question text or answer keys immediately produces a mismatched SHA-256 digest.
+                Every lifecycle transition is immutably anchored on the ledger. Any bit-level alteration in question text or answer keys immediately produces a mismatched SHA-256 digest.
               </p>
             </div>
 
@@ -646,7 +672,7 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-6 p-4 rounded-xl bg-rose-100/70 dark:bg-rose-950/50 border border-rose-300 dark:border-rose-800 flex items-center justify-between">
+            <div className="mt-6 p-4 rounded-xl bg-rose-100/70 dark:bg-rose-950/50 border border-rose-300 dark:border-rose-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <ShieldAlert className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0" />
                 <div>
@@ -658,11 +684,18 @@ export const LandingPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <Link to="/verify">
-                <Button variant="danger" size="sm">
-                  Test Live Verifier
-                </Button>
-              </Link>
+              <div className="flex items-center gap-2 shrink-0">
+                <Link to="/custody">
+                  <Button variant="outline" size="sm" className="bg-white dark:bg-slate-900">
+                    View Custody Chain
+                  </Button>
+                </Link>
+                <Link to="/verify">
+                  <Button variant="danger" size="sm">
+                    Test Live Verifier
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -753,10 +786,30 @@ export const LandingPage: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-6 text-slate-400">
-              <a href="#product" className="hover:text-white transition-colors">Product</a>
-              <a href="#security" className="hover:text-white transition-colors">Security</a>
-              <a href="#features" className="hover:text-white transition-colors">Features</a>
-              <Link to="/signin" className="hover:text-white transition-colors">Sign In</Link>
+              <a
+                href="#product"
+                onClick={(e) => scrollToAnchor(e, 'product')}
+                className="hover:text-white transition-colors cursor-pointer"
+              >
+                Product
+              </a>
+              <a
+                href="#security"
+                onClick={(e) => scrollToAnchor(e, 'security')}
+                className="hover:text-white transition-colors cursor-pointer"
+              >
+                Security
+              </a>
+              <a
+                href="#features"
+                onClick={(e) => scrollToAnchor(e, 'features')}
+                className="hover:text-white transition-colors cursor-pointer"
+              >
+                Features
+              </a>
+              <Link to="/signin" className="hover:text-white transition-colors">
+                Sign In
+              </Link>
             </div>
           </div>
 

@@ -1,6 +1,23 @@
+@"
 node_modules
 dist
 *.tsbuildinfo
 .DS_Store
 tmp
 out-tsc
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.db
+*.sqlite3
+
+# Local storage and demo scratch
+backend/storage/encrypted_papers/
+demo/
+scripts/generate_voice.ps1
+"@ | Set-Content .gitignore

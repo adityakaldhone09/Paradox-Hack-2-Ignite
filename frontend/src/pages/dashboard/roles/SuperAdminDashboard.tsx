@@ -34,8 +34,11 @@ import {
   CartesianGrid
 } from 'recharts';
 import { toast } from 'sonner';
+import { useTheme } from '../../../store/ThemeContext';
 
 export const SuperAdminDashboard: React.FC = () => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [summary, setSummary] = useState<any>(null);
   const [exams, setExams] = useState<any[]>([]);
   const [threatFeed, setThreatFeed] = useState<any[]>([]);
@@ -236,17 +239,20 @@ export const SuperAdminDashboard: React.FC = () => {
                     <stop offset="95%" stopColor="#4F46E5" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#94A3B8" opacity={0.2} />
-                <XAxis dataKey="label" stroke="#64748B" fontSize={11} />
-                <YAxis stroke="#64748B" fontSize={11} />
+                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#334155' : '#E2E8F0'} opacity={0.8} />
+                <XAxis dataKey="label" stroke={isDark ? '#94A3B8' : '#64748B'} fontSize={11} tick={{ fill: isDark ? '#94A3B8' : '#64748B' }} />
+                <YAxis stroke={isDark ? '#94A3B8' : '#64748B'} fontSize={11} tick={{ fill: isDark ? '#94A3B8' : '#64748B' }} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#0F172A',
-                    borderColor: '#334155',
+                    backgroundColor: isDark ? '#0F172A' : '#FFFFFF',
+                    borderColor: isDark ? '#334155' : '#CBD5E1',
                     borderRadius: '8px',
                     fontSize: '12px',
-                    color: '#fff',
+                    color: isDark ? '#FFFFFF' : '#0F172A',
+                    boxShadow: isDark ? '0 10px 15px -3px rgba(0, 0, 0, 0.5)' : '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
                   }}
+                  itemStyle={{ color: isDark ? '#E2E8F0' : '#1E293B' }}
+                  labelStyle={{ color: isDark ? '#94A3B8' : '#64748B', fontWeight: 600 }}
                 />
                 <Area type="monotone" dataKey="successful" stroke="#4F46E5" fillOpacity={1} fill="url(#gradSuccess)" name="Authorized Access" />
                 <Area type="monotone" dataKey="blocked" stroke="#F43F5E" fillOpacity={0} name="Blocked Attempt" />
