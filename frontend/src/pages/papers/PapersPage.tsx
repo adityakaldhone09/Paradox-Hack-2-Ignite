@@ -134,22 +134,22 @@ export const PapersPage: React.FC = () => {
       </div>
 
       {/* Filters & Search */}
-      <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+      <div className="flex flex-col sm:flex-row items-center gap-4 bg-white dark:bg-slate-900/60 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xs">
         <div className="relative flex-1 w-full">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
           <input
             type="text"
             placeholder="Search papers by title, code, or filename..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-brand-500"
+            className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-brand-500"
           />
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-brand-500 w-full sm:w-auto"
+            className="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-300 focus:outline-none focus:border-brand-500 w-full sm:w-auto"
           >
             <option value="">All Statuses</option>
             <option value="DRAFT">DRAFT</option>
@@ -164,19 +164,19 @@ export const PapersPage: React.FC = () => {
       {/* Paper Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {papers.map((p) => (
-          <Card key={p.id} hoverable className="p-5 border-slate-800 flex flex-col justify-between space-y-4">
+          <Card key={p.id} hoverable className="p-5 border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-4">
             <div>
               <div className="flex items-center justify-between gap-2">
-                <span className="font-mono text-xs font-bold text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded border border-brand-500/20">
+                <span className="font-mono text-xs font-bold text-brand-600 dark:text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded border border-brand-500/20">
                   {p.paper_id}
                 </span>
                 <StatusBadge status={p.status} />
               </div>
 
-              <h3 className="text-base font-bold text-slate-100 mt-2 line-clamp-1">{p.title}</h3>
-              <p className="text-xs text-slate-400">{p.exam_name || 'Standard Examination'}</p>
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mt-2 line-clamp-1">{p.title}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{p.exam_name || 'Standard Examination'}</p>
 
-              <div className="space-y-2 mt-4 pt-3 border-t border-slate-800/80 text-xs">
+              <div className="space-y-2 mt-4 pt-3 border-t border-slate-200 dark:border-slate-800/80 text-xs">
                 <div>
                   <span className="text-slate-500">SHA-256 Anchor:</span>
                   <div className="mt-0.5">
@@ -184,24 +184,24 @@ export const PapersPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center text-slate-400">
+                <div className="flex justify-between items-center text-slate-500 dark:text-slate-400">
                   <span>Encryption:</span>
-                  <span className="font-mono text-[11px] text-emerald-400 font-semibold">AES-256-GCM</span>
+                  <span className="font-mono text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">AES-256-GCM</span>
                 </div>
 
-                <div className="flex justify-between items-center text-slate-400">
+                <div className="flex justify-between items-center text-slate-500 dark:text-slate-400">
                   <span>Assigned Centres:</span>
-                  <span className="text-slate-200 font-semibold">{p.assigned_centres?.length || 0} Centres</span>
+                  <span className="text-slate-900 dark:text-slate-200 font-semibold">{p.assigned_centres?.length || 0} Centres</span>
                 </div>
 
-                <div className="flex justify-between items-center text-slate-400">
+                <div className="flex justify-between items-center text-slate-500 dark:text-slate-400">
                   <span>Version:</span>
-                  <span className="font-mono text-slate-300">v{p.version}</span>
+                  <span className="font-mono text-slate-700 dark:text-slate-300">v{p.version}</span>
                 </div>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
               <Link to={`/papers/${p.id}`} className="flex-1">
                 <Button variant="secondary" size="sm" className="w-full">
                   <Eye className="w-3.5 h-3.5" /> Manage & Details
@@ -209,12 +209,12 @@ export const PapersPage: React.FC = () => {
               </Link>
               <Link to={`/verify?paperId=${p.id}`}>
                 <Button variant="outline" size="sm" title="Verify Cryptographic Hash">
-                  <ShieldCheck className="w-3.5 h-3.5 text-brand-400" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
                 </Button>
               </Link>
               <Link to={`/custody?paperId=${p.id}`}>
                 <Button variant="outline" size="sm" title="Inspect Chain of Custody">
-                  <Boxes className="w-3.5 h-3.5 text-indigo-400" />
+                  <Boxes className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                 </Button>
               </Link>
             </div>
@@ -227,8 +227,8 @@ export const PapersPage: React.FC = () => {
         {isUploading ? (
           <div className="py-6 space-y-6">
             <div className="text-center space-y-2">
-              <h4 className="text-lg font-bold text-white">Cryptographic Pipeline Active</h4>
-              <p className="text-xs text-slate-400">Processing sensitive document through off-chain encryption and ledger anchoring</p>
+              <h4 className="text-lg font-bold text-slate-900 dark:text-white">Cryptographic Pipeline Active</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Processing sensitive document through off-chain encryption and ledger anchoring</p>
             </div>
 
             {/* Stages visualization */}
@@ -243,10 +243,10 @@ export const PapersPage: React.FC = () => {
                     key={stage.label}
                     className={`p-3 rounded-xl border transition-all text-center flex flex-col items-center ${
                       isPassed
-                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                        ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-300 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400'
                         : isCurrent
-                        ? 'bg-brand-500/15 border-brand-500/50 text-brand-300 shadow-lg shadow-brand-500/15 animate-pulse'
-                        : 'bg-slate-900/60 border-slate-800 text-slate-500 opacity-60'
+                        ? 'bg-brand-50 dark:bg-brand-500/15 border-brand-300 dark:border-brand-500/50 text-brand-700 dark:text-brand-300 shadow-lg shadow-brand-500/15 animate-pulse'
+                        : 'bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-400 opacity-60'
                     }`}
                   >
                     <Icon className="w-5 h-5 mb-1.5" />
@@ -258,18 +258,18 @@ export const PapersPage: React.FC = () => {
             </div>
 
             <div className="flex justify-center pt-2">
-              <Loader2 className="w-6 h-6 animate-spin text-brand-400" />
+              <Loader2 className="w-6 h-6 animate-spin text-brand-600 dark:text-brand-400" />
             </div>
           </div>
         ) : (
           <form onSubmit={handleUpload} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Target Examination *</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Target Examination *</label>
               <select
                 value={selectedExamId}
                 onChange={(e) => setSelectedExamId(e.target.value)}
                 required
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-brand-500"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-brand-500"
               >
                 {exams.map((ex) => (
                   <option key={ex.id} value={ex.id}>
@@ -280,20 +280,20 @@ export const PapersPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Paper Title *</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Paper Title *</label>
               <input
                 type="text"
                 required
                 placeholder="e.g. DBMS Semester Examination Set A 2026"
                 value={paperTitle}
                 onChange={(e) => setPaperTitle(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-brand-500"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-brand-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Select Question Paper (PDF) *</label>
-              <div className="border-2 border-dashed border-slate-700 hover:border-brand-500/60 rounded-xl p-6 text-center cursor-pointer transition-colors bg-slate-950/60">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Select Question Paper (PDF) *</label>
+              <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-brand-500/60 rounded-xl p-6 text-center cursor-pointer transition-colors bg-slate-50/50 dark:bg-slate-950/60">
                 <input
                   type="file"
                   accept=".pdf"
@@ -303,8 +303,8 @@ export const PapersPage: React.FC = () => {
                   className="hidden"
                 />
                 <label htmlFor="paper-file-input" className="cursor-pointer flex flex-col items-center">
-                  <UploadCloud className="w-8 h-8 text-brand-400 mb-2" />
-                  <span className="text-xs font-semibold text-slate-200">
+                  <UploadCloud className="w-8 h-8 text-brand-600 dark:text-brand-400 mb-2" />
+                  <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
                     {selectedFile ? selectedFile.name : 'Click to select or drag PDF question paper'}
                   </span>
                   <span className="text-[10px] text-slate-500 mt-1">
@@ -314,13 +314,13 @@ export const PapersPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-400 space-y-1">
-              <span className="font-semibold text-slate-300 block">Security Commitment:</span>
+            <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-400 space-y-1">
+              <span className="font-semibold text-slate-800 dark:text-slate-300 block">Security Commitment:</span>
               <p>• Plaintext PDF content will never touch public or private blockchain nodes.</p>
               <p>• SHA-256 hash digest is generated and anchored to the proof ledger.</p>
             </div>
 
-            <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+            <div className="flex justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
               <Button variant="ghost" type="button" onClick={() => setIsUploadOpen(false)}>
                 Cancel
               </Button>

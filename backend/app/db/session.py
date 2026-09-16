@@ -2,10 +2,15 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from sqlalchemy.orm import declarative_base
 from app.core.config import settings
 
+connect_args = {}
+if "sqlite" not in settings.DATABASE_URL:
+    connect_args["statement_cache_size"] = 0
+
 engine = create_async_engine(
     settings.DATABASE_URL,
     echo=False,
-    future=True
+    future=True,
+    connect_args=connect_args
 )
 
 AsyncSessionLocal = async_sessionmaker(

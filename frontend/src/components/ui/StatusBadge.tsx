@@ -19,8 +19,8 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = ''
     case 'ACTIVE':
     case 'RESOLVED':
       return (
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 ${className}`}>
-          {showIcon && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
+        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 ${className}`}>
+          {showIcon && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />}
           {status}
         </span>
       );
@@ -32,8 +32,8 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = ''
     case 'FAILED':
     case 'SUSPENDED':
       return (
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/30 animate-pulse-subtle ${className}`}>
-          {showIcon && <AlertOctagon className="w-3.5 h-3.5 text-rose-400" />}
+        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/30 animate-pulse-subtle ${className}`}>
+          {showIcon && <AlertOctagon className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />}
           {status}
         </span>
       );
@@ -42,8 +42,8 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = ''
     case 'ASSIGNED':
     case 'LOCKED':
       return (
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20 ${className}`}>
-          {showIcon && <Lock className="w-3.5 h-3.5 text-purple-400" />}
+        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-700 dark:text-purple-400 border border-purple-500/20 ${className}`}>
+          {showIcon && <Lock className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />}
           {status}
         </span>
       );
@@ -53,8 +53,8 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = ''
     case 'INVESTIGATING':
     case 'OPEN':
       return (
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20 ${className}`}>
-          {showIcon && <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />}
+        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 ${className}`}>
+          {showIcon && <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />}
           {status}
         </span>
       );
@@ -64,8 +64,8 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = ''
     case 'PENDING':
     default:
       return (
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 ${className}`}>
-          {showIcon && <Clock className="w-3.5 h-3.5 text-slate-400" />}
+        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 ${className}`}>
+          {showIcon && <Clock className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />}
           {status}
         </span>
       );

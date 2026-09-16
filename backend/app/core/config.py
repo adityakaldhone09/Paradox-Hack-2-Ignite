@@ -42,6 +42,10 @@ class Settings(BaseSettings):
             backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
             db_name = v.replace("sqlite+aiosqlite:///./", "")
             return f"sqlite+aiosqlite:///{os.path.join(backend_dir, db_name)}"
+        if v.startswith("postgresql://"):
+            return v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        if v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql+asyncpg://", 1)
         return v
 
     @field_validator("STORAGE_DIR", mode="after")
