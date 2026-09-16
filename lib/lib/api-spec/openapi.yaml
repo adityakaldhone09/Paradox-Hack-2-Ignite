@@ -1,0 +1,521 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.2.0
+  description: ExamChain secure examination paper chain-of-custody API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+  - name: dashboard
+  - name: examinations
+  - name: papers
+  - name: centres
+  - name: incidents
+  - name: blockchain
+  - name: audit
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get command center summary
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+  /dashboard/activity:
+    get:
+      operationId: getDashboardActivity
+      tags: [dashboard]
+      summary: Get recent security activity
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityEvent"
+  /examinations:
+    get:
+      operationId: listExaminations
+      tags: [examinations]
+      summary: List examinations
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Examination list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Examination"
+    post:
+      operationId: createExamination
+      tags: [examinations]
+      summary: Create an examination
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExaminationInput"
+      responses:
+        "201":
+          description: Created examination
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Examination"
+  /examinations/{id}:
+    get:
+      operationId: getExamination
+      tags: [examinations]
+      summary: Get an examination
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Examination
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Examination"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /papers:
+    get:
+      operationId: listPapers
+      tags: [papers]
+      summary: List secured examination papers
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Paper list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Paper"
+    post:
+      operationId: createPaper
+      tags: [papers]
+      summary: Register a paper
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaperInput"
+      responses:
+        "201":
+          description: Registered paper
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Paper"
+  /papers/{id}:
+    get:
+      operationId: getPaper
+      tags: [papers]
+      summary: Get paper details
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Paper details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Paper"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /papers/{id}/verify:
+    post:
+      operationId: verifyPaper
+      tags: [papers]
+      summary: Verify paper integrity
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerificationInput"
+      responses:
+        "200":
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerificationResult"
+  /papers/{id}/events:
+    get:
+      operationId: getPaperEvents
+      tags: [papers]
+      summary: Get chain of custody events
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Chain of custody
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CustodyEvent"
+  /centres:
+    get:
+      operationId: listCentres
+      tags: [centres]
+      summary: List examination centres
+      responses:
+        "200":
+          description: Centre list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Centre"
+  /centres/{id}:
+    get:
+      operationId: getCentre
+      tags: [centres]
+      summary: Get centre details
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Centre details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Centre"
+  /incidents:
+    get:
+      operationId: listIncidents
+      tags: [incidents]
+      summary: List security incidents
+      parameters:
+        - name: severity
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Incident list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Incident"
+    post:
+      operationId: createIncident
+      tags: [incidents]
+      summary: Create a security incident
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IncidentInput"
+      responses:
+        "201":
+          description: Created incident
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Incident"
+  /blockchain/summary:
+    get:
+      operationId: getBlockchainSummary
+      tags: [blockchain]
+      summary: Get blockchain network health
+      responses:
+        "200":
+          description: Blockchain summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlockchainSummary"
+  /blockchain/transactions:
+    get:
+      operationId: listBlockchainTransactions
+      tags: [blockchain]
+      summary: List blockchain transactions
+      responses:
+        "200":
+          description: Transaction list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BlockchainTransaction"
+  /audit/verify:
+    post:
+      operationId: auditVerify
+      tags: [audit]
+      summary: Verify an item for an auditor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuditVerifyInput"
+      responses:
+        "200":
+          description: Audit verification
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditVerification"
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+    DashboardSummary:
+      type: object
+      required: [activeExaminations, securedPapers, authorizedCentres, successfulAccesses, blockedAttempts, securityAlerts, integrityViolations, blockchainTransactions, accessSeries]
+      properties:
+        activeExaminations: { type: integer }
+        securedPapers: { type: integer }
+        authorizedCentres: { type: integer }
+        successfulAccesses: { type: integer }
+        blockedAttempts: { type: integer }
+        securityAlerts: { type: integer }
+        integrityViolations: { type: integer }
+        blockchainTransactions: { type: integer }
+        accessSeries:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChartPoint"
+    ChartPoint:
+      type: object
+      required: [label, value, secondary]
+      properties:
+        label: { type: string }
+        value: { type: integer }
+        secondary: { type: integer }
+    ActivityEvent:
+      type: object
+      required: [id, time, type, title, detail, status]
+      properties:
+        id: { type: string }
+        time: { type: string }
+        type: { type: string }
+        title: { type: string }
+        detail: { type: string }
+        status: { type: string }
+    Examination:
+      type: object
+      required: [id, examId, name, department, subject, examDate, startTime, endTime, centres, status, securityLevel]
+      properties:
+        id: { type: string }
+        examId: { type: string }
+        name: { type: string }
+        department: { type: string }
+        subject: { type: string }
+        examDate: { type: string }
+        startTime: { type: string }
+        endTime: { type: string }
+        centres: { type: integer }
+        status: { type: string }
+        securityLevel: { type: string }
+    ExaminationInput:
+      type: object
+      required: [name, examId, department, subject, examDate, startTime, endTime, securityLevel]
+      properties:
+        name: { type: string }
+        examId: { type: string }
+        department: { type: string }
+        subject: { type: string }
+        examDate: { type: string }
+        startTime: { type: string }
+        endTime: { type: string }
+        securityLevel: { type: string }
+    Paper:
+      type: object
+      required: [id, paperId, exam, subject, version, hash, encryption, status, createdBy, createdAt, releaseTime, integrity]
+      properties:
+        id: { type: string }
+        paperId: { type: string }
+        exam: { type: string }
+        subject: { type: string }
+        version: { type: string }
+        hash: { type: string }
+        encryption: { type: string }
+        status: { type: string }
+        createdBy: { type: string }
+        createdAt: { type: string }
+        releaseTime: { type: string }
+        integrity: { type: string }
+    PaperInput:
+      type: object
+      required: [paperId, exam, subject, releaseTime]
+      properties:
+        paperId: { type: string }
+        exam: { type: string }
+        subject: { type: string }
+        releaseTime: { type: string }
+    VerificationInput:
+      type: object
+      properties:
+        currentHash: { type: string }
+    VerificationResult:
+      type: object
+      required: [verified, blockchainHash, currentHash, message]
+      properties:
+        verified: { type: boolean }
+        blockchainHash: { type: string }
+        currentHash: { type: string }
+        message: { type: string }
+    CustodyEvent:
+      type: object
+      required: [id, event, timestamp, actor, device, status, transaction]
+      properties:
+        id: { type: string }
+        event: { type: string }
+        timestamp: { type: string }
+        actor: { type: string }
+        device: { type: string }
+        status: { type: string }
+        transaction: { type: string }
+    Centre:
+      type: object
+      required: [id, centreId, name, location, status, assignedExams, devices, lastActivity, risk]
+      properties:
+        id: { type: string }
+        centreId: { type: string }
+        name: { type: string }
+        location: { type: string }
+        status: { type: string }
+        assignedExams: { type: integer }
+        devices: { type: integer }
+        lastActivity: { type: string }
+        risk: { type: string }
+    Incident:
+      type: object
+      required: [id, type, severity, paper, centre, timestamp, status, description]
+      properties:
+        id: { type: string }
+        type: { type: string }
+        severity: { type: string }
+        paper: { type: string }
+        centre: { type: string }
+        timestamp: { type: string }
+        status: { type: string }
+        description: { type: string }
+    IncidentInput:
+      type: object
+      required: [type, severity, description]
+      properties:
+        type: { type: string }
+        severity: { type: string }
+        description: { type: string }
+        paper: { type: string }
+        centre: { type: string }
+    BlockchainSummary:
+      type: object
+      required: [network, status, latestBlock, transactions, nodes, confirmation]
+      properties:
+        network: { type: string }
+        status: { type: string }
+        latestBlock: { type: integer }
+        transactions: { type: integer }
+        nodes: { type: integer }
+        confirmation: { type: string }
+    BlockchainTransaction:
+      type: object
+      required: [id, hash, event, paperId, actor, timestamp, status, block]
+      properties:
+        id: { type: string }
+        hash: { type: string }
+        event: { type: string }
+        paperId: { type: string }
+        actor: { type: string }
+        timestamp: { type: string }
+        status: { type: string }
+        block: { type: integer }
+    AuditVerifyInput:
+      type: object
+      required: [paperId]
+      properties:
+        paperId: { type: string }
+    AuditVerification:
+      type: object
+      required: [paperId, verified, chainStatus, integrity, message]
+      properties:
+        paperId: { type: string }
+        verified: { type: boolean }
+        chainStatus: { type: string }
+        integrity: { type: string }
+        message: { type: string }
