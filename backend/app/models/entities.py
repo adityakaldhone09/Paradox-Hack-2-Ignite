@@ -10,7 +10,7 @@ def generate_uuid() -> str:
     return str(uuid.uuid4())
 
 def utc_now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 class User(Base):
     __tablename__ = "users"
@@ -154,8 +154,8 @@ class BlockchainTransaction(Base):
     actor_id = Column(String(255), nullable=False)
     centre_id = Column(String(36), nullable=True)
     device_id = Column(String(100), nullable=True)
-    payload_hash = Column(String(64), nullable=False)
-    previous_hash = Column(String(64), nullable=False)
+    payload_hash = Column(String(128), nullable=False)
+    previous_hash = Column(String(128), nullable=False)
     signature = Column(String(255), nullable=False)
     timestamp = Column(DateTime, default=utc_now)
     status = Column(String(50), default="CONFIRMED")

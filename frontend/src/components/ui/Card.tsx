@@ -18,7 +18,7 @@ export const Card: React.FC<CardProps> = ({
   return (
     <motion.div
       whileHover={hoverable ? { y: -2, transition: { duration: 0.2 } } : {}}
-      className={`rounded-xl transition-all duration-200 ${
+      className={`rounded-xl transition-all duration-200 text-slate-900 dark:text-slate-100 ${
         glow ? 'glass-panel-glow' : 'glass-panel'
       } p-5 ${className}`}
       {...props}
