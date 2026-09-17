@@ -15,7 +15,7 @@ import {
   Loader2,
   Plus,
 } from 'lucide-react';
-import { paperApi, examApi } from '../../services/apiClient';
+import { paperApi, examApi, getCachedApiResponse } from '../../services/apiClient';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -24,11 +24,11 @@ import { HashViewer } from '../../components/ui/HashViewer';
 import { toast } from 'sonner';
 
 export const PapersPage: React.FC = () => {
-  const [papers, setPapers] = useState<any[]>([]);
-  const [exams, setExams] = useState<any[]>([]);
+  const [papers, setPapers] = useState<any[]>(() => getCachedApiResponse('/papers') || []);
+  const [exams, setExams] = useState<any[]>(() => getCachedApiResponse('/exams') || []);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => !getCachedApiResponse('/papers'));
 
   // Upload Modal & Pipeline Animation state
   const [isUploadOpen, setIsUploadOpen] = useState(false);
@@ -38,16 +38,30 @@ export const PapersPage: React.FC = () => {
   const [uploadStep, setUploadStep] = useState<number>(0);
   const [isUploading, setIsUploading] = useState(false);
 
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const loadPapers = async () => {
     try {
-      const [pRes, eRes] = await Promise.all([
-        paperApi.list({ search: search || undefined, status: statusFilter || undefined }),
-        examApi.list(),
-      ]);
+      const promises: [Promise<any>, Promise<any>?] = [
+        paperApi.list({ search: debouncedSearch || undefined, status: statusFilter || undefined }),
+      ];
+      if (exams.length === 0) {
+        promises.push(examApi.list());
+      }
+      const [pRes, eRes] = await Promise.all(promises);
       setPapers(pRes.data);
-      setExams(eRes.data);
-      if (eRes.data.length > 0 && !selectedExamId) {
-        setSelectedExamId(eRes.data[0].id);
+      if (eRes) {
+        setExams(eRes.data);
+        if (eRes.data.length > 0 && !selectedExamId) {
+          setSelectedExamId(eRes.data[0].id);
+        }
       }
     } catch (err) {
       console.error('Error loading papers', err);
@@ -58,7 +72,7 @@ export const PapersPage: React.FC = () => {
 
   useEffect(() => {
     loadPapers();
-  }, [search, statusFilter]);
+  }, [debouncedSearch, statusFilter]);
 
   const stages = [
     { label: 'Uploading', desc: 'Secure multipart transfer', icon: UploadCloud },

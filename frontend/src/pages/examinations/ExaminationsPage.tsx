@@ -10,7 +10,7 @@ import {
   Shield,
   Eye
 } from 'lucide-react';
-import { examApi } from '../../services/apiClient';
+import { examApi, getCachedApiResponse } from '../../services/apiClient';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -18,7 +18,7 @@ import { Modal } from '../../components/ui/Modal';
 import { toast } from 'sonner';
 
 export const ExaminationsPage: React.FC = () => {
-  const [exams, setExams] = useState<any[]>([]);
+  const [exams, setExams] = useState<any[]>(() => getCachedApiResponse('/exams') || []);
   const [search, setSearch] = useState('');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,9 +33,18 @@ export const ExaminationsPage: React.FC = () => {
   const [endTime, setEndTime] = useState('13:00:00');
   const [securityLevel, setSecurityLevel] = useState('HIGH');
 
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const loadExams = async () => {
     try {
-      const res = await examApi.list({ search: search || undefined });
+      const res = await examApi.list({ search: debouncedSearch || undefined });
       setExams(res.data);
     } catch (err) {
       console.error('Error loading examinations', err);
@@ -44,7 +53,7 @@ export const ExaminationsPage: React.FC = () => {
 
   useEffect(() => {
     loadExams();
-  }, [search]);
+  }, [debouncedSearch]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();

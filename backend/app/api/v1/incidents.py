@@ -113,6 +113,7 @@ async def list_incidents(
     type: Optional[str] = Query(None),
     severity: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     query = select(Incident, Paper, Centre)\
@@ -152,7 +153,7 @@ async def list_incidents(
     ]
 
 @router.get("/{id}")
-async def get_incident(id: str, db: AsyncSession = Depends(get_db)):
+async def get_incident(id: str, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     row = (await db.execute(
         select(Incident, Paper, Centre, User)
         .outerjoin(Paper, Incident.paper_id == Paper.id)

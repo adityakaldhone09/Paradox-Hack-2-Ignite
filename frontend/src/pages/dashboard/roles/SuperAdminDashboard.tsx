@@ -15,7 +15,7 @@ import {
   Activity,
   Zap,
 } from 'lucide-react';
-import { securityApi, examApi, blockchainApi, demoApi } from '../../../services/apiClient';
+import { securityApi, examApi, blockchainApi, demoApi, getCachedApiResponse } from '../../../services/apiClient';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
@@ -35,11 +35,11 @@ import { useTheme } from '../../../store/ThemeContext';
 export const SuperAdminDashboard: React.FC = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const [summary, setSummary] = useState<any>(null);
-  const [exams, setExams] = useState<any[]>([]);
-  const [threatFeed, setThreatFeed] = useState<any[]>([]);
-  const [blockchainStatus, setBlockchainStatus] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [summary, setSummary] = useState<any>(() => getCachedApiResponse('/security/summary'));
+  const [exams, setExams] = useState<any[]>(() => getCachedApiResponse('/exams') || []);
+  const [threatFeed, setThreatFeed] = useState<any[]>(() => getCachedApiResponse('/security/threat-feed') || []);
+  const [blockchainStatus, setBlockchainStatus] = useState<any>(() => getCachedApiResponse('/blockchain/status'));
+  const [isLoading, setIsLoading] = useState(() => !getCachedApiResponse('/security/summary'));
   const [isSimulating, setIsSimulating] = useState(false);
 
   const loadDashboardData = async () => {

@@ -9,20 +9,18 @@ from app.models.entities import User
 
 security_scheme = HTTPBearer(auto_error=False)
 
+import time
+
+_user_cache: dict[str, tuple[User, float]] = {}
+
 async def get_current_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security_scheme),
     db: AsyncSession = Depends(get_db)
 ) -> User:
-    if not credentials:
-        # Fallback to demo default user if authorization header is absent (facilitates smooth testing)
-        query = select(User).where(User.email == "admin@veriq.local")
-        res = await db.execute(query)
-        user = res.scalars().first()
-        if user:
-            return user
+    if not credentials or not credentials.credentials:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication required",
+            detail="Authentication credentials were not provided",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -35,6 +33,11 @@ async def get_current_user(
         )
 
     user_id = payload.get("sub")
+    now = time.time()
+    cached = _user_cache.get(user_id)
+    if cached and (now - cached[1] < 60.0):
+        return cached[0]
+
     query = select(User).where(User.id == user_id)
     res = await db.execute(query)
     user = res.scalars().first()
@@ -43,6 +46,7 @@ async def get_current_user(
     if not user.is_active:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User account is deactivated")
 
+    _user_cache[user_id] = (user, now)
     return user
 
 def require_roles(allowed_roles: list[str]):

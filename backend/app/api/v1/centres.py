@@ -13,6 +13,7 @@ router = APIRouter(prefix="/centres", tags=["Centre Management"])
 async def list_centres(
     search: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     query = select(Centre)
@@ -31,14 +32,29 @@ async def list_centres(
     res = await db.execute(query)
     centres = res.scalars().all()
 
+    if not centres:
+        return []
+
+    c_ids = [c.id for c in centres]
+
+    # Batch count authorized devices
+    dev_res = await db.execute(
+        select(AuthorizedDevice.centre_id, func.count(AuthorizedDevice.id))
+        .where(AuthorizedDevice.centre_id.in_(c_ids), AuthorizedDevice.status == "AUTHORIZED")
+        .group_by(AuthorizedDevice.centre_id)
+    )
+    dev_counts = dict(dev_res.all())
+
+    # Batch count assigned exams
+    exam_res = await db.execute(
+        select(PaperCentreAssignment.centre_id, func.count(PaperCentreAssignment.id))
+        .where(PaperCentreAssignment.centre_id.in_(c_ids))
+        .group_by(PaperCentreAssignment.centre_id)
+    )
+    exam_counts = dict(exam_res.all())
+
     output = []
     for c in centres:
-        d_res = await db.execute(select(func.count(AuthorizedDevice.id)).where(AuthorizedDevice.centre_id == c.id, AuthorizedDevice.status == "AUTHORIZED"))
-        dev_count = d_res.scalar_one() or 0
-
-        e_res = await db.execute(select(func.count(PaperCentreAssignment.id)).where(PaperCentreAssignment.centre_id == c.id))
-        exam_count = e_res.scalar_one() or 0
-
         output.append(CentreResponse(
             id=c.id,
             centre_id=c.centre_id,
@@ -48,8 +64,8 @@ async def list_centres(
             code=c.code,
             is_authorized=c.is_authorized,
             status=c.status,
-            authorized_devices_count=dev_count,
-            assigned_exams_count=exam_count,
+            authorized_devices_count=dev_counts.get(c.id, 0),
+            assigned_exams_count=exam_counts.get(c.id, 0),
             created_at=c.created_at
         ))
     return output
@@ -92,7 +108,7 @@ async def create_centre(
     )
 
 @router.get("/{id}")
-async def get_centre(id: str, db: AsyncSession = Depends(get_db)):
+async def get_centre(id: str, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     centre = (await db.execute(select(Centre).where(or_(Centre.id == id, Centre.centre_id == id)))).scalars().first()
     if not centre:
         raise HTTPException(status_code=404, detail="Centre not found")

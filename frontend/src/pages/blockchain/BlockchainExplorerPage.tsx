@@ -11,20 +11,20 @@ import {
   ShieldCheck,
   Eye
 } from 'lucide-react';
-import { blockchainApi } from '../../services/apiClient';
+import { blockchainApi, getCachedApiResponse } from '../../services/apiClient';
 import { Card } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
-import { Modal } from '../../components/ui/Modal';
-import { HashViewer } from '../../components/ui/HashViewer';
 import { StatusBadge } from '../../components/ui/StatusBadge';
+import { HashViewer } from '../../components/ui/HashViewer';
+import { Modal } from '../../components/ui/Modal';
+import { Button } from '../../components/ui/Button';
 
 export const BlockchainExplorerPage: React.FC = () => {
-  const [status, setStatus] = useState<any>(null);
-  const [transactions, setTransactions] = useState<any[]>([]);
+  const [status, setStatus] = useState<any>(() => getCachedApiResponse('/blockchain/status'));
+  const [transactions, setTransactions] = useState<any[]>(() => getCachedApiResponse('/blockchain/transactions') || []);
   const [selectedTx, setSelectedTx] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => !getCachedApiResponse('/blockchain/status'));
 
   const loadData = async () => {
     try {

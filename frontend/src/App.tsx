@@ -99,12 +99,33 @@ export const App: React.FC = () => {
 
                         {/* Domain Modules */}
                         <Route path="/examinations" element={<ExaminationsPage />} />
-                        <Route path="/papers" element={<PapersPage />} />
-                        <Route path="/papers/:id" element={<PaperDetailPage />} />
+                        <Route
+                          path="/papers"
+                          element={
+                            <RoleGuard allowedRoles={['SUPER_ADMIN', 'PAPER_SETTER', 'CENTRE_ADMIN']}>
+                              <PapersPage />
+                            </RoleGuard>
+                          }
+                        />
+                        <Route
+                          path="/papers/:id"
+                          element={
+                            <RoleGuard allowedRoles={['SUPER_ADMIN', 'PAPER_SETTER', 'CENTRE_ADMIN']}>
+                              <PaperDetailPage />
+                            </RoleGuard>
+                          }
+                        />
                         <Route path="/verify" element={<VerifyIntegrityPage />} />
                         <Route path="/timelock" element={<TimeLockReleasePage />} />
                         <Route path="/release" element={<Navigate to="/timelock" replace />} />
-                        <Route path="/custody" element={<ChainOfCustodyPage />} />
+                        <Route
+                          path="/custody"
+                          element={
+                            <RoleGuard allowedRoles={['SUPER_ADMIN', 'PAPER_SETTER']}>
+                              <ChainOfCustodyPage />
+                            </RoleGuard>
+                          }
+                        />
                         <Route
                           path="/blockchain"
                           element={

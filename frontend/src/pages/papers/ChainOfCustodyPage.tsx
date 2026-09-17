@@ -12,7 +12,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
-import { paperApi } from '../../services/apiClient';
+import { paperApi, getCachedApiResponse } from '../../services/apiClient';
 import { Card } from '../../components/ui/Card';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { HashViewer } from '../../components/ui/HashViewer';
@@ -21,9 +21,10 @@ import { PaperSelector } from '../../components/ui/PaperSelector';
 export const ChainOfCustodyPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const initialPaperId = searchParams.get('paperId') || '';
+  const cachedPapers = getCachedApiResponse<any[]>('/papers') || [];
 
-  const [papers, setPapers] = useState<any[]>([]);
-  const [selectedPaperId, setSelectedPaperId] = useState(initialPaperId);
+  const [papers, setPapers] = useState<any[]>(() => cachedPapers);
+  const [selectedPaperId, setSelectedPaperId] = useState(() => initialPaperId || cachedPapers[0]?.id || '');
   const [custodyData, setCustodyData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedEvents, setExpandedEvents] = useState<Record<string, boolean>>({});

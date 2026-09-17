@@ -1,4 +1,5 @@
 import uuid
+from typing import Optional
 from datetime import datetime, timezone
 from sqlalchemy import (
     Column, String, Boolean, DateTime, Integer, Text, ForeignKey, Table, Enum
@@ -23,6 +24,11 @@ def normalize_utc_datetime(val):
     if isinstance(val, datetime):
         return val.astimezone(timezone.utc).replace(tzinfo=None) if val.tzinfo else val
     return val
+
+def to_naive_utc(dt: Optional[datetime]) -> Optional[datetime]:
+    if dt is None:
+        return None
+    return dt.replace(tzinfo=None) if dt.tzinfo else dt
 
 class User(Base):
     __tablename__ = "users"

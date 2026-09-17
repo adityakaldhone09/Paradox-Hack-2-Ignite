@@ -9,15 +9,15 @@ import {
   Building2,
   CheckCircle2
 } from 'lucide-react';
-import { securityApi } from '../../services/apiClient';
+import { securityApi, getCachedApiResponse } from '../../services/apiClient';
 import { Card } from '../../components/ui/Card';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { HashViewer } from '../../components/ui/HashViewer';
 
 export const SecurityOpsPage: React.FC = () => {
-  const [heatmap, setHeatmap] = useState<any[]>([]);
-  const [threatFeed, setThreatFeed] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [heatmap, setHeatmap] = useState<any[]>(() => getCachedApiResponse('/security/heatmap') || []);
+  const [threatFeed, setThreatFeed] = useState<any[]>(() => getCachedApiResponse('/security/threat-feed') || []);
+  const [isLoading, setIsLoading] = useState(() => !getCachedApiResponse('/security/heatmap'));
 
   useEffect(() => {
     const loadOpsData = async () => {
