@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="OG - VeriQ.png" alt="VeriQ Logo" width="280" />
+<img src="Sudhanshu - Logo.jpeg" alt="VeriQ Logo" width="280" />
 
 # VeriQ — Secure Examination Paper Distribution Using Blockchain
 
