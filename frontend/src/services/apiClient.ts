@@ -1,8 +1,27 @@
 import axios from 'axios';
 
-// Resolve backend API URL dynamically from environment (e.g. Render production URL or local proxy)
-const rawApiBase = (import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || '').trim();
-const cleanApiBase = rawApiBase.replace(/\/+$/, '');
+// Resolve backend API URL dynamically from environment or default to deployed Render backend in production
+const PRODUCTION_BACKEND_URL = 'https://paradox-hack-2-ignite.onrender.com';
+
+const resolveApiBase = (): string => {
+  const envUrl = (import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || '').trim();
+  if (envUrl) {
+    return envUrl.replace(/\/+$/, '');
+  }
+  // If running in production or on any remote deployed domain (not local dev), route to deployed backend
+  if (
+    import.meta.env.PROD ||
+    (typeof window !== 'undefined' &&
+      window.location.hostname &&
+      !['localhost', '127.0.0.1'].includes(window.location.hostname))
+  ) {
+    return PRODUCTION_BACKEND_URL;
+  }
+  // Local dev proxy
+  return '';
+};
+
+const cleanApiBase = resolveApiBase();
 
 export const apiClient = axios.create({
   baseURL: cleanApiBase ? `${cleanApiBase}/api/v1` : '/api/v1',
