@@ -263,9 +263,17 @@ export const PaperDetailPage: React.FC = () => {
             <div className="p-4 rounded-xl bg-neutral-50/60 dark:bg-neutral-900/40 border border-neutral-200/60 dark:border-neutral-800 text-xs">
               <div className="flex items-center justify-between">
                 <span className="text-neutral-400 text-[11px]">Authority Digital Signature:</span>
-                <span className="text-emerald-600 dark:text-emerald-400 text-[11px] font-medium flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Signature Verified
-                </span>
+                {paper.signature_verified ? (
+                  <span className="text-emerald-600 dark:text-emerald-400 text-[11px] font-medium flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Signature Verified
+                  </span>
+                ) : paper.digital_signature ? (
+                  <span className="text-amber-600 dark:text-amber-400 text-[11px] font-medium flex items-center gap-1">
+                    <AlertTriangle className="w-3.5 h-3.5" /> Signature Unverified
+                  </span>
+                ) : (
+                  <span className="text-neutral-400 text-[11px]">Pending Authority Signature</span>
+                )}
               </div>
               <div className="mt-1">
                 <HashViewer hash={paper.digital_signature || '0x4892c90fa41b9...'} truncate={false} />

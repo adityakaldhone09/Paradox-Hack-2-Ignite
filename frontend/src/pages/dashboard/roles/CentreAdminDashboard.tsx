@@ -77,8 +77,6 @@ export const CentreAdminDashboard: React.FC = () => {
     }));
 
     try {
-      // Artificial 400ms micro-pause for smooth UI state transition
-      await new Promise((r) => setTimeout(r, 400));
       const res = await paperApi.verify(paperId, { simulate_tamper: false });
       const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 

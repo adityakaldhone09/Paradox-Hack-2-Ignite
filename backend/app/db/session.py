@@ -14,10 +14,12 @@ if "sqlite" in settings.DATABASE_URL:
         "connect_args": {"timeout": 30}
     }
 else:
+    from sqlalchemy.pool import NullPool
     connect_args = {"statement_cache_size": 0}
     if any(k in settings.DATABASE_URL for k in ("supabase.com", "sslmode=require", "ssl=require", "pooler", "rds.amazonaws.com")):
         connect_args["ssl"] = "require"
     engine_kwargs = {
+        "poolclass": NullPool,
         "connect_args": connect_args
     }
 

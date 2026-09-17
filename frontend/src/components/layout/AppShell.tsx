@@ -33,22 +33,22 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
     });
   };
 
-  // Background pre-warming of critical page datasets for zero-latency instant transitions
+  const prewarmedRef = React.useRef(false);
+  // Background pre-warming of reference page datasets for zero-latency instant transitions
   useEffect(() => {
-    if (!user) return;
+    if (!user || prewarmedRef.current) return;
+    prewarmedRef.current = true;
     const prewarm = async () => {
       try {
         await Promise.allSettled([
           examApi.list(),
           paperApi.list(),
           centreApi.list(),
-          securityApi.getSummary(),
-          blockchainApi.getStatus(),
         ]);
       } catch {}
     };
     prewarm();
-  }, [user?.role]);
+  }, [user]);
 
   return (
     <div className="flex h-screen bg-neutral-50/50 dark:bg-[#0A0A0B] text-neutral-900 dark:text-neutral-100 overflow-hidden transition-colors duration-200 print:h-auto print:overflow-visible print:bg-white print:text-black">

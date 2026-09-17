@@ -94,23 +94,16 @@ export const PapersPage: React.FC = () => {
     setUploadStep(1);
 
     try {
-      await new Promise((r) => setTimeout(r, 500));
-      setUploadStep(2);
-      await new Promise((r) => setTimeout(r, 500));
-      setUploadStep(3);
-      await new Promise((r) => setTimeout(r, 500));
-      setUploadStep(4);
-      await new Promise((r) => setTimeout(r, 500));
-      setUploadStep(5);
+      setUploadStep(1);
 
       const formData = new FormData();
       formData.append('file', selectedFile);
       formData.append('exam_id', selectedExamId);
       formData.append('title', paperTitle);
 
+      setUploadStep(3);
       await paperApi.upload(formData);
       setUploadStep(6);
-      await new Promise((r) => setTimeout(r, 600));
 
       toast.success('Question paper secured and anchored to blockchain.');
       setIsUploadOpen(false);

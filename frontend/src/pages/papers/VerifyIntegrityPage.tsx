@@ -56,12 +56,13 @@ export const VerifyIntegrityPage: React.FC = () => {
     setVerificationResult(null);
 
     try {
-      await new Promise((r) => setTimeout(r, 600));
       const res = await paperApi.verify(selectedPaperId, { simulate_tamper: simulateTamper });
       setVerificationResult(res.data);
 
       if (res.data.verified) {
         toast.success('Document integrity confirmed: SHA-256 matches blockchain proof');
+      } else if (res.data.status === 'TAMPER_DETECTED') {
+        toast.error('Simulation: 1-byte tamper detected! Digest mismatch confirmed');
       } else {
         toast.error('CRITICAL: Hash mismatch! Document tampering detected');
       }

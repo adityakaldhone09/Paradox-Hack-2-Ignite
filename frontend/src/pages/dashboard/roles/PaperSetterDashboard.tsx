@@ -93,21 +93,11 @@ export const PaperSetterDashboard: React.FC = () => {
 
     // Multi-stage animated progress
     setUploadStep(1);
-    await new Promise((r) => setTimeout(r, 500));
-
-    setUploadStep(2);
-    await new Promise((r) => setTimeout(r, 500));
 
     try {
       setUploadStep(3);
-      await new Promise((r) => setTimeout(r, 500));
-
-      setUploadStep(4);
       const res = await paperApi.upload(formData);
       setUploadResult(res.data);
-
-      setUploadStep(5);
-      await new Promise((r) => setTimeout(r, 600));
 
       setUploadStep(6);
       toast.success('Question Paper encrypted and anchored to blockchain!');

@@ -33,7 +33,16 @@ const IncidentsPage = lazy(() => import('./pages/incidents/IncidentsPage').then(
 const SecurityOpsPage = lazy(() => import('./pages/security/SecurityOpsPage').then((m) => ({ default: m.SecurityOpsPage })));
 const AuditorPortalPage = lazy(() => import('./pages/audit/AuditorPortalPage').then((m) => ({ default: m.AuditorPortalPage })));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000,
+      gcTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 export const App: React.FC = () => {
   return (
@@ -42,24 +51,24 @@ export const App: React.FC = () => {
         <AuthProvider>
           <Router>
             <Toaster position="top-right" richColors closeButton />
-            <Suspense fallback={<div className="flex min-h-screen items-center justify-center text-sm text-neutral-500">Loading VeriQ…</div>}>
-              <Routes>
-                {/* Public Standalone Pages (No Shell) */}
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/signin" element={<SignInPage />} />
-                <Route path="/signup" element={<SignUpPage />} />
-                <Route path="/login" element={<Navigate to="/signin" replace />} />
-                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                <Route path="/reset-password" element={<ResetPasswordPage />} />
-                <Route path="/unauthorized" element={<UnauthorizedPage />} />
-                <Route path="/logout" element={<LogoutPage />} />
+            <Routes>
+              {/* Public Standalone Pages (No Shell) */}
+              <Route path="/" element={<Suspense fallback={<div className="flex min-h-screen items-center justify-center text-sm text-neutral-500">Loading VeriQ…</div>}><LandingPage /></Suspense>} />
+              <Route path="/signin" element={<Suspense fallback={<div className="flex min-h-screen items-center justify-center text-sm text-neutral-500">Loading VeriQ…</div>}><SignInPage /></Suspense>} />
+              <Route path="/signup" element={<Suspense fallback={<div className="flex min-h-screen items-center justify-center text-sm text-neutral-500">Loading VeriQ…</div>}><SignUpPage /></Suspense>} />
+              <Route path="/login" element={<Navigate to="/signin" replace />} />
+              <Route path="/forgot-password" element={<Suspense fallback={<div className="flex min-h-screen items-center justify-center text-sm text-neutral-500">Loading VeriQ…</div>}><ForgotPasswordPage /></Suspense>} />
+              <Route path="/reset-password" element={<Suspense fallback={<div className="flex min-h-screen items-center justify-center text-sm text-neutral-500">Loading VeriQ…</div>}><ResetPasswordPage /></Suspense>} />
+              <Route path="/unauthorized" element={<Suspense fallback={<div className="flex min-h-screen items-center justify-center text-sm text-neutral-500">Loading VeriQ…</div>}><UnauthorizedPage /></Suspense>} />
+              <Route path="/logout" element={<Suspense fallback={<div className="flex min-h-screen items-center justify-center text-sm text-neutral-500">Loading VeriQ…</div>}><LogoutPage /></Suspense>} />
 
-                {/* Protected Internal Dashboard Shell */}
-                <Route
-                  path="/*"
-                  element={
-                    <ProtectedRoute>
-                      <AppShell>
+              {/* Protected Internal Dashboard Shell */}
+              <Route
+                path="/*"
+                element={
+                  <ProtectedRoute>
+                    <AppShell>
+                      <Suspense fallback={<div className="flex min-h-[300px] items-center justify-center text-xs text-neutral-400">Loading workspace…</div>}>
                         <Routes>
                           {/* Auto-Routing Dashboard */}
                           <Route path="/dashboard" element={<DashboardPage />} />
@@ -163,12 +172,12 @@ export const App: React.FC = () => {
                           {/* Fallback */}
                           <Route path="*" element={<Navigate to="/dashboard" replace />} />
                         </Routes>
-                      </AppShell>
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
-            </Suspense>
+                      </Suspense>
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
           </Router>
         </AuthProvider>
       </ThemeProvider>

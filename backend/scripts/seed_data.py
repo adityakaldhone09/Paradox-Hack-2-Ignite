@@ -171,6 +171,8 @@ async def seed():
                 file_name=fname,
                 file_size=len(raw_content),
                 sha256_hash=sha256,
+                storage_bucket="encrypted_papers",
+                storage_object_path=f"encrypted_papers/{p_code}.enc",
                 encrypted_file_path=storage_path,
                 encryption_iv=iv,
                 encryption_tag=tag,

@@ -1,7 +1,11 @@
 import axios from 'axios';
 
+// Resolve backend API URL dynamically from environment (e.g. Render production URL or local proxy)
+const rawApiBase = (import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || '').trim();
+const cleanApiBase = rawApiBase.replace(/\/+$/, '');
+
 export const apiClient = axios.create({
-  baseURL: '/api/v1',
+  baseURL: cleanApiBase ? `${cleanApiBase}/api/v1` : '/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },

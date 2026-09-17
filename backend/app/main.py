@@ -39,23 +39,20 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS Middleware - strict origins with credentials support
+# CORS Middleware - strict origins with credentials support and flexible deployment matching
+def get_allowed_cors_origins() -> List[str]:
+    origins = list(settings.CORS_ORIGINS) if settings.CORS_ORIGINS else []
+    if settings.FRONTEND_URL and settings.FRONTEND_URL not in origins:
+        origins.append(settings.FRONTEND_URL.rstrip("/"))
+    for dev_origin in ["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:3000", "http://127.0.0.1:5173"]:
+        if dev_origin not in origins:
+            origins.append(dev_origin)
+    return origins
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=(
-        settings.CORS_ORIGINS
-        or ([] if settings.APP_ENV.lower() in ("production", "prod") else [
-            "http://localhost:3000",
-            "http://localhost:5173",
-            "http://127.0.0.1:3000",
-            "http://127.0.0.1:5173",
-        ])
-    ),
-    allow_origin_regex=(
-        r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
-        if settings.APP_ENV.lower() not in ("production", "prod")
-        else None
-    ),
+    allow_origins=get_allowed_cors_origins(),
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$|^https://.*\.onrender\.com$|^https://.*\.vercel\.app$|^https://.*\.netlify\.app$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

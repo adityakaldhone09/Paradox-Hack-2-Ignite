@@ -74,13 +74,15 @@ class Paper(Base):
     file_name = Column(String(255), nullable=False)
     file_size = Column(Integer, default=0)
     sha256_hash = Column(String(64), nullable=False, index=True)
+    storage_bucket = Column(String(100), default="encrypted_papers", nullable=True)
+    storage_object_path = Column(String(500), nullable=True)
     encrypted_file_path = Column(String(500), nullable=False)
     encryption_iv = Column(String(64), nullable=False)
     encryption_tag = Column(String(64), nullable=False)
     version = Column(String(20), default="1.0")
-    status = Column(String(50), default="DRAFT") # DRAFT, APPROVED, ASSIGNED, RELEASED, REVOKED
-    release_time = Column(DateTime, nullable=True) # Time-locked release timestamp
-    created_by = Column(String(255), nullable=False)
+    status = Column(String(50), default="DRAFT", index=True) # DRAFT, APPROVED, ASSIGNED, RELEASED, REVOKED
+    release_time = Column(DateTime, nullable=True, index=True) # Time-locked release timestamp
+    created_by = Column(String(255), nullable=False, index=True)
     created_at = Column(DateTime, default=utc_now)
     approved_by = Column(String(255), nullable=True)
     approved_at = Column(DateTime, nullable=True)

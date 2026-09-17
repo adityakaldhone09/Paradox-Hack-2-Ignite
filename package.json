@@ -5,11 +5,11 @@
   "private": true,
   "scripts": {
     "dev": "concurrently -n \"backend,frontend\" -c \"blue,green\" \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload",
+    "dev:backend": "cd backend && (python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload || python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload)",
     "dev:frontend": "cd frontend && npm run dev",
     "build:frontend": "cd frontend && npm run build",
-    "seed": "cd backend && python scripts/seed_data.py",
-    "test:backend": "cd backend && python -m pytest -v",
+    "seed": "cd backend && (python3 scripts/seed_data.py || python scripts/seed_data.py)",
+    "test:backend": "cd backend && (python3 -m pytest -v || python -m pytest -v)",
     "test:frontend": "cd frontend && pnpm run test"
   },
   "devDependencies": {

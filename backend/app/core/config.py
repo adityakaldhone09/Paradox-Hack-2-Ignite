@@ -1,5 +1,5 @@
 import os
-from typing import List, Set
+from typing import List, Set, Any
 from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -74,6 +74,24 @@ class Settings(BaseSettings):
             backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
             return os.path.abspath(os.path.join(backend_dir, v[2:]))
         return v
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v: Any) -> List[str]:
+        if isinstance(v, str):
+            v = v.strip()
+            if not v:
+                return []
+            if v.startswith("[") and v.endswith("]"):
+                try:
+                    import json
+                    return json.loads(v)
+                except Exception:
+                    pass
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
+        elif isinstance(v, (list, tuple, set)):
+            return list(v)
+        return []
 
     @model_validator(mode="after")
     def validate_security_credentials(self) -> "Settings":

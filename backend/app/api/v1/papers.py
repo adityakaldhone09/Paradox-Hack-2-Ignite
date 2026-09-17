@@ -13,7 +13,9 @@ from app.schemas.schemas import PaperResponse, PaperAssignCentreRequest, PaperVe
 from app.services.hashing_service import hashing_service
 from app.services.encryption_service import encryption_service
 from app.services.blockchain_service import blockchain_service
-from app.core.security import sign_data
+from app.services.storage_service import storage_service
+from app.services.verification_service import verification_service
+from app.core.security import sign_data, verify_signature
 from app.api.deps import get_current_user, require_roles
 
 router = APIRouter(prefix="/papers", tags=["Paper Management"])
@@ -134,13 +136,11 @@ async def upload_paper(
     # 4. Perform AES-256-GCM Encryption
     ciphertext, iv_hex, tag_hex = encryption_service.encrypt(file_bytes)
 
-    # 5. Store Encrypted File to Off-Chain Storage
+    # 5. Store Encrypted File to Off-Chain Storage atomically
     paper_uuid = str(uuid.uuid4())
     paper_code = f"PAP-{exam.subject[:4].upper()}-{paper_uuid[:6].upper()}"
-    storage_path = os.path.join(settings.STORAGE_DIR, f"{paper_uuid}.enc")
-    
-    with open(storage_path, "wb") as f:
-        f.write(ciphertext)
+    canonical_obj, absolute_storage_path = storage_service.store_encrypted_artifact(paper_uuid, ciphertext)
+    authority_sig = sign_data(f"{paper_code}:{sha256_hash}")
 
     # 6. Save Paper Record
     paper = Paper(
@@ -151,13 +151,16 @@ async def upload_paper(
         file_name=file.filename or "question_paper.pdf",
         file_size=len(file_bytes),
         sha256_hash=sha256_hash,
-        encrypted_file_path=storage_path,
+        storage_bucket="encrypted_papers",
+        storage_object_path=canonical_obj,
+        encrypted_file_path=absolute_storage_path,
         encryption_iv=iv_hex,
         encryption_tag=tag_hex,
         version=version,
         status="DRAFT",
         created_by=user.email,
-        created_at=utc_now()
+        created_at=utc_now(),
+        digital_signature=authority_sig
     )
     db.add(paper)
     await db.flush()
@@ -243,6 +246,10 @@ async def get_paper(
     )
     txs = tx_res.scalars().all()
 
+    sig_valid = False
+    if paper.digital_signature:
+        sig_valid = verify_signature(f"{paper.paper_id}:{paper.sha256_hash}", paper.digital_signature)
+
     return {
         "id": paper.id,
         "paper_id": paper.paper_id,
@@ -264,6 +271,7 @@ async def get_paper(
         "approved_by": paper.approved_by,
         "approved_at": paper.approved_at.isoformat() if paper.approved_at else None,
         "digital_signature": paper.digital_signature,
+        "signature_verified": sig_valid,
         "revocation_reason": paper.revocation_reason,
         "assigned_centres": [
             {
@@ -502,6 +510,14 @@ async def release_paper(
 
     return {"message": "Paper released for authorized examination centres", "status": paper.status, "tx_hash": bc_tx["tx_hash"]}
 
+@router.get("/{id}/verification-diagnostics")
+async def get_paper_verification_diagnostics(
+    id: str,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    return await verification_service.get_diagnostics(id, db)
+
 @router.post("/{id}/verify")
 async def verify_paper_integrity(
     id: str,
@@ -509,99 +525,15 @@ async def verify_paper_integrity(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    paper = (await db.execute(select(Paper).where(or_(Paper.id == id, Paper.paper_id == id)))).scalars().first()
-    if not paper:
-        raise HTTPException(status_code=404, detail="Paper not found")
-
     simulate_tamper = req.simulate_tamper if req else False
-
-    # Read the stored encrypted file with automatic storage directory fallback
-    target_path = paper.encrypted_file_path
-    if not os.path.exists(target_path):
-        candidate_name = os.path.join(settings.STORAGE_DIR, os.path.basename(paper.encrypted_file_path))
-        candidate_code = os.path.join(settings.STORAGE_DIR, f"{paper.paper_id}.enc")
-        candidate_id = os.path.join(settings.STORAGE_DIR, f"{paper.id}.enc")
-        if os.path.exists(candidate_name):
-            target_path = candidate_name
-        elif os.path.exists(candidate_code):
-            target_path = candidate_code
-        elif os.path.exists(candidate_id):
-            target_path = candidate_id
-
-    if not os.path.exists(target_path):
-        raise HTTPException(status_code=500, detail="Encrypted off-chain paper storage missing")
-
-    with open(target_path, "rb") as f:
-        ciphertext = f.read()
-
-    try:
-        decrypted_bytes = encryption_service.decrypt(ciphertext, paper.encryption_iv, paper.encryption_tag)
-        calculated_hash = hashing_service.calculate_file_hash(decrypted_bytes)
-    except Exception as e:
-        calculated_hash = "tampered_corrupt_payload_hash"
-
-    if req and req.candidate_hash:
-        calculated_hash = req.candidate_hash
-    elif simulate_tamper:
-        # In tamper simulation, alter the calculated hash
-        calculated_hash = "f" * 64
-
-    is_match = (calculated_hash.lower() == paper.sha256_hash.lower())
-
-    # Record blockchain verification event
-    bc_tx = await blockchain_service.record_transaction(
-        event_type="PAPER_VERIFIED",
-        paper_id=paper.id,
-        actor_id=user.email,
-        payload_data={
-            "expected_hash": paper.sha256_hash,
-            "calculated_hash": calculated_hash,
-            "verified": is_match
-        }
+    candidate_hash = req.candidate_hash if req else None
+    return await verification_service.verify_paper_integrity(
+        paper_identifier=id,
+        actor=user,
+        db=db,
+        simulate_tamper=simulate_tamper,
+        candidate_hash=candidate_hash
     )
-
-    db_tx = BlockchainTransaction(
-        tx_hash=bc_tx["tx_hash"],
-        block_number=bc_tx["block_number"],
-        event_type="PAPER_VERIFIED",
-        paper_id=paper.id,
-        actor_id=user.email,
-        payload_hash=bc_tx["payload_hash"],
-        previous_hash=bc_tx["previous_hash"],
-        signature=bc_tx["signature"],
-        timestamp=utc_now(),
-        status="CONFIRMED"
-    )
-    db.add(db_tx)
-
-    # If tampering detected, automatically log critical incident!
-    if not is_match:
-        inc = Incident(
-            incident_id=f"INC-{uuid.uuid4().hex[:8].upper()}",
-            type="HASH_MISMATCH",
-            severity="CRITICAL",
-            paper_id=paper.id,
-            user_id=user.id,
-            timestamp=utc_now(),
-            description=f"CRITICAL: Document integrity failure! Calculated SHA-256 {calculated_hash[:16]}... does not match blockchain proof {paper.sha256_hash[:16]}...",
-            status="OPEN",
-            tx_hash=bc_tx["tx_hash"]
-        )
-        db.add(inc)
-
-    await db.commit()
-
-    return {
-        "verified": is_match,
-        "is_authentic": is_match,
-        "status": "VERIFIED_VALID" if is_match else "INTEGRITY_FAILURE",
-        "title": paper.title,
-        "paper_id": paper.paper_id,
-        "blockchain_anchored_hash": paper.sha256_hash,
-        "current_document_hash": calculated_hash,
-        "tx_hash": bc_tx["tx_hash"],
-        "message": "DOCUMENT VERIFIED: Hash match confirmed with blockchain ledger." if is_match else "DOCUMENT INTEGRITY FAILURE: Hash mismatch detected. Potential document tampering."
-    }
 
 @router.post("/{id}/revoke")
 async def revoke_paper(
