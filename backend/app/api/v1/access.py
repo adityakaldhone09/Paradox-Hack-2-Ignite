@@ -42,7 +42,7 @@ async def request_paper_access(
     event_type = "ACCESS_GRANTED" if allowed else "ACCESS_DENIED"
     resolved_device_id = details.get("device_id") if details else None
     if not resolved_device_id:
-        resolved_device_id = req.device_fingerprint[:16]
+        resolved_device_id = req.device_fingerprint[:16] if req.device_fingerprint else "UNKNOWN_DEVICE"
 
     # Record blockchain transaction
     bc_tx = await blockchain_service.record_transaction(
@@ -94,9 +94,9 @@ async def request_paper_access(
     # If access blocked, automatically log incident for Security Operations Center
     if not allowed:
         inc_type = "EARLY_ACCESS" if reason == "RELEASE_WINDOW_NOT_STARTED" else (
-            "DEVICE_MISMATCH" if reason == "DEVICE_MISMATCH" else "UNAUTHORIZED_ACCESS"
+            "DEVICE_MISMATCH" if reason in ("DEVICE_MISMATCH", "DEVICE_REVOKED") else "UNAUTHORIZED_ACCESS"
         )
-        severity = "CRITICAL" if reason == "DEVICE_MISMATCH" else "HIGH"
+        severity = "CRITICAL" if reason in ("DEVICE_MISMATCH", "DEVICE_REVOKED") else "HIGH"
         
         inc = Incident(
             incident_id=f"INC-{uuid.uuid4().hex[:8].upper()}",
