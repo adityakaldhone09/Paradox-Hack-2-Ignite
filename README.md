@@ -1,9 +1,6 @@
 <div align="center">
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="frontend/public/assets/veriq-logo-full-dark.png">
-  <img src="frontend/public/assets/veriq-logo-full.png" alt="VeriQ Logo" width="220" />
-</picture>
+<img src="OG - VeriQ.png" alt="VeriQ Logo" width="280" />
 
 # VeriQ — Secure Examination Paper Distribution Using Blockchain
 
