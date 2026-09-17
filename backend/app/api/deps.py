@@ -13,21 +13,16 @@ async def get_current_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security_scheme),
     db: AsyncSession = Depends(get_db)
 ) -> User:
-    if not credentials:
-        # Fallback to demo default user if authorization header is absent (facilitates smooth testing)
-        query = select(User).where(User.email == "admin@veriq.local")
-        res = await db.execute(query)
-        user = res.scalars().first()
-        if user:
-            return user
+    if not credentials or not credentials.credentials or not credentials.credentials.strip():
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication required",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    payload = decode_token(credentials.credentials)
-    if not payload or payload.get("type") != "access":
+    token = credentials.credentials.strip()
+    payload = decode_token(token)
+    if not payload or payload.get("type") != "access" or not payload.get("sub"):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
@@ -39,9 +34,16 @@ async def get_current_user(
     res = await db.execute(query)
     user = res.scalars().first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     if not user.is_active:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User account is deactivated")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User account is deactivated"
+        )
 
     return user
 
