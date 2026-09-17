@@ -20,6 +20,11 @@ class AccessControlService:
         """
         now = current_time or datetime.now(timezone.utc)
 
+        # 0. Validate sanitized device fingerprint
+        if not device_fingerprint or not str(device_fingerprint).strip():
+            return False, "DEVICE_MISMATCH", {"message": "Device fingerprint is missing or empty."}
+        clean_fp = str(device_fingerprint).strip()
+
         # 1. Check Paper Status
         if paper.status == "REVOKED":
             return False, "PAPER_REVOKED", {"message": f"Examination paper {paper.paper_id} has been revoked: {paper.revocation_reason}"}
@@ -29,7 +34,16 @@ class AccessControlService:
         if user.role not in allowed_roles:
             return False, "ROLE_INSUFFICIENT", {"message": f"User role {user.role} is not permitted to access active question papers"}
 
-        # 3. Check Centre Assignment
+        # 3. Check User Centre Scope (if user is bound to a specific centre)
+        if user.role in ["CENTRE_ADMIN", "INVIGILATOR"] and user.centre_id and user.centre_id != centre_id:
+            return False, "UNAUTHORIZED_CENTRE", {"message": f"User {user.email} is scoped to centre {user.centre_id} and cannot access centre {centre_id}"}
+
+        # 4. Check Centre Validity & Authorization
+        centre = (await db.execute(select(Centre).where(Centre.id == centre_id))).scalars().first()
+        if not centre or not centre.is_authorized or centre.status != "ACTIVE":
+            return False, "UNAUTHORIZED_CENTRE", {"message": f"Examination centre {centre_id} is not authorized or active"}
+
+        # 5. Check Centre Assignment for this Paper
         query = select(PaperCentreAssignment).where(
             PaperCentreAssignment.paper_id == paper.id,
             PaperCentreAssignment.centre_id == centre_id
@@ -39,18 +53,31 @@ class AccessControlService:
         if not assignment:
             return False, "UNAUTHORIZED_CENTRE", {"message": f"Centre {centre_id} is not authorized for paper {paper.paper_id}"}
 
-        # 4. Check Authorized Device
+        # 6. Check Authorized Device (Server-Side DB Verification)
         dev_query = select(AuthorizedDevice).where(
             AuthorizedDevice.centre_id == centre_id,
-            AuthorizedDevice.device_fingerprint == device_fingerprint,
-            AuthorizedDevice.status == "AUTHORIZED"
+            AuthorizedDevice.device_fingerprint == clean_fp
         )
         dev_res = await db.execute(dev_query)
         device = dev_res.scalars().first()
         if not device:
-            return False, "DEVICE_MISMATCH", {"message": f"Device with fingerprint {device_fingerprint[:12]}... is not registered or authorized at centre {centre_id}"}
+            # Check if the device is registered under a different centre (cross-centre attempt)
+            cross_dev = (await db.execute(select(AuthorizedDevice).where(AuthorizedDevice.device_fingerprint == clean_fp))).scalars().first()
+            if cross_dev:
+                return False, "DEVICE_MISMATCH", {
+                    "message": f"Device {cross_dev.device_id} is registered to a different centre, not authorized at centre {centre_id}",
+                    "device_id": cross_dev.device_id
+                }
+            return False, "DEVICE_MISMATCH", {"message": f"Device with fingerprint {clean_fp[:12]}... is not registered at centre {centre_id}"}
 
-        # 5. Check Time Window (Time-Locked Release)
+        # Check Device Status (fail-closed if revoked or inactive)
+        if device.status != "AUTHORIZED":
+            return False, "DEVICE_REVOKED", {
+                "message": f"Device {device.device_id} status is '{device.status}' and not permitted for paper release",
+                "device_id": device.device_id
+            }
+
+        # 7. Check Time Window (Time-Locked Release)
         # Standardize all datetimes to naive UTC to prevent timezone comparison issues
         window_start = assignment.release_window_start.replace(tzinfo=None) if assignment.release_window_start else None
         window_end = assignment.release_window_end.replace(tzinfo=None) if assignment.release_window_end else None
@@ -74,7 +101,7 @@ class AccessControlService:
                 "device_id": device.device_id
             }
 
-        # Update last seen timestamp on device
+        # Update last seen timestamp on device ONLY after all release gates succeed
         device.last_seen = now_naive
 
         # All checks passed!

@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
+from pydantic import BaseModel, EmailStr, Field, ConfigDict, field_validator
 
 from typing import Literal
 
@@ -156,9 +156,16 @@ class DeviceResponse(BaseModel):
 class AccessRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    paper_id: str
-    centre_id: str
-    device_fingerprint: str
+    paper_id: str = Field(..., min_length=1)
+    centre_id: str = Field(..., min_length=1)
+    device_fingerprint: str = Field(..., min_length=1)
+
+    @field_validator("paper_id", "centre_id", "device_fingerprint")
+    @classmethod
+    def validate_non_empty_strings(cls, v: str, info) -> str:
+        if not v or not v.strip():
+            raise ValueError(f"{info.field_name} cannot be empty or whitespace")
+        return v.strip()
 
 class AccessResponse(BaseModel):
     allowed: bool
