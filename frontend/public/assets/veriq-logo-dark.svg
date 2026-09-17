@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 40" fill="none">
+  <!-- VeriQ Mark for Dark Mode -->
+  <rect width="40" height="40" rx="10" fill="#FFFFFF"/>
+  <path d="M10 11L18.5 27.5C19.2 28.9 20.8 28.9 21.5 27.5L30 11H25L20 22L15 11H10Z" fill="#0A0A0B"/>
+  <path d="M14 19.5C14 16.5 16.5 14 20 14C23.5 14 26 16.5 26 19.5C26 22.5 23.5 25 20 25C18.2 25 16.6 24.3 15.5 23.1" stroke="#0A0A0B" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M17 21L21 25L29 14" stroke="#3B82F6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- VeriQ Wordmark (Dark Mode) -->
+  <text x="50" y="27" font-family="Inter, -apple-system, sans-serif" font-size="22" font-weight="800" letter-spacing="-0.04em" fill="#FFFFFF">Veri<tspan fill="#3B82F6">Q</tspan></text>
+</svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none">
+  <!-- VeriQ Mark: Bold geometric V/Q glyph with precision blue verification stroke -->
+  <rect width="40" height="40" rx="10" fill="#0A0A0B"/>
+  
+  <!-- Outer Geometric V Contour -->
+  <path d="M10 11L18.5 27.5C19.2 28.9 20.8 28.9 21.5 27.5L30 11H25L20 22L15 11H10Z" fill="#FFFFFF"/>
+  
+  <!-- Q Base Counter Ring Segment -->
+  <path d="M14 19.5C14 16.5 16.5 14 20 14C23.5 14 26 16.5 26 19.5C26 22.5 23.5 25 20 25C18.2 25 16.6 24.3 15.5 23.1" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+  
+  <!-- Vibrant Blue Verification Accent Stroke -->
+  <path d="M17 21L21 25L29 14" stroke="#2563EB" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

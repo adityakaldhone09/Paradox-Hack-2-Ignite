@@ -40,7 +40,6 @@ export const LandingPage: React.FC = () => {
 
   // Active Lifecycle 7-stage interactive loop & selection
   const [activeLifecycleStage, setActiveLifecycleStage] = useState(4); // Default to release/verify
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   // Sticky story active stage
   const [activeStoryStage, setActiveStoryStage] = useState(0);
@@ -59,14 +58,13 @@ export const LandingPage: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Calm, slow-paced lifecycle animation loop
+  // Calm, continuous lifecycle animation loop irrespective of cursor hovering
   useEffect(() => {
-    if (!isAutoPlaying) return;
     const timer = setInterval(() => {
       setActiveLifecycleStage((prev) => (prev + 1) % 7);
-    }, 3800);
+    }, 3200);
     return () => clearInterval(timer);
-  }, [isAutoPlaying]);
+  }, []);
 
   // Section 28 & 29: 7 Interactive Lifecycle Stages with Restrained Semantic Colors
   const lifecycleStages = [
@@ -445,15 +443,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Stepper Visual Nodes (7 Steps) */}
-            <div className="relative pt-6 pb-2">
-              {/* Connector Track */}
-              <div className="absolute top-[44px] left-8 right-8 h-0.5 bg-neutral-100 dark:bg-neutral-800 -z-0 hidden md:block" />
-              {/* Connector Active Progress */}
-              <div
-                className="absolute top-[44px] left-8 h-0.5 bg-blue-600 -z-0 hidden md:block transition-all duration-300"
-                style={{ width: `${(activeLifecycleStage / (lifecycleStages.length - 1)) * 90}%` }}
-              />
-
+            <div className="relative pt-4 pb-2">
               <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2.5 relative z-10">
                 {lifecycleStages.map((stg, idx) => {
                   const Icon = stg.icon;
@@ -462,30 +452,22 @@ export const LandingPage: React.FC = () => {
                   return (
                     <div
                       key={stg.id}
-                      onMouseEnter={() => {
-                        setIsAutoPlaying(false);
-                        setActiveLifecycleStage(idx);
-                      }}
-                      onMouseLeave={() => setIsAutoPlaying(true)}
-                      onClick={() => {
-                        setIsAutoPlaying(false);
-                        setActiveLifecycleStage(idx);
-                      }}
-                      className={`cursor-pointer p-3 rounded-2xl border text-center transition-all duration-200 group ${
+                      onClick={() => setActiveLifecycleStage(idx)}
+                      className={`cursor-pointer p-3 rounded-2xl border text-center transition-all duration-300 ${
                         isCurrent
-                          ? 'border-blue-600 dark:border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 shadow-sm scale-102'
+                          ? 'border-blue-600 dark:border-blue-500 bg-blue-50/60 dark:bg-blue-950/40 shadow-sm scale-102 ring-1 ring-blue-500/20'
                           : isPast
-                          ? 'border-neutral-200 dark:border-neutral-800/80 bg-neutral-50/60 dark:bg-neutral-900/40 opacity-90 hover:opacity-100 hover:border-blue-300'
-                          : 'border-transparent opacity-50 hover:opacity-90 hover:border-neutral-200 dark:hover:border-neutral-800'
+                          ? 'border-neutral-200/80 dark:border-neutral-800/80 bg-neutral-50/50 dark:bg-neutral-900/30 opacity-90'
+                          : 'border-neutral-100 dark:border-neutral-800/40 bg-neutral-50/20 dark:bg-neutral-900/10 opacity-50'
                       }`}
                     >
                       <div
-                        className={`w-9 h-9 mx-auto mb-2 rounded-xl flex items-center justify-center transition-all duration-200 ${
+                        className={`w-9 h-9 mx-auto mb-2 rounded-xl flex items-center justify-center transition-all duration-300 ${
                           isCurrent
                             ? 'bg-blue-600 text-white shadow-xs scale-105'
                             : isPast
-                            ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 group-hover:text-blue-600'
-                            : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-400 group-hover:text-neutral-700'
+                            ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200'
+                            : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-400'
                         }`}
                       >
                         <Icon className="w-4 h-4" />

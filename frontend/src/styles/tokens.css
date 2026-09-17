@@ -35,6 +35,25 @@
   --status-info: #2563EB;
   --status-info-soft: rgba(37, 99, 235, 0.1);
 
+  /* Layout Dimensions (Section 3, 4, 11, 16) */
+  --sidebar-width-expanded: 248px;
+  --sidebar-width-collapsed: 76px;
+  --header-height: 76px;
+  --icon-container-size: 40px;
+
+  /* Semantic Navigation Icon Accent Colors (Section 21) */
+  --nav-icon-overview: #2563EB;
+  --nav-icon-examinations: #4F46E5;
+  --nav-icon-papers: #475569;
+  --nav-icon-centres: #0D9488;
+  --nav-icon-verify: #16A34A;
+  --nav-icon-timelock: #D97706;
+  --nav-icon-custody: #7C3AED;
+  --nav-icon-security: #1D4ED8;
+  --nav-icon-incidents: #E11D48;
+  --nav-icon-blockchain: #9333EA;
+  --nav-icon-audit: #059669;
+
   /* Radii */
   --radius-sm: 8px;
   --radius-md: 12px;
