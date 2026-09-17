@@ -30,5 +30,15 @@ export default defineConfig({
   },
   build: {
     target: 'esnext',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom', 'react-router-dom'],
+          motion: ['framer-motion'],
+          data: ['@tanstack/react-query', 'axios'],
+          ui: ['lucide-react', 'sonner'],
+        },
+      },
+    },
   },
 });

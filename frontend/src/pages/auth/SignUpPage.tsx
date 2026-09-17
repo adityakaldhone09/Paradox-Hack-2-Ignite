@@ -16,6 +16,7 @@ import {
 import { useAuth, UserRole } from '../../store/AuthContext';
 import { useTheme } from '../../store/ThemeContext';
 import { Button } from '../../components/ui/Button';
+import { VeriQLogo } from '../../components/ui/VeriQLogo';
 
 export const SignUpPage: React.FC = () => {
   const { signup, getDashboardUrl } = useAuth();
@@ -95,8 +96,8 @@ export const SignUpPage: React.FC = () => {
       <div className="max-w-xl w-full mx-auto space-y-8">
         {/* Brand Header */}
         <div className="text-center space-y-2">
-          <Link to="/" className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 mb-2 shadow-xs">
-            <Shield className="w-5 h-5" />
+          <Link to="/" className="inline-flex items-center justify-center mb-2">
+            <VeriQLogo size="lg" />
           </Link>
           <h1 className="text-2xl font-bold tracking-tight text-neutral-950 dark:text-white">
             Request access to VeriQ

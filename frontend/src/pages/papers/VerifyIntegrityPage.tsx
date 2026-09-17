@@ -29,8 +29,9 @@ export const VerifyIntegrityPage: React.FC = () => {
       try {
         const res = await paperApi.list();
         setPapers(res.data);
-        if (res.data.length > 0 && !selectedPaperId) {
-          setSelectedPaperId(res.data[0].id);
+        const resolvedPaperId = initialPaperId || (res.data[0]?.id ?? '');
+        if (resolvedPaperId) {
+          setSelectedPaperId(resolvedPaperId);
         }
       } catch (err) {
         console.error('Error fetching papers', err);
@@ -39,7 +40,15 @@ export const VerifyIntegrityPage: React.FC = () => {
       }
     };
     loadList();
-  }, []);
+  }, [initialPaperId]);
+
+  useEffect(() => {
+    if (!selectedPaperId || isLoadingPapers || isVerifying) return;
+    const shouldAutoVerify = !!initialPaperId && !verificationResult;
+    if (shouldAutoVerify) {
+      runVerification(false);
+    }
+  }, [selectedPaperId, initialPaperId, isLoadingPapers, isVerifying]);
 
   const runVerification = async (simulateTamper = false) => {
     if (!selectedPaperId) return;

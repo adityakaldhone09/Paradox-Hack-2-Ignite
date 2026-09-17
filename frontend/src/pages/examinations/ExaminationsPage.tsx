@@ -15,9 +15,12 @@ import { StatusBadge } from '../../components/ui/StatusBadge';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
+import { useAuth } from '../../store/AuthContext';
 import { toast } from 'sonner';
 
 export const ExaminationsPage: React.FC = () => {
+  const { user } = useAuth();
+  const canCreateExaminations = user?.role !== 'INVIGILATOR';
   const [exams, setExams] = useState<any[]>(() => getCachedApiResponse('/exams') || []);
   const [search, setSearch] = useState('');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -93,9 +96,11 @@ export const ExaminationsPage: React.FC = () => {
             Configure examination schedules, security classification levels, and assigned question papers.
           </p>
         </div>
-        <Button onClick={() => setIsCreateOpen(true)} className="shadow-lg shadow-brand-500/20">
-          <Plus className="w-4 h-4" /> Create Examination
-        </Button>
+        {canCreateExaminations && (
+          <Button onClick={() => setIsCreateOpen(true)} className="shadow-lg shadow-brand-500/20">
+            <Plus className="w-4 h-4" /> Create Examination
+          </Button>
+        )}
       </div>
 
       {/* Search */}

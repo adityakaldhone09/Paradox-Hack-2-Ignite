@@ -581,7 +581,7 @@ export const generateAuditReportHTML = (report: AuditReportData): string => {
 
     <!-- Official Document Stamp & Footer -->
     <div class="footer-stamp">
-      <span>VeriQ Decentralized Examination Paper Chain of Custody System (WB-03)</span>
+      <span>VeriQ Decentralized Examination Paper Chain of Custody System</span>
       <span class="font-mono">Document Checksum: SHA256-${report.report_id.slice(-8)}-${report.paper.sha256_hash.slice(0, 12).toUpperCase()}</span>
       <span>Official Government / Regulatory Grade Audit Record</span>
     </div>

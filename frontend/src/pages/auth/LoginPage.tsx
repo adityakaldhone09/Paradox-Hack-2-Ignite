@@ -5,6 +5,7 @@ import { useAuth } from '../../store/AuthContext';
 import { useTheme } from '../../store/ThemeContext';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+import { VeriQLogo } from '../../components/ui/VeriQLogo';
 import { toast } from 'sonner';
 
 export const LoginPage: React.FC = () => {
@@ -67,13 +68,10 @@ export const LoginPage: React.FC = () => {
       <div className="w-full max-w-md space-y-6">
         {/* Logo and Tagline */}
         <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 to-brand-400 flex items-center justify-center shadow-xl shadow-brand-500/25 mx-auto mb-3">
-            <Shield className="w-7 h-7 text-slate-950 font-bold" />
-          </div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">VeriQ Command Gateway</h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Secure Every Question Paper. Verify Every Action.
-          </p>
+          <Link to="/" className="inline-flex items-center justify-center mb-1">
+            <VeriQLogo size="lg" showTagline />
+          </Link>
+          <h1 className="text-xl font-bold text-neutral-900 dark:text-white tracking-tight mt-1">Command Gateway</h1>
         </div>
 
         {/* Login Card */}

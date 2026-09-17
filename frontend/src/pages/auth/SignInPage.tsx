@@ -16,6 +16,7 @@ import {
 import { useAuth, UserRole } from '../../store/AuthContext';
 import { useTheme } from '../../store/ThemeContext';
 import { Button } from '../../components/ui/Button';
+import { VeriQLogo } from '../../components/ui/VeriQLogo';
 
 export const SignInPage: React.FC = () => {
   const { login, getDashboardUrl } = useAuth();
@@ -112,9 +113,9 @@ export const SignInPage: React.FC = () => {
 
       <div className="w-full max-w-[440px] mx-auto space-y-6">
         {/* Brand Header */}
-        <div className="text-center space-y-1.5">
-          <Link to="/" className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-[#111111] dark:bg-white text-white dark:text-neutral-950 mb-1 shadow-xs hover:scale-105 transition-transform">
-            <Shield className="w-4 h-4" />
+        <div className="text-center space-y-2">
+          <Link to="/" className="inline-flex items-center justify-center mb-1">
+            <VeriQLogo size="lg" />
           </Link>
           <h1 className="text-2xl font-bold tracking-tight text-neutral-950 dark:text-white">
             Welcome back.
