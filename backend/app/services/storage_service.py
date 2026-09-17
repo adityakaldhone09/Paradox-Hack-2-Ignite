@@ -1,6 +1,6 @@
 import os
 import re
-from typing import Tuple, Optional, Dict, Any
+from typing import Tuple, Optional, Dict, Any, List
 from app.core.config import settings
 
 class StorageError(Exception):
@@ -61,51 +61,66 @@ class StorageService:
 
         return canonical_object_path, absolute_path
 
-    def locate_artifact_path(self, paper: Any) -> Tuple[Optional[str], list]:
+    def locate_artifact_path(self, paper: Any) -> Tuple[Optional[str], List[str]]:
         """
         Resolve the canonical storage path on disk for a paper record,
-        handling canonical relative references, legacy absolute paths, and standard naming conventions.
+        handling canonical relative references, legacy absolute paths, and standard naming conventions
+        across any deployment working directory (e.g. Render, Docker, local).
         """
-        candidates = []
+        # Determine all candidate storage directories across various runtime roots
+        search_dirs: List[str] = []
+        for d in [
+            self.storage_dir,
+            os.path.abspath(self.storage_dir) if self.storage_dir else None,
+            os.path.join(settings.BASE_DIR, "storage", "encrypted_papers"),
+            os.path.join(settings.BASE_DIR, "backend", "storage", "encrypted_papers"),
+            os.path.join(os.getcwd(), "storage", "encrypted_papers"),
+            os.path.join(os.getcwd(), "backend", "storage", "encrypted_papers"),
+        ]:
+            if d and d not in search_dirs:
+                search_dirs.append(d)
 
-        # 1. Check storage_object_path if present
+        # Collect candidate filenames
+        filenames: List[str] = []
         storage_object_path = getattr(paper, "storage_object_path", None)
         if storage_object_path:
             norm = self.normalize_filename(storage_object_path)
-            if norm:
-                candidates.append(os.path.join(self.storage_dir, norm))
+            if norm and norm not in filenames:
+                filenames.append(norm)
 
-        # 2. Check encrypted_file_path directly if it exists on disk
         direct_path = getattr(paper, "encrypted_file_path", None)
         if direct_path:
-            if os.path.exists(direct_path):
+            if os.path.exists(direct_path) and os.path.isfile(direct_path):
                 return direct_path, [direct_path]
             norm_direct = self.normalize_filename(direct_path)
-            if norm_direct:
-                candidates.append(os.path.join(self.storage_dir, norm_direct))
+            if norm_direct and norm_direct not in filenames:
+                filenames.append(norm_direct)
 
-        # 3. Standard naming conventions: {paper_id}.enc and {id}.enc
         paper_id = getattr(paper, "paper_id", None)
         if paper_id:
-            candidates.append(os.path.join(self.storage_dir, f"{paper_id}.enc"))
+            name = f"{paper_id}.enc"
+            if name not in filenames:
+                filenames.append(name)
 
         db_id = getattr(paper, "id", None)
         if db_id:
-            candidates.append(os.path.join(self.storage_dir, f"{db_id}.enc"))
+            name = f"{db_id}.enc"
+            if name not in filenames:
+                filenames.append(name)
 
-        # Eliminate duplicates while preserving order
-        seen = set()
-        deduped = []
-        for c in candidates:
-            if c not in seen:
-                seen.add(c)
-                deduped.append(c)
+        # Build candidate file paths across all candidate directories
+        candidates: List[str] = []
+        for sdir in search_dirs:
+            for fname in filenames:
+                candidate = os.path.join(sdir, fname)
+                if candidate not in candidates:
+                    candidates.append(candidate)
 
-        for path in deduped:
+        for path in candidates:
             if os.path.exists(path) and os.path.isfile(path):
-                return path, deduped
+                return path, candidates
 
-        return None, deduped
+        return None, candidates
 
     def resolve_encrypted_paper_artifact(self, paper: Any) -> Tuple[bytes, str]:
         """

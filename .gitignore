@@ -49,10 +49,11 @@ pnpm-debug.log*
 *.sqlite3
 *.sqlite-wal
 *.sqlite-shm
-storage/
-storage/encrypted_papers/
-backend/storage/
-backend/storage/encrypted_papers/
+
+# Encrypted paper seed fixtures must be tracked
+!backend/storage/encrypted_papers/*.enc
+!storage/encrypted_papers/*.enc
+
 demo/
 scripts/generate_voice.ps1
 
