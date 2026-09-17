@@ -5,11 +5,11 @@
   "private": true,
   "scripts": {
     "dev": "concurrently -n \"backend,frontend\" -c \"blue,green\" \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "cd backend && venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload",
+    "dev:backend": "cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload",
     "dev:frontend": "cd frontend && pnpm run dev",
     "build:frontend": "cd frontend && pnpm run build",
-    "seed": "cd backend && (source venv/bin/activate || . venv/bin/activate || true) && python3 scripts/seed_data.py",
-    "test:backend": "cd backend && (source venv/bin/activate || . venv/bin/activate || true) && pytest -v",
+    "seed": "cd backend && python scripts/seed_data.py",
+    "test:backend": "cd backend && python -m pytest -v",
     "test:frontend": "cd frontend && pnpm run test"
   },
   "devDependencies": {

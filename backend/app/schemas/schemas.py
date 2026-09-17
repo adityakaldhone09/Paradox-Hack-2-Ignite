@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
 from typing import Literal
 
@@ -153,10 +153,11 @@ class DeviceResponse(BaseModel):
 
 # Access Control
 class AccessRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     paper_id: str
     centre_id: str
     device_fingerprint: str
-    override_time: Optional[datetime] = None # For demo early access testing
 
 class AccessResponse(BaseModel):
     allowed: bool

@@ -5,11 +5,12 @@ from sqlalchemy import select, or_
 from app.db.session import get_db
 from app.models.entities import Paper, Examination, PaperCentreAssignment, Centre, BlockchainTransaction, AccessEvent, Incident, User
 from app.services.hashing_service import hashing_service
+from app.api.deps import get_current_user
 
 router = APIRouter(prefix="/audit", tags=["Auditor Portal"])
 
 @router.get("/report/{paper_id}")
-async def generate_audit_report(paper_id: str, db: AsyncSession = Depends(get_db)):
+async def generate_audit_report(paper_id: str, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     paper = (await db.execute(select(Paper).where(or_(Paper.id == paper_id, Paper.paper_id == paper_id)))).scalars().first()
     if not paper:
         raise HTTPException(status_code=404, detail="Paper not found")

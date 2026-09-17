@@ -13,6 +13,7 @@ router = APIRouter(prefix="/centres", tags=["Centre Management"])
 async def list_centres(
     search: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     query = select(Centre)
@@ -92,7 +93,7 @@ async def create_centre(
     )
 
 @router.get("/{id}")
-async def get_centre(id: str, db: AsyncSession = Depends(get_db)):
+async def get_centre(id: str, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     centre = (await db.execute(select(Centre).where(or_(Centre.id == id, Centre.centre_id == id)))).scalars().first()
     if not centre:
         raise HTTPException(status_code=404, detail="Centre not found")

@@ -33,10 +33,11 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS Middleware
+# CORS Middleware - strict origins with credentials support
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Allow all origins for hackathon development flexibility
+    allow_origins=settings.CORS_ORIGINS,
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

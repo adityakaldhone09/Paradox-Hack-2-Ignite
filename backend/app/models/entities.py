@@ -1,4 +1,5 @@
 import uuid
+from typing import Optional
 from datetime import datetime, timezone
 from sqlalchemy import (
     Column, String, Boolean, DateTime, Integer, Text, ForeignKey, Table, Enum
@@ -11,6 +12,11 @@ def generate_uuid() -> str:
 
 def utc_now() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
+
+def to_naive_utc(dt: Optional[datetime]) -> Optional[datetime]:
+    if dt is None:
+        return None
+    return dt.replace(tzinfo=None)
 
 class User(Base):
     __tablename__ = "users"

@@ -13,16 +13,10 @@ async def get_current_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security_scheme),
     db: AsyncSession = Depends(get_db)
 ) -> User:
-    if not credentials:
-        # Fallback to demo default user if authorization header is absent (facilitates smooth testing)
-        query = select(User).where(User.email == "admin@veriq.local")
-        res = await db.execute(query)
-        user = res.scalars().first()
-        if user:
-            return user
+    if not credentials or not credentials.credentials:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication required",
+            detail="Authentication credentials were not provided",
             headers={"WWW-Authenticate": "Bearer"},
         )
 

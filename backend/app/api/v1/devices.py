@@ -4,14 +4,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_
 from app.db.session import get_db
-from app.models.entities import AuthorizedDevice, Centre, User
+from app.models.entities import AuthorizedDevice, Centre, User, utc_now
 from app.schemas.schemas import DeviceCreate, DeviceResponse
 from app.api.deps import get_current_user, require_roles
 
 router = APIRouter(prefix="/devices", tags=["Device Authorization"])
 
 @router.get("", response_model=List[DeviceResponse])
-async def list_devices(db: AsyncSession = Depends(get_db)):
+async def list_devices(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     res = await db.execute(select(AuthorizedDevice).order_by(AuthorizedDevice.registered_at.desc()))
     devs = res.scalars().all()
     return [
@@ -52,8 +52,8 @@ async def register_device(
         os=req.os,
         ip_address=req.ip_address,
         status="AUTHORIZED",
-        registered_at=datetime.now(timezone.utc),
-        last_seen=datetime.now(timezone.utc)
+        registered_at=utc_now(),
+        last_seen=utc_now()
     )
     db.add(dev)
     await db.commit()

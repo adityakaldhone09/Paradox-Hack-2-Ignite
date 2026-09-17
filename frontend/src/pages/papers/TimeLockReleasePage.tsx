@@ -11,7 +11,7 @@ import {
   Server,
   Zap
 } from 'lucide-react';
-import { paperApi, centreApi, accessApi } from '../../services/apiClient';
+import { paperApi, centreApi, accessApi, deviceApi, demoApi } from '../../services/apiClient';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { CountdownTimer } from '../../components/ui/CountdownTimer';
@@ -21,8 +21,10 @@ import { toast } from 'sonner';
 export const TimeLockReleasePage: React.FC = () => {
   const [papers, setPapers] = useState<any[]>([]);
   const [centres, setCentres] = useState<any[]>([]);
+  const [devices, setDevices] = useState<any[]>([]);
   const [selectedPaperId, setSelectedPaperId] = useState('');
   const [selectedCentreId, setSelectedCentreId] = useState('');
+  const [selectedDeviceId, setSelectedDeviceId] = useState('auto');
   const [serverTime, setServerTime] = useState(new Date().toLocaleTimeString());
   const [accessResult, setAccessResult] = useState<any>(null);
   const [isAttempting, setIsAttempting] = useState(false);
@@ -36,12 +38,14 @@ export const TimeLockReleasePage: React.FC = () => {
 
   const loadData = async () => {
     try {
-      const [pRes, cRes] = await Promise.all([
+      const [pRes, cRes, dRes] = await Promise.all([
         paperApi.list(),
         centreApi.list(),
+        deviceApi.list(),
       ]);
       setPapers(pRes.data);
       setCentres(cRes.data);
+      setDevices(dRes.data);
       if (pRes.data.length > 0) setSelectedPaperId(pRes.data[0].id);
       if (cRes.data.length > 0) setSelectedCentreId(cRes.data[0].id);
     } catch (err) {
@@ -53,21 +57,30 @@ export const TimeLockReleasePage: React.FC = () => {
     loadData();
   }, []);
 
-  const handleAttemptAccess = async (forceEarly = false) => {
+  const centreDevices = devices.filter((d) => d.centre_id === selectedCentreId);
+
+  const handleAttemptAccess = async () => {
     setIsAttempting(true);
     setAccessResult(null);
 
     try {
-      // Simulate hardware fingerprint
-      const fingerprint = 'DEV_FINGERPRINT_C101_HARDWARE_TPM_SECURE';
-      // If forceEarly is true, pass an override time in the past or before release
-      const overrideTime = forceEarly ? new Date(Date.now() - 3600 * 1000).toISOString() : undefined;
+      // Determine device fingerprint based on selection
+      let fingerprint = '';
+      if (selectedDeviceId === 'rogue') {
+        fingerprint = 'ROGUE_UNREGISTERED_DEVICE_HARDWARE_TPM_FAIL';
+      } else if (selectedDeviceId !== 'auto') {
+        const dev = devices.find((d) => d.id === selectedDeviceId);
+        fingerprint = dev?.device_fingerprint || '';
+      } else if (centreDevices.length > 0) {
+        fingerprint = centreDevices[0].device_fingerprint;
+      } else {
+        fingerprint = 'DEFAULT_TERMINAL_FINGERPRINT';
+      }
 
       const res = await accessApi.requestAccess({
         paper_id: selectedPaperId,
         centre_id: selectedCentreId,
         device_fingerprint: fingerprint,
-        override_time: overrideTime,
       });
 
       setAccessResult(res.data);
@@ -78,6 +91,25 @@ export const TimeLockReleasePage: React.FC = () => {
       }
     } catch (err: any) {
       toast.error('Access error: ' + (err.response?.data?.detail || err.message));
+    } finally {
+      setIsAttempting(false);
+    }
+  };
+
+  const handleSimulateEarlyAccess = async () => {
+    setIsAttempting(true);
+    setAccessResult(null);
+    try {
+      const res = await demoApi.simulate('EARLY_ACCESS');
+      setAccessResult({
+        allowed: false,
+        reason: res.data.reason || 'RELEASE_WINDOW_NOT_STARTED',
+        message: res.data.description || 'Early access attempt blocked: release window has not started.',
+        tx_hash: res.data.blockchain_tx_hash,
+      });
+      toast.error('🚨 Early access attempt intercepted and logged to blockchain ledger!');
+    } catch (err: any) {
+      toast.error('Simulation error: ' + (err.response?.data?.detail || err.message));
     } finally {
       setIsAttempting(false);
     }
@@ -147,6 +179,23 @@ export const TimeLockReleasePage: React.FC = () => {
                 ))}
               </select>
             </div>
+
+            <div>
+              <label className="block text-slate-700 dark:text-slate-300 mb-1 font-semibold">Authorized Hardware Terminal / Device *</label>
+              <select
+                value={selectedDeviceId}
+                onChange={(e) => setSelectedDeviceId(e.target.value)}
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-brand-500 font-mono"
+              >
+                <option value="auto">Auto-detect Centre Terminal ({centreDevices.length} available)</option>
+                {centreDevices.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.device_name} ({d.device_id}) — {d.status}
+                  </option>
+                ))}
+                <option value="rogue">⚠️ Rogue / Unregistered Terminal (Simulate Attack)</option>
+              </select>
+            </div>
           </div>
         </Card>
 
@@ -165,7 +214,7 @@ export const TimeLockReleasePage: React.FC = () => {
 
           <div className="space-y-2 pt-4 border-t border-slate-200 dark:border-slate-800">
             <Button
-              onClick={() => handleAttemptAccess(false)}
+              onClick={handleAttemptAccess}
               isLoading={isAttempting}
               className="w-full"
             >
@@ -173,7 +222,7 @@ export const TimeLockReleasePage: React.FC = () => {
             </Button>
             <Button
               variant="outline"
-              onClick={() => handleAttemptAccess(true)}
+              onClick={handleSimulateEarlyAccess}
               disabled={isAttempting}
               className="w-full border-amber-300 dark:border-amber-500/40 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10"
               title="Simulate accessing prior to the designated release window"

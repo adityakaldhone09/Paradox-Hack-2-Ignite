@@ -14,6 +14,7 @@ async def list_examinations(
     search: Optional[str] = Query(None),
     department: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     query = select(Examination)
@@ -110,7 +111,7 @@ async def create_examination(
     )
 
 @router.get("/{id}")
-async def get_examination(id: str, db: AsyncSession = Depends(get_db)):
+async def get_examination(id: str, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     exam_res = await db.execute(select(Examination).where(or_(Examination.id == id, Examination.exam_id == id)))
     exam = exam_res.scalars().first()
     if not exam:

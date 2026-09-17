@@ -28,9 +28,8 @@ async def request_paper_access(
     if not centre:
         raise HTTPException(status_code=404, detail="Examination Centre not found")
 
-    # Evaluate access using AccessControlService
-    # Support override_time for testing demo early access scenarios
-    evaluation_time = req.override_time or datetime.now(timezone.utc)
+    # Enforce server-authoritative time (no client-controlled time override)
+    evaluation_time = datetime.now(timezone.utc).replace(tzinfo=None)
     allowed, reason, details = await access_control_service.evaluate_access(
         db=db,
         paper=paper,
@@ -41,6 +40,9 @@ async def request_paper_access(
     )
 
     event_type = "ACCESS_GRANTED" if allowed else "ACCESS_DENIED"
+    resolved_device_id = details.get("device_id") if details else None
+    if not resolved_device_id:
+        resolved_device_id = req.device_fingerprint[:16]
 
     # Record blockchain transaction
     bc_tx = await blockchain_service.record_transaction(
@@ -48,7 +50,7 @@ async def request_paper_access(
         paper_id=paper.id,
         actor_id=user.email,
         centre_id=centre.id,
-        device_id=req.device_fingerprint[:16],
+        device_id=resolved_device_id,
         payload_data={
             "paper_id": paper.paper_id,
             "centre_id": centre.centre_id,
@@ -58,12 +60,12 @@ async def request_paper_access(
         }
     )
 
-    # Save AccessEvent log
+    # Save AccessEvent log with naive UTC timestamp
     access_evt = AccessEvent(
         paper_id=paper.id,
         centre_id=centre.id,
         user_id=user.id,
-        device_id=req.device_fingerprint[:16],
+        device_id=resolved_device_id,
         timestamp=evaluation_time,
         action="REQUEST_ACCESS",
         allowed=allowed,
@@ -80,11 +82,11 @@ async def request_paper_access(
         paper_id=paper.id,
         actor_id=user.email,
         centre_id=centre.id,
-        device_id=req.device_fingerprint[:16],
+        device_id=resolved_device_id,
         payload_hash=bc_tx["payload_hash"],
         previous_hash=bc_tx["previous_hash"],
         signature=bc_tx["signature"],
-        timestamp=datetime.fromisoformat(bc_tx["timestamp"]),
+        timestamp=evaluation_time,
         status="CONFIRMED"
     )
     db.add(db_tx)
@@ -103,7 +105,7 @@ async def request_paper_access(
             paper_id=paper.id,
             centre_id=centre.id,
             user_id=user.id,
-            device_id=req.device_fingerprint[:16],
+            device_id=resolved_device_id,
             timestamp=evaluation_time,
             description=f"Blocked paper access attempt for {paper.paper_id} at {centre.name}: {details.get('message', reason)}",
             status="OPEN",
@@ -126,6 +128,7 @@ async def request_paper_access(
 async def get_access_logs(
     paper_id: Optional[str] = Query(None),
     limit: int = Query(50),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     query = select(AccessEvent, Paper, Centre, User)\

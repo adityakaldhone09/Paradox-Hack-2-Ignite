@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.db.session import get_db
-from app.models.entities import Paper, Centre, Incident, BlockchainTransaction, AccessEvent, User
+from app.models.entities import Paper, Centre, Incident, BlockchainTransaction, AccessEvent, User, utc_now
 from app.schemas.schemas import SimulateEventRequest
 from app.services.blockchain_service import blockchain_service
 from app.services.anomaly_service import anomaly_service
@@ -22,7 +22,7 @@ async def simulate_security_event(req: SimulateEventRequest, db: AsyncSession = 
         raise HTTPException(status_code=400, detail="Seed demo data must be loaded before running simulations")
 
     evt_type = req.event_type.upper()
-    now = datetime.now(timezone.utc)
+    now = utc_now()
     incident_id = f"INC-{uuid.uuid4().hex[:8].upper()}"
 
     if evt_type == "EARLY_ACCESS":

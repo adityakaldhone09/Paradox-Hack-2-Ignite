@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_
 from app.core.config import settings
 from app.db.session import get_db
-from app.models.entities import Paper, Examination, PaperCentreAssignment, Centre, BlockchainTransaction, User, Incident
+from app.models.entities import Paper, Examination, PaperCentreAssignment, Centre, BlockchainTransaction, User, Incident, to_naive_utc, utc_now
 from app.schemas.schemas import PaperResponse, PaperAssignCentreRequest, PaperVerifyRequest, PaperRevokeRequest
 from app.services.hashing_service import hashing_service
 from app.services.encryption_service import encryption_service
@@ -23,6 +23,7 @@ async def list_papers(
     search: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
     exam_id: Optional[str] = Query(None),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     query = select(Paper)
@@ -136,7 +137,7 @@ async def upload_paper(
         version=version,
         status="DRAFT",
         created_by=user.email,
-        created_at=datetime.now(timezone.utc)
+        created_at=utc_now()
     )
     db.add(paper)
     await db.flush()
@@ -167,7 +168,7 @@ async def upload_paper(
         payload_hash=bc_tx["payload_hash"],
         previous_hash=bc_tx["previous_hash"],
         signature=bc_tx["signature"],
-        timestamp=datetime.fromisoformat(bc_tx["timestamp"]),
+        timestamp=utc_now(),
         status="CONFIRMED"
     )
     db.add(db_tx)
@@ -194,7 +195,7 @@ async def upload_paper(
     )
 
 @router.get("/{id}")
-async def get_paper(id: str, db: AsyncSession = Depends(get_db)):
+async def get_paper(id: str, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     query = select(Paper).where(or_(Paper.id == id, Paper.paper_id == id))
     res = await db.execute(query)
     paper = res.scalars().first()
@@ -281,7 +282,7 @@ async def approve_paper(
 
     paper.status = "APPROVED"
     paper.approved_by = user.email
-    paper.approved_at = datetime.now(timezone.utc)
+    paper.approved_at = utc_now()
     
     # Generate cryptographic signature of approval
     approval_payload = f"{paper.id}:{paper.sha256_hash}:{user.email}:{paper.approved_at.isoformat()}"
@@ -309,7 +310,7 @@ async def approve_paper(
         payload_hash=bc_tx["payload_hash"],
         previous_hash=bc_tx["previous_hash"],
         signature=bc_tx["signature"],
-        timestamp=datetime.fromisoformat(bc_tx["timestamp"]),
+        timestamp=utc_now(),
         status="CONFIRMED"
     )
     db.add(db_tx)
@@ -332,6 +333,9 @@ async def assign_centre_to_paper(
     if not centre:
         raise HTTPException(status_code=404, detail="Centre not found")
 
+    start_time_naive = to_naive_utc(req.release_window_start)
+    end_time_naive = to_naive_utc(req.release_window_end)
+
     # Check existing assignment
     existing = (await db.execute(
         select(PaperCentreAssignment)
@@ -339,20 +343,20 @@ async def assign_centre_to_paper(
     )).scalars().first()
 
     if existing:
-        existing.release_window_start = req.release_window_start
-        existing.release_window_end = req.release_window_end
+        existing.release_window_start = start_time_naive
+        existing.release_window_end = end_time_naive
         assignment = existing
     else:
         assignment = PaperCentreAssignment(
             paper_id=paper.id,
             centre_id=centre.id,
-            release_window_start=req.release_window_start,
-            release_window_end=req.release_window_end,
+            release_window_start=start_time_naive,
+            release_window_end=end_time_naive,
             status="ASSIGNED"
         )
         db.add(assignment)
 
-    paper.release_time = req.release_window_start
+    paper.release_time = start_time_naive
     if paper.status == "APPROVED":
         paper.status = "ASSIGNED"
 
@@ -365,8 +369,8 @@ async def assign_centre_to_paper(
         payload_data={
             "paper_id": paper.paper_id,
             "centre_id": centre.centre_id,
-            "release_window_start": req.release_window_start.isoformat(),
-            "release_window_end": req.release_window_end.isoformat()
+            "release_window_start": start_time_naive.isoformat(),
+            "release_window_end": end_time_naive.isoformat()
         }
     )
 
@@ -380,7 +384,7 @@ async def assign_centre_to_paper(
         payload_hash=bc_tx["payload_hash"],
         previous_hash=bc_tx["previous_hash"],
         signature=bc_tx["signature"],
-        timestamp=datetime.fromisoformat(bc_tx["timestamp"]),
+        timestamp=utc_now(),
         status="CONFIRMED"
     )
     db.add(db_tx)
@@ -423,7 +427,7 @@ async def release_paper(
         payload_hash=bc_tx["payload_hash"],
         previous_hash=bc_tx["previous_hash"],
         signature=bc_tx["signature"],
-        timestamp=datetime.fromisoformat(bc_tx["timestamp"]),
+        timestamp=utc_now(),
         status="CONFIRMED"
     )
     db.add(db_tx)
@@ -444,11 +448,23 @@ async def verify_paper_integrity(
 
     simulate_tamper = req.simulate_tamper if req else False
 
-    # Read the stored encrypted file, decrypt it, and verify the recovered plaintext hash
-    if not os.path.exists(paper.encrypted_file_path):
+    # Read the stored encrypted file with automatic storage directory fallback
+    target_path = paper.encrypted_file_path
+    if not os.path.exists(target_path):
+        candidate_name = os.path.join(settings.STORAGE_DIR, os.path.basename(paper.encrypted_file_path))
+        candidate_code = os.path.join(settings.STORAGE_DIR, f"{paper.paper_id}.enc")
+        candidate_id = os.path.join(settings.STORAGE_DIR, f"{paper.id}.enc")
+        if os.path.exists(candidate_name):
+            target_path = candidate_name
+        elif os.path.exists(candidate_code):
+            target_path = candidate_code
+        elif os.path.exists(candidate_id):
+            target_path = candidate_id
+
+    if not os.path.exists(target_path):
         raise HTTPException(status_code=500, detail="Encrypted off-chain paper storage missing")
 
-    with open(paper.encrypted_file_path, "rb") as f:
+    with open(target_path, "rb") as f:
         ciphertext = f.read()
 
     try:
@@ -484,7 +500,7 @@ async def verify_paper_integrity(
         payload_hash=bc_tx["payload_hash"],
         previous_hash=bc_tx["previous_hash"],
         signature=bc_tx["signature"],
-        timestamp=datetime.fromisoformat(bc_tx["timestamp"]),
+        timestamp=utc_now(),
         status="CONFIRMED"
     )
     db.add(db_tx)
@@ -497,6 +513,7 @@ async def verify_paper_integrity(
             severity="CRITICAL",
             paper_id=paper.id,
             user_id=user.id,
+            timestamp=utc_now(),
             description=f"CRITICAL: Document integrity failure! Calculated SHA-256 {calculated_hash[:16]}... does not match blockchain proof {paper.sha256_hash[:16]}...",
             status="OPEN",
             tx_hash=bc_tx["tx_hash"]
@@ -549,7 +566,7 @@ async def revoke_paper(
         payload_hash=bc_tx["payload_hash"],
         previous_hash=bc_tx["previous_hash"],
         signature=bc_tx["signature"],
-        timestamp=datetime.fromisoformat(bc_tx["timestamp"]),
+        timestamp=utc_now(),
         status="CONFIRMED"
     )
     db.add(db_tx)
@@ -558,7 +575,7 @@ async def revoke_paper(
     return {"message": "Paper revoked. All subsequent access requests will be blocked.", "status": "REVOKED", "tx_hash": bc_tx["tx_hash"]}
 
 @router.get("/{id}/chain-of-custody")
-async def get_chain_of_custody(id: str, db: AsyncSession = Depends(get_db)):
+async def get_chain_of_custody(id: str, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     paper = (await db.execute(select(Paper).where(or_(Paper.id == id, Paper.paper_id == id)))).scalars().first()
     if not paper:
         raise HTTPException(status_code=404, detail="Paper not found")

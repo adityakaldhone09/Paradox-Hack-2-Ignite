@@ -51,34 +51,36 @@ class AccessControlService:
             return False, "DEVICE_MISMATCH", {"message": f"Device with fingerprint {device_fingerprint[:12]}... is not registered or authorized at centre {centre_id}"}
 
         # 5. Check Time Window (Time-Locked Release)
-        # Standardize timestamps
-        window_start = assignment.release_window_start
-        window_end = assignment.release_window_end
+        # Standardize all datetimes to naive UTC to prevent timezone comparison issues
+        window_start = assignment.release_window_start.replace(tzinfo=None) if assignment.release_window_start else None
+        window_end = assignment.release_window_end.replace(tzinfo=None) if assignment.release_window_end else None
+        now_naive = now.replace(tzinfo=None) if now else datetime.now(timezone.utc).replace(tzinfo=None)
 
-        if window_start.tzinfo is None:
-            window_start = window_start.replace(tzinfo=timezone.utc)
-        if window_end.tzinfo is None:
-            window_end = window_end.replace(tzinfo=timezone.utc)
-
-        if now < window_start:
-            time_diff = int((window_start - now).total_seconds())
+        if window_start and now_naive < window_start:
+            time_diff = int((window_start - now_naive).total_seconds())
             return False, "RELEASE_WINDOW_NOT_STARTED", {
                 "message": "Access blocked: release window has not started.",
                 "scheduled_release": window_start.isoformat(),
-                "current_server_time": now.isoformat(),
-                "seconds_remaining": time_diff
+                "current_server_time": now_naive.isoformat(),
+                "seconds_remaining": time_diff,
+                "device_id": device.device_id
             }
 
-        if now > window_end:
+        if window_end and now_naive > window_end:
             return False, "RELEASE_WINDOW_EXPIRED", {
                 "message": "Access blocked: examination release window has expired.",
                 "window_end": window_end.isoformat(),
-                "current_server_time": now.isoformat()
+                "current_server_time": now_naive.isoformat(),
+                "device_id": device.device_id
             }
+
+        # Update last seen timestamp on device
+        device.last_seen = now_naive
 
         # All checks passed!
         return True, "AUTHORIZED", {
             "message": "Access authorized: credentials, device, centre, and time-lock verified.",
+            "device_id": device.device_id,
             "device_name": device.device_name,
             "centre_id": centre_id
         }

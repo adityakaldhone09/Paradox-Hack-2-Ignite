@@ -60,7 +60,7 @@ export const paperApi = {
 };
 
 export const accessApi = {
-  requestAccess: (data: { paper_id: string; centre_id: string; device_fingerprint: string; override_time?: string }) =>
+  requestAccess: (data: { paper_id: string; centre_id: string; device_fingerprint: string }) =>
     apiClient.post('/access/request', data),
   getLogs: (params?: any) => apiClient.get('/access/logs', { params }),
 };
