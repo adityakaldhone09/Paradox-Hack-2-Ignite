@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "VeriQ — Secure Every Question Paper. Verify Every Action. (WB-03)",
   "private": true,
+  "packageManager": "pnpm@9.15.4",
   "scripts": {
     "dev": "concurrently -n \"backend,frontend\" -c \"blue,green\" \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && (python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload || python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload)",
