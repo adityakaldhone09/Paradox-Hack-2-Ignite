@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.db.session import get_db
+from app.core.config import settings
 from app.core.security import verify_password, create_access_token, create_refresh_token, decode_token
 from app.schemas.schemas import (
     LoginRequest, SignupRequest, ForgotPasswordRequest, ResetPasswordRequest,
@@ -146,6 +147,11 @@ async def get_me(user: User = Depends(get_current_user)):
 @router.get("/demo-users")
 async def get_demo_users(db: AsyncSession = Depends(get_db)):
     """Returns safe demo credentials for 1-click login during the hackathon demonstration."""
+    if settings.APP_ENV.lower() in ("production", "prod"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Demo user credentials endpoint is disabled in production environment"
+        )
     query = select(User).order_by(User.role)
     res = await db.execute(query)
     users = res.scalars().all()
