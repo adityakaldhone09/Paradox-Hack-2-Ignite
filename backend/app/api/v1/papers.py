@@ -23,10 +23,7 @@ async def list_papers(
     search: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
     exam_id: Optional[str] = Query(None),
-<<<<<<< HEAD
-=======
     created_by: Optional[str] = Query(None),
->>>>>>> upstream/main
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
@@ -648,15 +645,11 @@ async def revoke_paper(
     return {"message": "Paper revoked. All subsequent access requests will be blocked.", "status": "REVOKED", "tx_hash": bc_tx["tx_hash"]}
 
 @router.get("/{id}/chain-of-custody")
-<<<<<<< HEAD
 async def get_chain_of_custody(
     id: str,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-=======
-async def get_chain_of_custody(id: str, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
->>>>>>> upstream/main
     paper = (await db.execute(select(Paper).where(or_(Paper.id == id, Paper.paper_id == id)))).scalars().first()
     if not paper:
         raise HTTPException(status_code=404, detail="Paper not found")
