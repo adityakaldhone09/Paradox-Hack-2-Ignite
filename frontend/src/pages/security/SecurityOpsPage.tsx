@@ -9,15 +9,15 @@ import {
   Building2,
   CheckCircle2
 } from 'lucide-react';
-import { securityApi } from '../../services/apiClient';
+import { securityApi, getCachedApiResponse } from '../../services/apiClient';
 import { Card } from '../../components/ui/Card';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { HashViewer } from '../../components/ui/HashViewer';
 
 export const SecurityOpsPage: React.FC = () => {
-  const [heatmap, setHeatmap] = useState<any[]>([]);
-  const [threatFeed, setThreatFeed] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [heatmap, setHeatmap] = useState<any[]>(() => getCachedApiResponse('/security/heatmap') || []);
+  const [threatFeed, setThreatFeed] = useState<any[]>(() => getCachedApiResponse('/security/threat-feed') || []);
+  const [isLoading, setIsLoading] = useState(() => !getCachedApiResponse('/security/heatmap'));
 
   useEffect(() => {
     const loadOpsData = async () => {
@@ -42,11 +42,11 @@ export const SecurityOpsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-            <ShieldAlert className="w-6 h-6 text-rose-400" />
+          <h1 className="text-2xl font-bold text-neutral-950 dark:text-white tracking-tight flex items-center gap-2">
+            <ShieldAlert className="w-6 h-6 text-rose-500 dark:text-rose-400" />
             Security Operations & Anomaly Detection
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
             Real-time multi-centre threat surveillance, risk heatmaps, and AI-assisted behavioral anomaly telemetry.
           </p>
         </div>

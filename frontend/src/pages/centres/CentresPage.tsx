@@ -9,7 +9,7 @@ import {
   XCircle,
   Laptop
 } from 'lucide-react';
-import { centreApi, deviceApi } from '../../services/apiClient';
+import { centreApi, deviceApi, getCachedApiResponse } from '../../services/apiClient';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { StatusBadge } from '../../components/ui/StatusBadge';
@@ -17,15 +17,21 @@ import { HashViewer } from '../../components/ui/HashViewer';
 import { toast } from 'sonner';
 
 export const CentresPage: React.FC = () => {
-  const [centres, setCentres] = useState<any[]>([]);
-  const [devices, setDevices] = useState<any[]>([]);
+  const [centres, setCentres] = useState<any[]>(() => getCachedApiResponse('/centres') || []);
+  const [devices, setDevices] = useState<any[]>(() => getCachedApiResponse('/devices') || []);
   const [search, setSearch] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [isLoading, setIsLoading] = useState(() => !getCachedApiResponse('/centres'));
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const loadData = async () => {
     try {
       const [cRes, dRes] = await Promise.all([
-        centreApi.list({ search: search || undefined }),
+        centreApi.list({ search: debouncedSearch || undefined }),
         deviceApi.list(),
       ]);
       setCentres(cRes.data);
@@ -39,7 +45,7 @@ export const CentresPage: React.FC = () => {
 
   useEffect(() => {
     loadData();
-  }, [search]);
+  }, [debouncedSearch]);
 
   const toggleCentreAuth = async (id: string, isCurrentlyAuth: boolean) => {
     try {
@@ -76,11 +82,11 @@ export const CentresPage: React.FC = () => {
       {/* Title */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-            <Building2 className="w-6 h-6 text-brand-400" />
+          <h1 className="text-2xl font-bold text-neutral-950 dark:text-white tracking-tight flex items-center gap-2">
+            <Building2 className="w-6 h-6 text-brand-600 dark:text-brand-400" />
             Centres & Authorized Devices
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
             Manage authorized examination centres and whitelist trusted hardware terminal fingerprints.
           </p>
         </div>

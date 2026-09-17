@@ -1,0 +1,13 @@
+Reference findings from supplied PDFs/images:
+- Premium minimal dark UI direction with near-black background, white typography, subtle borders, blue/green accents.
+- Header is wider and visually substantial; left logo shows shield/check VerIQ mark and text only, no WB-03 subtitle.
+- Hero has a prominent Active Lifecycle panel below the hero copy; panel should be larger, have a clear 5-step flow, compatible accent colors, and hover/active transitions.
+- Supporting information beneath lifecycle should be larger and better aligned.
+- Seven steps of custodial protection are presented as dark cards in a wide grid; cards need hover lift, tint, border glow, and icon/arrow micro-interactions.
+- Footer should feel like a professional product footer with navigation groups, security/legal information, and stronger brand lockup.
+- Dashboard requested: move role persona switch/control to bottom-left of sidebar with improved animation/color.
+- Provided logo should be integrated in the upper-left; use a shield/check style mark with VeriQ wordmark.
+- Invigilator role must not show/create the New examination / Create examination action.
+- Centre Admin assigned paper verification should be an interactive dashboard action; add a verification button/modal or state transition in frontend mock UI.
+- Common hover styles requested: gentle scale, lift/glow, underline slide-in, tint/fade, icon shift, sliding button background; use restrained implementations.
+- Reduced motion should remain respected.

@@ -10,15 +10,18 @@ import {
   Shield,
   Eye
 } from 'lucide-react';
-import { examApi } from '../../services/apiClient';
+import { examApi, getCachedApiResponse } from '../../services/apiClient';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
+import { useAuth } from '../../store/AuthContext';
 import { toast } from 'sonner';
 
 export const ExaminationsPage: React.FC = () => {
-  const [exams, setExams] = useState<any[]>([]);
+  const { user } = useAuth();
+  const canCreateExaminations = user?.role !== 'INVIGILATOR';
+  const [exams, setExams] = useState<any[]>(() => getCachedApiResponse('/exams') || []);
   const [search, setSearch] = useState('');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,9 +36,18 @@ export const ExaminationsPage: React.FC = () => {
   const [endTime, setEndTime] = useState('13:00:00');
   const [securityLevel, setSecurityLevel] = useState('HIGH');
 
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const loadExams = async () => {
     try {
-      const res = await examApi.list({ search: search || undefined });
+      const res = await examApi.list({ search: debouncedSearch || undefined });
       setExams(res.data);
     } catch (err) {
       console.error('Error loading examinations', err);
@@ -44,7 +56,7 @@ export const ExaminationsPage: React.FC = () => {
 
   useEffect(() => {
     loadExams();
-  }, [search]);
+  }, [debouncedSearch]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,17 +88,19 @@ export const ExaminationsPage: React.FC = () => {
       {/* Title & Action */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-            <GraduationCap className="w-6 h-6 text-brand-400" />
+          <h1 className="text-2xl font-bold text-neutral-950 dark:text-white tracking-tight flex items-center gap-2">
+            <GraduationCap className="w-6 h-6 text-brand-600 dark:text-brand-400" />
             Examination Management
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
             Configure examination schedules, security classification levels, and assigned question papers.
           </p>
         </div>
-        <Button onClick={() => setIsCreateOpen(true)} className="shadow-lg shadow-brand-500/20">
-          <Plus className="w-4 h-4" /> Create Examination
-        </Button>
+        {canCreateExaminations && (
+          <Button onClick={() => setIsCreateOpen(true)} className="shadow-lg shadow-brand-500/20">
+            <Plus className="w-4 h-4" /> Create Examination
+          </Button>
+        )}
       </div>
 
       {/* Search */}

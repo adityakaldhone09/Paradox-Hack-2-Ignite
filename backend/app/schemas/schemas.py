@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
 from typing import Literal
 
@@ -105,6 +105,7 @@ class PaperAssignCentreRequest(BaseModel):
 
 class PaperVerifyRequest(BaseModel):
     file_bytes_base64: Optional[str] = None # Or verify currently stored file
+    candidate_hash: Optional[str] = None
     simulate_tamper: bool = False
 
 class PaperRevokeRequest(BaseModel):
@@ -153,10 +154,11 @@ class DeviceResponse(BaseModel):
 
 # Access Control
 class AccessRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     paper_id: str
     centre_id: str
     device_fingerprint: str
-    override_time: Optional[datetime] = None # For demo early access testing
 
 class AccessResponse(BaseModel):
     allowed: bool

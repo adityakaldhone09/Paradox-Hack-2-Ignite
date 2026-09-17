@@ -35,20 +35,30 @@ async def list_examinations(
     res = await db.execute(query)
     exams = res.scalars().all()
 
+    if not exams:
+        return []
+
+    ex_ids = [ex.id for ex in exams]
+
+    # Batch count papers per exam
+    paper_res = await db.execute(
+        select(Paper.exam_id, func.count(Paper.id))
+        .where(Paper.exam_id.in_(ex_ids))
+        .group_by(Paper.exam_id)
+    )
+    paper_counts = dict(paper_res.all())
+
+    # Batch count assigned centres across papers of each exam
+    centre_res = await db.execute(
+        select(Paper.exam_id, func.count(func.distinct(PaperCentreAssignment.centre_id)))
+        .join(PaperCentreAssignment, PaperCentreAssignment.paper_id == Paper.id)
+        .where(Paper.exam_id.in_(ex_ids))
+        .group_by(Paper.exam_id)
+    )
+    centre_counts = dict(centre_res.all())
+
     output = []
     for ex in exams:
-        # Count papers
-        p_res = await db.execute(select(func.count(Paper.id)).where(Paper.exam_id == ex.id))
-        paper_count = p_res.scalar_one() or 0
-
-        # Count assigned centres across papers of this exam
-        c_res = await db.execute(
-            select(func.count(func.distinct(PaperCentreAssignment.centre_id)))
-            .join(Paper, PaperCentreAssignment.paper_id == Paper.id)
-            .where(Paper.exam_id == ex.id)
-        )
-        centres_count = c_res.scalar_one() or 0
-
         output.append(ExamResponse(
             id=ex.id,
             exam_id=ex.exam_id,
@@ -61,8 +71,8 @@ async def list_examinations(
             end_time=ex.end_time,
             security_level=ex.security_level,
             status=ex.status,
-            total_papers=paper_count,
-            assigned_centres_count=centres_count,
+            total_papers=paper_counts.get(ex.id, 0),
+            assigned_centres_count=centre_counts.get(ex.id, 0),
             created_at=ex.created_at
         ))
     return output
@@ -70,7 +80,7 @@ async def list_examinations(
 @router.post("", response_model=ExamResponse, status_code=status.HTTP_201_CREATED)
 async def create_examination(
     req: ExamCreate,
-    user: User = Depends(require_roles(["SUPER_ADMIN", "EXAM_AUTHORITY"])),
+    user: User = Depends(require_roles(["SUPER_ADMIN"])),
     db: AsyncSession = Depends(get_db)
 ):
     existing = await db.execute(select(Examination).where(Examination.exam_id == req.exam_id))

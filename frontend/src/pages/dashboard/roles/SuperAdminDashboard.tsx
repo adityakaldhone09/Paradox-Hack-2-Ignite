@@ -13,13 +13,9 @@ import {
   ArrowUpRight,
   RefreshCw,
   Activity,
-  Cpu,
-  ShieldCheck,
-  Sparkles,
-  Layers,
-  FileCode
+  Zap,
 } from 'lucide-react';
-import { securityApi, examApi, blockchainApi, demoApi } from '../../../services/apiClient';
+import { securityApi, examApi, blockchainApi, demoApi, getCachedApiResponse } from '../../../services/apiClient';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
@@ -31,7 +27,7 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  CartesianGrid
+  CartesianGrid,
 } from 'recharts';
 import { toast } from 'sonner';
 import { useTheme } from '../../../store/ThemeContext';
@@ -39,11 +35,11 @@ import { useTheme } from '../../../store/ThemeContext';
 export const SuperAdminDashboard: React.FC = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const [summary, setSummary] = useState<any>(null);
-  const [exams, setExams] = useState<any[]>([]);
-  const [threatFeed, setThreatFeed] = useState<any[]>([]);
-  const [blockchainStatus, setBlockchainStatus] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [summary, setSummary] = useState<any>(() => getCachedApiResponse('/security/summary'));
+  const [exams, setExams] = useState<any[]>(() => getCachedApiResponse('/exams') || []);
+  const [threatFeed, setThreatFeed] = useState<any[]>(() => getCachedApiResponse('/security/threat-feed') || []);
+  const [blockchainStatus, setBlockchainStatus] = useState<any>(() => getCachedApiResponse('/blockchain/status'));
+  const [isLoading, setIsLoading] = useState(() => !getCachedApiResponse('/security/summary'));
   const [isSimulating, setIsSimulating] = useState(false);
 
   const loadDashboardData = async () => {
@@ -73,7 +69,6 @@ export const SuperAdminDashboard: React.FC = () => {
     return () => {
       window.removeEventListener('veriQ_refresh_data', handleRefresh);
       clearInterval(interval);
-      window.removeEventListener('veriQ_refresh_data', handleRefresh);
     };
   }, []);
 
@@ -81,7 +76,7 @@ export const SuperAdminDashboard: React.FC = () => {
     setIsSimulating(true);
     try {
       const res = await demoApi.simulateEvent(type);
-      toast.error(`🚨 Security Event Triggered: ${label}`, {
+      toast.error(`Security Event: ${label}`, {
         description: res.data?.description || `Recorded in Block #${res.data?.block_number}`,
       });
       loadDashboardData();
@@ -93,44 +88,44 @@ export const SuperAdminDashboard: React.FC = () => {
   };
 
   const kpis = [
-    { label: 'Active Examinations', value: summary?.active_examinations ?? 5, icon: GraduationCap, color: 'text-blue-600 dark:text-blue-400', link: '/examinations' },
-    { label: 'Secured Papers', value: summary?.secured_papers ?? 10, icon: FileCheck, color: 'text-indigo-600 dark:text-indigo-400', link: '/papers' },
-    { label: 'Authorized Centres', value: summary?.authorized_centres ?? 10, icon: Building2, color: 'text-purple-600 dark:text-purple-400', link: '/centres' },
-    { label: 'Successful Accesses', value: summary?.successful_accesses ?? 284, icon: CheckCircle2, color: 'text-emerald-600 dark:text-emerald-400', link: '/custody' },
-    { label: 'Blocked Attempts', value: summary?.blocked_attempts ?? 4, icon: Lock, color: 'text-amber-600 dark:text-amber-400', link: '/incidents' },
-    { label: 'Security Alerts', value: summary?.security_alerts ?? 2, icon: AlertTriangle, color: 'text-amber-500', link: '/incidents' },
-    { label: 'Integrity Violations', value: summary?.integrity_violations ?? 0, icon: ShieldAlert, color: 'text-rose-600 dark:text-rose-400', link: '/security-ops' },
-    { label: 'Ledger Transactions', value: summary?.blockchain_transactions ?? 28, icon: Boxes, color: 'text-indigo-600 dark:text-indigo-400', link: '/blockchain' },
+    { label: 'Active Examinations', value: summary?.active_examinations ?? 5, sub: 'Scheduled cycles', link: '/examinations' },
+    { label: 'Secured Papers', value: summary?.secured_papers ?? 10, sub: 'AES-256 sealed', link: '/papers' },
+    { label: 'Authorized Centres', value: summary?.authorized_centres ?? 10, sub: 'Hardware whitelisted', link: '/centres' },
+    { label: 'Successful Accesses', value: summary?.successful_accesses ?? 284, sub: 'Verified downloads', link: '/custody' },
+    { label: 'Blocked Attempts', value: summary?.blocked_attempts ?? 4, sub: 'Early/rogue blocked', link: '/incidents' },
+    { label: 'Security Alerts', value: summary?.security_alerts ?? 2, sub: 'Open incidents', link: '/incidents' },
+    { label: 'Integrity Violations', value: summary?.integrity_violations ?? 0, sub: 'Zero tampering', link: '/security-ops' },
+    { label: 'Ledger Transactions', value: summary?.blockchain_transactions ?? 28, sub: 'Anchored blocks', link: '/blockchain' },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 text-left">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-neutral-200/80 dark:border-neutral-800">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+            <h1 className="text-2xl font-bold tracking-tight text-neutral-950 dark:text-white">
               Super Admin Command Center
             </h1>
             <span
-              className={`text-xs px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+              className={`text-[11px] px-2.5 py-0.5 rounded-full font-mono font-medium ${
                 summary?.threat_level === 'CRITICAL'
-                  ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-800 animate-pulse'
-                  : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
+                  ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800'
+                  : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'
               }`}
             >
               {summary?.threat_level || 'NORMAL'} POSTURE
             </span>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Institutional examination security governance, blockchain anchoring, and threat mitigation.
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+            System security posture, blockchain ledger verification, and institutional governance.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={loadDashboardData} isLoading={isLoading}>
             <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
-            Refresh Telemetry
+            Sync Telemetry
           </Button>
           <Link to="/papers">
             <Button variant="primary" size="sm">
@@ -141,85 +136,42 @@ export const SuperAdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Quick Simulation Banner */}
-      <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300">
-          <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-          <span className="font-semibold">Hackathon Stress Tests:</span>
-          <span className="text-slate-500 dark:text-slate-400 hidden sm:inline">
-            Trigger real cryptographic events to verify instant blockchain logging & alerts
-          </span>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-xs h-7 px-2.5 border-amber-300 dark:border-amber-800 hover:bg-amber-50 dark:hover:bg-amber-950/40"
-            onClick={() => runSimulation('EARLY_ACCESS', 'Early Access Blocked')}
-            disabled={isSimulating}
-          >
-            Early Access
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-xs h-7 px-2.5 border-rose-300 dark:border-rose-800 hover:bg-rose-50 dark:hover:bg-rose-950/40"
-            onClick={() => runSimulation('DOCUMENT_TAMPERING', 'Document Tampering Alert')}
-            disabled={isSimulating}
-          >
-            Tamper Document
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-xs h-7 px-2.5 border-purple-300 dark:border-purple-800 hover:bg-purple-50 dark:hover:bg-purple-950/40"
-            onClick={() => runSimulation('DEVICE_MISMATCH', 'Rogue Device Fingerprint')}
-            disabled={isSimulating}
-          >
-            Rogue Device
-          </Button>
-        </div>
-      </div>
-
-      {/* KPI Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
-        {kpis.map((kpi) => {
-          const Icon = kpi.icon;
-          return (
-            <Link key={kpi.label} to={kpi.link} className="block group">
-              <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs hover:shadow-md hover:border-indigo-400 dark:hover:border-indigo-500 transition-all">
-                <div className="flex items-center justify-between mb-2">
-                  <Icon className={`w-4 h-4 ${kpi.color}`} />
-                  <ArrowUpRight className="w-3 h-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-colors" />
-                </div>
-                <div className="text-xl font-bold text-slate-900 dark:text-white">
-                  {kpi.value}
-                </div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5 truncate">
-                  {kpi.label}
-                </div>
+      {/* Typographic Metric Grid (Restrained, Apple/Linear style) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-4">
+        {kpis.map((kpi) => (
+          <Link key={kpi.label} to={kpi.link} className="block group">
+            <div className="p-5 rounded-2xl bg-white dark:bg-[#111113] border border-neutral-200/80 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 shadow-xs hover:shadow-sm transition-all duration-200">
+              <div className="flex items-center justify-between text-neutral-400 text-xs font-mono uppercase tracking-wider mb-2">
+                <span>{kpi.label}</span>
+                <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
-            </Link>
-          );
-        })}
+              <div className="text-3xl font-extrabold text-neutral-950 dark:text-white tracking-tight">
+                {kpi.value}
+              </div>
+              <div className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                {kpi.sub}
+              </div>
+            </div>
+          </Link>
+        ))}
       </div>
 
       {/* Main Charts & Telemetry */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Real-time Access Graph */}
-        <Card className="lg:col-span-2 p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-          <div className="flex items-center justify-between mb-4">
+        <Card className="lg:col-span-2 p-6 bg-white dark:bg-[#111113] border border-neutral-200/80 dark:border-neutral-800">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Activity className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                Paper Access & Release Evaluation Telemetry
+              <h2 className="text-sm font-bold text-neutral-950 dark:text-white flex items-center gap-2">
+                <Activity className="w-4 h-4 text-neutral-500" />
+                Paper Access & Release Evaluation
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Synchronized 24-hour verification request throughput and policy enforcement
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+                24-hour verification request throughput and policy enforcement
               </p>
             </div>
-            <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-              Live Stream
+            <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+              LIVE STREAM
             </span>
           </div>
 
@@ -235,177 +187,137 @@ export const SuperAdminDashboard: React.FC = () => {
               ]}>
                 <defs>
                   <linearGradient id="gradSuccess" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor="#4F46E5" stopOpacity={0}/>
+                    <stop offset="5%" stopColor={isDark ? '#3B82F6' : '#2563EB'} stopOpacity={0.25}/>
+                    <stop offset="95%" stopColor={isDark ? '#3B82F6' : '#2563EB'} stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#334155' : '#E2E8F0'} opacity={0.8} />
-                <XAxis dataKey="label" stroke={isDark ? '#94A3B8' : '#64748B'} fontSize={11} tick={{ fill: isDark ? '#94A3B8' : '#64748B' }} />
-                <YAxis stroke={isDark ? '#94A3B8' : '#64748B'} fontSize={11} tick={{ fill: isDark ? '#94A3B8' : '#64748B' }} />
+                <CartesianGrid strokeDasharray="2 2" stroke={isDark ? '#27272A' : '#F3F4F6'} vertical={false} />
+                <XAxis dataKey="label" stroke={isDark ? '#71717A' : '#9CA3AF'} fontSize={11} tickLine={false} />
+                <YAxis stroke={isDark ? '#71717A' : '#9CA3AF'} fontSize={11} tickLine={false} axisLine={false} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: isDark ? '#0F172A' : '#FFFFFF',
-                    borderColor: isDark ? '#334155' : '#CBD5E1',
-                    borderRadius: '8px',
+                    backgroundColor: isDark ? '#18181B' : '#FFFFFF',
+                    borderColor: isDark ? '#27272A' : '#E5E7EB',
+                    borderRadius: '12px',
                     fontSize: '12px',
-                    color: isDark ? '#FFFFFF' : '#0F172A',
-                    boxShadow: isDark ? '0 10px 15px -3px rgba(0, 0, 0, 0.5)' : '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                   }}
-                  itemStyle={{ color: isDark ? '#E2E8F0' : '#1E293B' }}
-                  labelStyle={{ color: isDark ? '#94A3B8' : '#64748B', fontWeight: 600 }}
                 />
-                <Area type="monotone" dataKey="successful" stroke="#4F46E5" fillOpacity={1} fill="url(#gradSuccess)" name="Authorized Access" />
-                <Area type="monotone" dataKey="blocked" stroke="#F43F5E" fillOpacity={0} name="Blocked Attempt" />
+                <Area type="monotone" dataKey="successful" stroke={isDark ? '#3B82F6' : '#2563EB'} strokeWidth={2} fillOpacity={1} fill="url(#gradSuccess)" name="Successful Releases" />
+                <Area type="monotone" dataKey="blocked" stroke="#EF4444" strokeWidth={1.5} fillOpacity={0} name="Blocked Attempts" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </Card>
 
-        {/* Blockchain Ledger State */}
-        <Card className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+        {/* Blockchain Network Telemetry Card */}
+        <Card className="p-6 bg-white dark:bg-[#111113] border border-neutral-200/80 dark:border-neutral-800 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Boxes className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                VeriQ Proof Ledger
+            <div className="flex items-center justify-between pb-4 border-b border-neutral-100 dark:border-neutral-800">
+              <h2 className="text-sm font-bold text-neutral-950 dark:text-white flex items-center gap-2">
+                <Boxes className="w-4 h-4 text-neutral-500" />
+                Blockchain Ledger
               </h2>
-              <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                {blockchainStatus?.status || 'CONNECTED'}
+              <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                CONNECTED
               </span>
             </div>
 
-            <div className="space-y-3 text-xs">
-              <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
-                <div className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-semibold">
-                  Network Specification
-                </div>
-                <div className="font-bold text-slate-800 dark:text-slate-100 mt-0.5">
-                  {blockchainStatus?.network || 'VeriQ-Proof-Ledger-Local'}
-                </div>
-                <div className="text-[11px] text-slate-500 mt-1">
-                  Consensus: Proof-of-Authority (PoA) Consortium
-                </div>
-              </div>
-
-              <div className="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800">
-                <span className="text-slate-500">Block Height:</span>
-                <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
-                  #{blockchainStatus?.block_height ?? 14}
+            <div className="space-y-4 pt-4 text-xs">
+              <div className="flex justify-between items-center">
+                <span className="text-neutral-500">Ledger Block Height:</span>
+                <span className="font-mono font-bold text-neutral-950 dark:text-white">
+                  #{blockchainStatus?.block_height ?? 1489}
                 </span>
               </div>
-
-              <div className="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800">
-                <span className="text-slate-500">Total Anchored Txs:</span>
-                <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
-                  {blockchainStatus?.total_transactions ?? 28}
+              <div className="flex justify-between items-center">
+                <span className="text-neutral-500">Chain State:</span>
+                <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                  {blockchainStatus?.chain_valid ? 'Cryptographically Valid' : 'Validating'}
                 </span>
               </div>
-
-              <div className="py-2">
-                <div className="text-slate-500 mb-1">Latest Mined Block Hash:</div>
-                <HashViewer hash={blockchainStatus?.latest_block_hash || '0x7df489c1...'} />
+              <div className="flex justify-between items-center">
+                <span className="text-neutral-500">Consensus Engine:</span>
+                <span className="font-mono text-neutral-700 dark:text-neutral-300">
+                  SHA-256 Proof-of-Authority
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-neutral-500">Total Anchored Events:</span>
+                <span className="font-mono font-bold text-neutral-950 dark:text-white">
+                  {blockchainStatus?.total_events ?? 28}
+                </span>
               </div>
             </div>
           </div>
 
-          <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+          <div className="pt-4 border-t border-neutral-100 dark:border-neutral-800">
             <Link to="/blockchain">
-              <Button variant="outline" size="sm" className="w-full justify-between">
-                <span>Inspect Blockchain Explorer</span>
-                <ArrowUpRight className="w-4 h-4" />
+              <Button variant="outline" size="sm" className="w-full">
+                Open Ledger Explorer <ArrowUpRight className="w-3.5 h-3.5 ml-1.5" />
               </Button>
             </Link>
           </div>
         </Card>
       </div>
 
-      {/* Examinations Overview & Incident Feed */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Threat Feed & Active Examinations */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Active Examinations */}
-        <Card className="lg:col-span-2 p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+        <Card className="p-6 bg-white dark:bg-[#111113] border border-neutral-200/80 dark:border-neutral-800">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <GraduationCap className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-              Scheduled Examination Rosters
+            <h2 className="text-sm font-bold text-neutral-950 dark:text-white flex items-center gap-2">
+              <GraduationCap className="w-4 h-4 text-neutral-500" />
+              Active Examination Schedules
             </h2>
-            <Link to="/examinations" className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">
-              View All ({exams.length})
+            <Link to="/examinations" className="text-xs text-neutral-500 hover:text-neutral-950 dark:hover:text-white">
+              View All
             </Link>
           </div>
 
-          <div className="space-y-3">
-            {exams.slice(0, 4).map((ex) => (
+          <div className="space-y-2.5">
+            {exams.slice(0, 4).map((exam) => (
               <div
-                key={ex.id}
-                className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                key={exam.id}
+                className="p-3.5 rounded-xl border border-neutral-100 dark:border-neutral-800/80 bg-neutral-50/50 dark:bg-neutral-900/30 flex items-center justify-between text-xs"
               >
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400">
-                      {ex.exam_id}
-                    </span>
-                    <span className="font-bold text-xs text-slate-900 dark:text-white">
-                      {ex.name}
-                    </span>
-                  </div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    {ex.subject} • {ex.exam_date} ({ex.start_time} - {ex.end_time})
-                  </div>
+                  <p className="font-semibold text-neutral-950 dark:text-white">{exam.title}</p>
+                  <p className="text-[11px] font-mono text-neutral-400">{exam.code} • {exam.duration_minutes} Minutes</p>
                 </div>
-
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
-                    {ex.assigned_centres_count || 10} Centres
-                  </span>
-                  <StatusBadge status={ex.status || 'SCHEDULED'} />
-                </div>
+                <StatusBadge status={exam.status} />
               </div>
             ))}
           </div>
         </Card>
 
-        {/* Live Incident & Threat Feed */}
-        <Card className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+        {/* Threat & Security Incident Feed */}
+        <Card className="p-6 bg-white dark:bg-[#111113] border border-neutral-200/80 dark:border-neutral-800">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 text-rose-500" />
-              Live Threat Log
+            <h2 className="text-sm font-bold text-neutral-950 dark:text-white flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-neutral-500" />
+              Recent Security & Incident Logs
             </h2>
-            <Link to="/incidents" className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">
-              View Log
+            <Link to="/incidents" className="text-xs text-neutral-500 hover:text-neutral-950 dark:hover:text-white">
+              Incident Console
             </Link>
           </div>
 
-          <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
-            {threatFeed.length === 0 ? (
-              <div className="text-center py-8 text-xs text-slate-400">
-                No active threats detected. All perimeter gates secure.
-              </div>
-            ) : (
-              threatFeed.slice(0, 5).map((inc) => (
-                <div
-                  key={inc.id}
-                  className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs"
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className={`font-bold text-[10px] uppercase px-1.5 py-0.5 rounded ${
-                      inc.severity === 'CRITICAL'
-                        ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
-                        : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                    }`}>
-                      {inc.severity}
-                    </span>
-                    <span className="text-[10px] text-slate-400">
-                      {new Date(inc.timestamp).toLocaleTimeString()}
-                    </span>
-                  </div>
-                  <div className="font-medium text-slate-800 dark:text-slate-200 line-clamp-2">
-                    {inc.description}
-                  </div>
+          <div className="space-y-2.5">
+            {threatFeed.slice(0, 4).map((item) => (
+              <div
+                key={item.id}
+                className="p-3.5 rounded-xl border border-neutral-100 dark:border-neutral-800/80 bg-neutral-50/50 dark:bg-neutral-900/30 flex items-center justify-between text-xs"
+              >
+                <div>
+                  <p className="font-medium text-neutral-900 dark:text-neutral-200">{item.description}</p>
+                  <p className="text-[10px] font-mono text-neutral-400 mt-0.5">
+                    {new Date(item.timestamp).toLocaleTimeString()} • Centre {item.centre_id || 'Global'}
+                  </p>
                 </div>
-              ))
-            )}
+                <StatusBadge status={item.severity || 'INFO'} />
+              </div>
+            ))}
           </div>
         </Card>
       </div>

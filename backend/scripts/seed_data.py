@@ -135,16 +135,16 @@ async def seed():
         # 5. Seed Papers (10 Papers with real AES-256-GCM off-chain encryption)
         # -------------------------------------------------------------
         papers_config = [
-            ("PAP-DBMS-01", "EXAM-CS301", "DBMS Question Paper Set A", "dbms_set_a.pdf", "APPROVED", -2, "Prof. Ananya Sen"),
-            ("PAP-DBMS-02", "EXAM-CS301", "DBMS Question Paper Set B", "dbms_set_b.pdf", "APPROVED", -2, "Prof. Ananya Sen"),
-            ("PAP-MATH-01", "EXAM-MATH301", "Engineering Mathematics III Regular", "math_paper_main.pdf", "RELEASE_SCHEDULED", -1, "Dr. Rajesh Sharma"),
-            ("PAP-MATH-02", "EXAM-MATH301", "Engineering Mathematics III Backlog", "math_paper_backlog.pdf", "DRAFT", 0, "Prof. Ananya Sen"),
-            ("PAP-PHY-01", "EXAM-PHY201", "Applied Physics Main Exam", "physics_main_2026.pdf", "APPROVED", -3, "Dr. Meenakshi Sundaram"),
-            ("PAP-PHY-02", "EXAM-PHY201", "Applied Physics Alternate Set", "physics_alternate.pdf", "DRAFT", 0, "Dr. Meenakshi Sundaram"),
-            ("PAP-SEC-01", "EXAM-SEC401", "Cyber Security Top Secret Standard Exam", "cybersec_topsecret.pdf", "RELEASE_SCHEDULED", 2, "Vikramaditya Rao"),
-            ("PAP-SEC-02", "EXAM-SEC401", "Cyber Security Defense Lab Component", "cybersec_lab_questions.pdf", "APPROVED", -1, "Vikramaditya Rao"),
-            ("PAP-AI-01", "EXAM-AI501", "AI & Deep Learning Final Theory", "ai_final_theory.pdf", "APPROVED", -1, "Prof. Ananya Sen"),
-            ("PAP-AI-02", "EXAM-AI501", "AI Legacy Paper Version 0.9", "ai_legacy_paper.pdf", "REVOKED", -10, "Vikramaditya Rao"),
+            ("PAP-DBMS-01", "EXAM-CS301", "DBMS Question Paper Set A", "dbms_set_a.pdf", "APPROVED", -2, "setter@veriq.local"),
+            ("PAP-DBMS-02", "EXAM-CS301", "DBMS Question Paper Set B", "dbms_set_b.pdf", "APPROVED", -2, "setter@veriq.local"),
+            ("PAP-MATH-01", "EXAM-MATH301", "Engineering Mathematics III Regular", "math_paper_main.pdf", "RELEASE_SCHEDULED", -1, "admin@veriq.local"),
+            ("PAP-MATH-02", "EXAM-MATH301", "Engineering Mathematics III Backlog", "math_paper_backlog.pdf", "DRAFT", 0, "setter@veriq.local"),
+            ("PAP-PHY-01", "EXAM-PHY201", "Applied Physics Main Exam", "physics_main_2026.pdf", "APPROVED", -3, "setter2@veriq.local"),
+            ("PAP-PHY-02", "EXAM-PHY201", "Applied Physics Alternate Set", "physics_alternate.pdf", "DRAFT", 0, "setter2@veriq.local"),
+            ("PAP-SEC-01", "EXAM-SEC401", "Cyber Security Top Secret Standard Exam", "cybersec_topsecret.pdf", "RELEASE_SCHEDULED", 2, "admin@veriq.local"),
+            ("PAP-SEC-02", "EXAM-SEC401", "Cyber Security Defense Lab Component", "cybersec_lab_questions.pdf", "APPROVED", -1, "admin@veriq.local"),
+            ("PAP-AI-01", "EXAM-AI501", "AI & Deep Learning Final Theory", "ai_final_theory.pdf", "APPROVED", -1, "setter@veriq.local"),
+            ("PAP-AI-02", "EXAM-AI501", "AI Legacy Paper Version 0.9", "ai_legacy_paper.pdf", "REVOKED", -10, "admin@veriq.local"),
         ]
 
         paper_objs = {}
@@ -176,7 +176,7 @@ async def seed():
                 release_time=rel_time,
                 created_by=creator,
                 created_at=now - timedelta(days=5),
-                approved_by="authority@veriq.local" if status in ["APPROVED", "RELEASE_SCHEDULED", "RELEASED", "REVOKED"] else None,
+                approved_by="admin@veriq.local" if status in ["APPROVED", "RELEASE_SCHEDULED", "RELEASED", "REVOKED"] else None,
                 approved_at=now - timedelta(days=4) if status in ["APPROVED", "RELEASE_SCHEDULED", "RELEASED", "REVOKED"] else None,
                 digital_signature=sign_data(f"{p_code}:{sha256}") if status in ["APPROVED", "RELEASE_SCHEDULED", "RELEASED", "REVOKED"] else None,
                 revocation_reason="Version superseded due to curriculum update" if status == "REVOKED" else None

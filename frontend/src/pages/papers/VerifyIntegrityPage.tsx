@@ -5,17 +5,13 @@ import {
   CheckCircle2,
   AlertOctagon,
   ShieldCheck,
-  Search,
-  RefreshCw,
-  Binary,
-  Boxes,
   Zap,
-  ArrowRight
 } from 'lucide-react';
 import { paperApi } from '../../services/apiClient';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { HashViewer } from '../../components/ui/HashViewer';
+import { PaperSelector } from '../../components/ui/PaperSelector';
 import { toast } from 'sonner';
 
 export const VerifyIntegrityPage: React.FC = () => {
@@ -26,21 +22,33 @@ export const VerifyIntegrityPage: React.FC = () => {
   const [selectedPaperId, setSelectedPaperId] = useState(initialPaperId);
   const [verificationResult, setVerificationResult] = useState<any>(null);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isLoadingPapers, setIsLoadingPapers] = useState(true);
 
   useEffect(() => {
     const loadList = async () => {
       try {
         const res = await paperApi.list();
         setPapers(res.data);
-        if (res.data.length > 0 && !selectedPaperId) {
-          setSelectedPaperId(res.data[0].id);
+        const resolvedPaperId = initialPaperId || (res.data[0]?.id ?? '');
+        if (resolvedPaperId) {
+          setSelectedPaperId(resolvedPaperId);
         }
       } catch (err) {
         console.error('Error fetching papers', err);
+      } finally {
+        setIsLoadingPapers(false);
       }
     };
     loadList();
-  }, []);
+  }, [initialPaperId]);
+
+  useEffect(() => {
+    if (!selectedPaperId || isLoadingPapers || isVerifying) return;
+    const shouldAutoVerify = !!initialPaperId && !verificationResult;
+    if (shouldAutoVerify) {
+      runVerification(false);
+    }
+  }, [selectedPaperId, initialPaperId, isLoadingPapers, isVerifying]);
 
   const runVerification = async (simulateTamper = false) => {
     if (!selectedPaperId) return;
@@ -48,15 +56,14 @@ export const VerifyIntegrityPage: React.FC = () => {
     setVerificationResult(null);
 
     try {
-      // Small pause for realistic cryptographic hashing effect
       await new Promise((r) => setTimeout(r, 600));
       const res = await paperApi.verify(selectedPaperId, { simulate_tamper: simulateTamper });
       setVerificationResult(res.data);
 
       if (res.data.verified) {
-        toast.success('Document integrity confirmed! SHA-256 matches blockchain proof.');
+        toast.success('Document integrity confirmed: SHA-256 matches blockchain proof');
       } else {
-        toast.error('CRITICAL: Hash mismatch! Document tampering detected.');
+        toast.error('CRITICAL: Hash mismatch! Document tampering detected');
       }
     } catch (err: any) {
       toast.error('Verification failed: ' + (err.response?.data?.detail || err.message));
@@ -68,126 +75,103 @@ export const VerifyIntegrityPage: React.FC = () => {
   const selectedPaper = papers.find((p) => p.id === selectedPaperId || p.paper_id === selectedPaperId);
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-8 max-w-2xl mx-auto text-left">
       {/* Page Header */}
-      <div className="text-center space-y-2">
-        <h1 className="text-2xl font-black text-white tracking-tight flex items-center justify-center gap-2">
-          <ShieldCheck className="w-7 h-7 text-brand-600 dark:text-brand-400" />
+      <div className="text-center space-y-1.5 pb-3 border-b border-neutral-200/80 dark:border-neutral-800">
+        <h1 className="text-2xl font-bold text-neutral-950 dark:text-white tracking-tight flex items-center justify-center gap-2.5">
+          <ShieldCheck className="w-5 h-5 text-neutral-900 dark:text-white" />
           Cryptographic Integrity & Tamper Verification
         </h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+        <p className="text-xs text-neutral-500 dark:text-neutral-400 max-w-lg mx-auto">
           Verify recovered off-chain document bytes against the immutable SHA-256 anchor registered on the blockchain proof ledger.
         </p>
       </div>
 
-      {/* Select Paper Card */}
-      <Card className="p-5 border border-slate-200 dark:border-slate-800 space-y-4">
-        <div>
-          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-            Select Examination Paper to Verify *
-          </label>
-          <select
-            value={selectedPaperId}
-            onChange={(e) => {
-              setSelectedPaperId(e.target.value);
-              setVerificationResult(null);
-            }}
-            className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-brand-500 font-medium"
-          >
-            {papers.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.paper_id} — {p.title} ({p.status})
-              </option>
-            ))}
-          </select>
-        </div>
+      {/* Modern Searchable Paper Selector */}
+      <PaperSelector
+        papers={papers}
+        selectedPaperId={selectedPaperId}
+        onSelect={(id) => {
+          setSelectedPaperId(id);
+          setVerificationResult(null);
+        }}
+        isLoading={isLoadingPapers}
+        onContinue={() => runVerification(false)}
+        continueLabel="Run Cryptographic Verification"
+        continueLoading={isVerifying}
+      />
 
-        {selectedPaper && (
-          <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 text-xs space-y-1">
-            <div className="flex justify-between items-center text-slate-500 dark:text-slate-400">
-              <span>Blockchain Proof Anchor:</span>
-              <HashViewer hash={selectedPaper.sha256_hash} truncate={true} prefixLen={10} suffixLen={8} />
-            </div>
-            <div className="flex justify-between items-center text-slate-500 dark:text-slate-400">
-              <span>Encryption Status:</span>
-              <span className="text-emerald-600 dark:text-emerald-400 font-mono font-semibold">AES-256-GCM Authenticated</span>
-            </div>
-          </div>
-        )}
-
-        <div className="flex items-center justify-between gap-3 pt-2">
-          <Button
-            onClick={() => runVerification(false)}
-            isLoading={isVerifying}
-            className="flex-1 shadow-lg shadow-brand-500/20"
-          >
-            <ShieldCheck className="w-4 h-4" /> Run Standard Verification
-          </Button>
-          <Button
-            variant="outline"
+      {/* Tamper Simulation Test Trigger */}
+      {selectedPaper && (
+        <div className="flex justify-center pt-1">
+          <button
+            type="button"
             onClick={() => runVerification(true)}
             disabled={isVerifying}
-            className="border-rose-300 dark:border-rose-500/40 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10"
-            title="Simulates byte modification to demonstrate tamper detection alert"
+            className="text-xs font-medium text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 flex items-center gap-1.5 py-1 px-2.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
           >
-            <Zap className="w-4 h-4 text-rose-500" /> Simulate Tampering Failure
-          </Button>
+            <Zap className="w-3.5 h-3.5" />
+            <span>Simulate 1-Byte Tamper Failure</span>
+          </button>
         </div>
-      </Card>
+      )}
 
       {/* Verification Result Display */}
       {verificationResult && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
           className={`p-6 rounded-2xl border ${
             verificationResult.verified
-              ? 'bg-emerald-50/60 dark:bg-emerald-500/5 border-emerald-200 dark:border-emerald-500/30'
-              : 'bg-rose-50/60 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/40 animate-pulse-subtle'
-          } space-y-6 shadow-xl`}
+              ? 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-200/80 dark:border-emerald-800/60'
+              : 'bg-rose-50/40 dark:bg-rose-950/20 border-rose-200/80 dark:border-rose-800/60'
+          } space-y-5 shadow-xs`}
         >
           {/* Status Banner */}
-          <div className="flex items-center gap-4">
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
-              verificationResult.verified ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400'
+          <div className="flex items-center gap-3.5">
+            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
+              verificationResult.verified
+                ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400'
+                : 'bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400'
             }`}>
               {verificationResult.verified ? (
-                <CheckCircle2 className="w-8 h-8" />
+                <CheckCircle2 className="w-5 h-5" />
               ) : (
-                <AlertOctagon className="w-8 h-8" />
+                <AlertOctagon className="w-5 h-5" />
               )}
             </div>
             <div>
-              <h2 className={`text-xl font-extrabold tracking-tight ${
-                verificationResult.verified ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400'
+              <h2 className={`text-base font-bold tracking-tight ${
+                verificationResult.verified ? 'text-emerald-800 dark:text-emerald-300' : 'text-rose-800 dark:text-rose-300'
               }`}>
-                {verificationResult.verified ? '✅ DOCUMENT VERIFIED' : '🚨 DOCUMENT INTEGRITY FAILURE'}
+                {verificationResult.verified ? 'DOCUMENT VERIFIED' : 'DOCUMENT INTEGRITY FAILURE'}
               </h2>
-              <p className="text-xs text-slate-700 dark:text-slate-300 mt-0.5">{verificationResult.message}</p>
+              <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-0.5">{verificationResult.message}</p>
             </div>
           </div>
 
           {/* Hash Comparison Table */}
-          <div className="space-y-3 bg-white dark:bg-slate-950/80 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-xs shadow-xs">
+          <div className="space-y-3 bg-white dark:bg-[#111113] p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 text-xs shadow-2xs">
             <div>
-              <span className="text-slate-500 dark:text-slate-400 block mb-1">Blockchain Anchored Digest (Ground Truth Proof):</span>
-              <code className="font-mono text-xs px-2.5 py-1 rounded bg-slate-50 dark:bg-slate-900 text-brand-700 dark:text-brand-400 border border-brand-200 dark:border-brand-500/30 block break-all">
+              <span className="text-neutral-400 block mb-1 text-[11px]">Blockchain Anchored Digest (Ground Truth):</span>
+              <code className="font-mono text-xs px-2.5 py-1.5 rounded-lg bg-neutral-50 dark:bg-neutral-800/80 text-neutral-900 dark:text-neutral-100 border border-neutral-200 dark:border-neutral-700 block break-all">
                 {verificationResult.blockchain_anchored_hash}
               </code>
             </div>
 
             <div>
-              <span className="text-slate-500 dark:text-slate-400 block mb-1">Current Calculated Digest (Recovered Plaintext):</span>
-              <code className={`font-mono text-xs px-2.5 py-1 rounded border block break-all ${
+              <span className="text-neutral-400 block mb-1 text-[11px]">Current Calculated Digest (Recovered Plaintext):</span>
+              <code className={`font-mono text-xs px-2.5 py-1.5 rounded-lg border block break-all ${
                 verificationResult.verified
-                  ? 'bg-slate-50 dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30'
-                  : 'text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/40 bg-rose-50 dark:bg-rose-950/30'
+                  ? 'bg-neutral-50 dark:bg-neutral-800/80 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60'
+                  : 'text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-800/60 bg-rose-50/50 dark:bg-rose-950/30'
               }`}>
                 {verificationResult.current_document_hash}
               </code>
             </div>
 
-            <div className="flex justify-between items-center text-[11px] text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex justify-between items-center text-[11px] text-neutral-400 pt-2 border-t border-neutral-100 dark:border-neutral-800">
               <span>Ledger Transaction Anchor:</span>
               <HashViewer hash={verificationResult.tx_hash} truncate={true} prefixLen={8} suffixLen={6} />
             </div>
