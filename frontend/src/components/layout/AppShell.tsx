@@ -137,7 +137,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   };
 
   return (
-    <div className="flex h-screen bg-neutral-50/50 dark:bg-[#0A0A0B] text-neutral-900 dark:text-neutral-100 overflow-hidden transition-colors duration-200">
+    <div className="flex h-screen bg-neutral-50/50 dark:bg-[#0A0A0B] text-neutral-900 dark:text-neutral-100 overflow-hidden transition-colors duration-200 print:h-auto print:overflow-visible print:bg-white print:text-black">
       {/* ⌘K Command Palette */}
       <CommandPalette />
 
@@ -146,7 +146,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         initial={false}
         animate={{ width: isCollapsed ? '70px' : '250px' }}
         transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-        className="relative flex flex-col bg-white dark:bg-[#111113] border-r border-neutral-200 dark:border-neutral-800 z-20 select-none shadow-xs"
+        className="relative flex flex-col bg-white dark:bg-[#111113] border-r border-neutral-200 dark:border-neutral-800 z-20 select-none shadow-xs print:hidden"
       >
         {/* Brand Header */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-neutral-200 dark:border-neutral-800">
@@ -232,9 +232,9 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
       </motion.aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden print:h-auto print:overflow-visible">
         {/* Top Header Bar */}
-        <header className="h-16 border-b border-neutral-200 dark:border-neutral-800 bg-white/90 dark:bg-[#0A0A0B]/90 backdrop-blur-md flex items-center justify-between px-6 z-10">
+        <header className="h-16 border-b border-neutral-200 dark:border-neutral-800 bg-white/90 dark:bg-[#0A0A0B]/90 backdrop-blur-md flex items-center justify-between px-6 z-10 print:hidden">
           {/* Persona Switcher & ⌘K Search button */}
           <div className="flex items-center gap-4">
             <button
@@ -303,8 +303,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         </header>
 
         {/* Scrollable Dashboard Workspace */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
-          <div className="max-w-7xl mx-auto space-y-6">
+        <main className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar print:overflow-visible print:p-0 print:m-0">
+          <div className="max-w-7xl mx-auto space-y-6 print:max-w-none print:m-0 print:p-0">
             {children}
           </div>
         </main>
