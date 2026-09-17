@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="OG - VeriQ.png" alt="VeriQ Logo" width="280" />
+<img src="Sudhanshu - Logo.jpeg" alt="VeriQ Logo" width="280" />
 
 # VeriQ — Secure Examination Paper Distribution Using Blockchain
 
@@ -24,28 +24,21 @@
 
 </div>
 
+<div align="center">
+
 ## 📑 Table of Contents
 
-- [Executive Summary](#-executive-summary)
-- [Key Security Invariants & Value Pillars](#️-key-security-invariants--value-pillars)
-- [System Architecture](#️-system-architecture)
-  - [High-Level Dual-Plane Topology](#1-high-level-dual-plane-topology)
-  - [End-to-End Examination Lifecycle Flow](#2-end-to-end-examination-lifecycle-flow)
-  - [Cryptographic Envelope Encryption Model](#3-cryptographic-envelope-encryption-model)
-- [10-Gate Deterministic Release Engine](#-10-gate-deterministic-release-engine)
-- [Demo Personas & Role-Based Access (RBAC)](#-demo-personas--role-based-access-rbac)
-- [Attack Simulation & Security Testing](#️-attack-simulation--security-testing)
-- [Enterprise Documentation Suite](#-enterprise-documentation-suite)
-- [Repository Structure](#-repository-structure)
-- [Quickstart & Local Setup](#-quickstart--local-setup)
-  - [Prerequisites](#prerequisites)
-  - [Installation & Seeding](#1-installation--seeding)
-  - [Running the Application](#2-running-the-application)
-  - [Running Automated Tests](#3-running-automated-tests)
-- [API & Swagger Documentation](#-api--swagger-documentation)
-- [Deployment Readiness](#-deployment-readiness)
-- [Delivery Roadmap](#️-delivery-roadmap)
-- [License](#-license)
+| | |
+| :--- | :--- |
+| **1.** [Executive Summary](#-executive-summary) | **8.** [Enterprise Documentation Suite](#-enterprise-documentation-suite) |
+| **2.** [Key Security Invariants & Value Pillars](#️-key-security-invariants--value-pillars) | **9.** [Repository Structure](#-repository-structure) |
+| **3.** [System Architecture & Lifecycle](#️-system-architecture) | **10.** [Quickstart & Local Setup](#-quickstart--local-setup) |
+| **4.** [10-Gate Deterministic Release Engine](#-10-gate-deterministic-release-engine) | **11.** [API & Swagger Documentation](#-api--swagger-documentation) |
+| **5.** [Demo Personas & Role-Based Access (RBAC)](#-demo-personas--role-based-access-rbac) | **12.** [Deployment Readiness](#-deployment-readiness) |
+| **6.** [Attack Simulation & Security Testing](#️-attack-simulation--security-testing) | **13.** [Delivery Roadmap](#️-delivery-roadmap) |
+| **7.** [Cryptographic Model & Dual-Plane Specs](#3-cryptographic-envelope-encryption-model) | **14.** [License](#-license) |
+
+</div>
 
 ---
 
