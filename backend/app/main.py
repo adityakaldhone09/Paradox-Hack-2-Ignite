@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 from uuid import uuid4
 from fastapi import FastAPI, Request, status
@@ -23,6 +24,8 @@ from app.api.v1.users import router as users_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Ensure runtime storage directory exists
+    os.makedirs(settings.STORAGE_DIR, exist_ok=True)
     # Initialize DB tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

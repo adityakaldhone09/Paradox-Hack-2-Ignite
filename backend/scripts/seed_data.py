@@ -26,6 +26,9 @@ from app.services.blockchain_service import blockchain_service
 async def seed():
     print("🌱 Initializing VeriQ Database Schema & Seeding Data...")
 
+    # Ensure runtime storage directory exists
+    os.makedirs(settings.STORAGE_DIR, exist_ok=True)
+
     # Ensure tables exist
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
