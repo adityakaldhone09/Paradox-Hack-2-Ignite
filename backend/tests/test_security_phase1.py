@@ -59,7 +59,7 @@ def test_invalid_jwt_token():
 def test_expired_jwt_token():
     """AC-04: Expired JWT tokens must be rejected with HTTP 401."""
     expired_token = create_access_token(
-        data={"sub": "user-123", "email": "test@veriq.local", "role": "EXAM_AUTHORITY"},
+        data={"sub": "user-123", "email": "test@veriq.local", "role": "SUPER_ADMIN"},
         expires_delta=timedelta(seconds=-120)
     )
     headers = {"Authorization": f"Bearer {expired_token}"}
@@ -113,17 +113,18 @@ async def test_valid_jwt_authentication_and_role_authorization():
     token = create_access_token(data={"sub": admin_user.id, "email": admin_user.email, "role": admin_user.role})
     headers = {"Authorization": f"Bearer {token}"}
 
-    # 1. Identity endpoint
-    me_resp = client.get("/api/v1/auth/me", headers=headers)
-    assert me_resp.status_code == 200
-    user_data = me_resp.json()
-    assert user_data["email"] == "admin@veriq.local"
-    assert user_data["role"] == "SUPER_ADMIN"
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as async_client:
+        # 1. Identity endpoint
+        me_resp = await async_client.get("/api/v1/auth/me", headers=headers)
+        assert me_resp.status_code == 200
+        user_data = me_resp.json()
+        assert user_data["email"] == "admin@veriq.local"
+        assert user_data["role"] == "SUPER_ADMIN"
 
-    # 2. Protected read endpoint
-    papers_resp = client.get("/api/v1/papers", headers=headers)
-    assert papers_resp.status_code == 200
-    assert isinstance(papers_resp.json(), list)
+        # 2. Protected read endpoint
+        papers_resp = await async_client.get("/api/v1/papers", headers=headers)
+        assert papers_resp.status_code == 200
+        assert isinstance(papers_resp.json(), list)
 
 @pytest.mark.asyncio
 async def test_unauthenticated_request_rejected_async():
@@ -532,7 +533,7 @@ def test_sec_04_07_valid_configured_secrets_in_production():
 
 def test_sec_04_08_jwt_access_token_functionality():
     """SEC-04-08: JWT access token creation and decoding work with configured secret."""
-    test_data = {"sub": "usr-test-01", "email": "test@veriq.local", "role": "EXAM_AUTHORITY"}
+    test_data = {"sub": "usr-test-01", "email": "test@veriq.local", "role": "SUPER_ADMIN"}
     token = create_access_token(data=test_data)
     decoded = decode_token(token)
     assert decoded["sub"] == test_data["sub"]
