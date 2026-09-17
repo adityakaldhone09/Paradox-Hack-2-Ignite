@@ -1,15 +1,11 @@
-# VeriQ — Secure Examination Paper Distribution Using Blockchain
-
 <div align="center">
 
-```
-██╗   ██╗███████╗██████╗ ██╗ ██████╗ 
-██║   ██║██╔════╝██╔══██╗██║██╔═══██╗
-██║   ██║█████╗  ██████╔╝██║██║   ██║
-╚██╗ ██╔╝██╔══╝  ██╔══██╗██║██║▄▄ ██║
- ╚████╔╝ ███████╗██║  ██║██║╚██████╔╝
-  ╚═══╝  ╚══════╝╚═╝  ╚═╝╚═╝ ╚══▀▀═╝ 
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="frontend/public/assets/veriq-logo-full-dark.png">
+  <img src="frontend/public/assets/veriq-logo-full.png" alt="VeriQ Logo" width="220" />
+</picture>
+
+# VeriQ — Secure Examination Paper Distribution Using Blockchain
 
 **Secure Every Question Paper. Verify Every Action.**
 
@@ -34,14 +30,14 @@
 ## 📑 Table of Contents
 
 - [Executive Summary](#-executive-summary)
-- [Key Security Invariants & Value Pillars](#-key-security-invariants--value-pillars)
-- [System Architecture](#-system-architecture)
+- [Key Security Invariants & Value Pillars](#️-key-security-invariants--value-pillars)
+- [System Architecture](#️-system-architecture)
   - [High-Level Dual-Plane Topology](#1-high-level-dual-plane-topology)
   - [End-to-End Examination Lifecycle Flow](#2-end-to-end-examination-lifecycle-flow)
   - [Cryptographic Envelope Encryption Model](#3-cryptographic-envelope-encryption-model)
 - [10-Gate Deterministic Release Engine](#-10-gate-deterministic-release-engine)
 - [Demo Personas & Role-Based Access (RBAC)](#-demo-personas--role-based-access-rbac)
-- [Attack Simulation & Security Testing](#-attack-simulation--security-testing)
+- [Attack Simulation & Security Testing](#️-attack-simulation--security-testing)
 - [Enterprise Documentation Suite](#-enterprise-documentation-suite)
 - [Repository Structure](#-repository-structure)
 - [Quickstart & Local Setup](#-quickstart--local-setup)
@@ -50,7 +46,8 @@
   - [Running the Application](#2-running-the-application)
   - [Running Automated Tests](#3-running-automated-tests)
 - [API & Swagger Documentation](#-api--swagger-documentation)
-- [Delivery Roadmap](#-delivery-roadmap)
+- [Deployment Readiness](#-deployment-readiness)
+- [Delivery Roadmap](#️-delivery-roadmap)
 - [License](#-license)
 
 ---
@@ -262,14 +259,22 @@ To prevent premature access, insider leaks, or unauthorized downloads, the **10-
 
 ## 👥 Demo Personas & Role-Based Access (RBAC)
 
-The pre-seeded database includes 4 distinct operational personas to demonstrate end-to-end segregation of duties:
+The pre-seeded database includes distinct operational personas to demonstrate end-to-end segregation of duties across national, regional, and examination center levels:
 
-| Persona / Role | Demo Email | Demo Password | Core Responsibilities |
-|:---|:---|:---|:---|
-| **Super Admin** (`SUPER_ADMIN`) | `admin@veriq.local` | `password123` | Full governance, examination scheduling, paper approvals, security monitoring, and cryptographic audit oversight. |
-| **Paper Setter** (`PAPER_SETTER`) | `setter@veriq.local` | `password123` | Examination question paper authoring, AES-256-GCM encryption, SHA-256 hashing, and custody submission. |
-| **Centre Admin** (`CENTRE_ADMIN`) | `centre@veriq.local` | `password123` | Assigned examination oversight, terminal device authorizations, local release scheduling, and incident triage. |
-| **Invigilator** (`INVIGILATOR`) | `invigilator@veriq.local` | `password123` | Proctoring hall operations, terminal hardware validation, time-locked paper verification, and integrity checks. |
+| Persona / Role | Demo Email | Demo Password | Centre Scope | Core Responsibilities |
+|:---|:---|:---|:---|:---|
+| **Super Admin** (`SUPER_ADMIN`) | `admin@veriq.local` | `password123` | *Global / National* | Full governance, examination scheduling, paper approvals, security monitoring, and cryptographic audit oversight. |
+| **Paper Setter** (`PAPER_SETTER`) | `setter@veriq.local` | `password123` | *Authoring Unit* | Examination question paper authoring, AES-256-GCM envelope encryption, SHA-256 hashing, and custody submission. |
+| **Centre Admin** (`CENTRE_ADMIN`) | `centre@veriq.local` | `password123` | `C101` (Mumbai AIT) | Assigned examination oversight, terminal device authorizations, local release scheduling, and incident triage. |
+| **Invigilator** (`INVIGILATOR`) | `invigilator@veriq.local` | `password123` | `C101` (Mumbai AIT) | Proctoring hall operations, terminal hardware validation, time-locked paper verification, and integrity checks. |
+
+> [!TIP]
+> **Additional Regional Personas Available:**
+> - Pune Centre: `pune.admin@veriq.local` & `pune.invig@veriq.local` (Centre `C102`)
+> - Bengaluru Centre: `blr.admin@veriq.local` (Centre `C103`)
+> - Delhi Centre: `delhi.admin@veriq.local` & `delhi.invig@veriq.local` (Centre `C104`)
+> - Hyderabad Centre: `hyd.admin@veriq.local` & `hyd.invig@veriq.local` (Centre `C105`)
+> *(All pre-seeded test accounts use password: `password123`)*
 
 
 ---
@@ -421,13 +426,17 @@ pnpm run dev
 ---
 
 ### 3. Running Automated Tests
-
+ 
 ```bash
-# Run Backend Pytest Suite
+# Run Backend Pytest Suite (100% Passing Security & Crypto Tests)
 pnpm run test:backend
+# Or directly:
+# cd backend && python -m pytest tests/ -v
 
-# Run Frontend Vitest Suite
+# Run Frontend TypeScript & Build Validation
 pnpm run test:frontend
+# Or build full production bundle:
+# pnpm run build:frontend
 ```
 
 ---
@@ -441,21 +450,25 @@ VeriQ provides interactive API documentation generated directly from Pydantic sc
 | **Authentication** | `/api/v1/auth` | JWT token issuance, session refresh, and credential validation. |
 | **Examinations** | `/api/v1/exams` | Examination creation, scheduling, center binding, and state query. |
 | **Question Papers** | `/api/v1/papers` | Paper upload, AES-256-GCM encryption, approval multi-sig, and metadata. |
-| **10-Gate Release** | `/api/v1/release` | Time-locked evaluation, key unwrapping, and stream decryption. |
+| **10-Gate Release** | `/api/v1/access` | Time-locked evaluation, key unwrapping, and stream decryption. |
+| **Centres & Devices** | `/api/v1/centres`, `/api/v1/devices` | Authorized centre registrations, device fingerprints, and status control. |
 | **Blockchain** | `/api/v1/blockchain` | On-chain ledger blocks, Merkle proof verification, and transaction feed. |
-| **Audit & SecOps** | `/api/v1/audit` | Immutable audit trail querying, threat telemetry, and emergency locks. |
+| **Security & Incidents** | `/api/v1/security`, `/api/v1/incidents` | Threat telemetry, breach simulation triggers, and incident triage. |
+| **Audit & Governance** | `/api/v1/audit` | Immutable audit trail querying and cryptographic verification. |
 
-Access full interactive Swagger UI at `http://localhost:8000/docs` or ReDoc at `http://localhost:8000/redoc`.
+Access full interactive Swagger UI at [http://localhost:8000/docs](http://localhost:8000/docs) or ReDoc at [http://localhost:8000/redoc](http://localhost:8000/redoc).
 
-## Deployment Readiness
+---
 
-Deployment follows a validate, stage, smoke test, promote, and monitor workflow.
-Use [docs/deployment.md](docs/deployment.md) for supported commands and
-[docs/production-checklist.md](docs/production-checklist.md) for release gates.
-The environment contract, runtime topology, and recovery procedure are in
-[docs/environment.md](docs/environment.md),
-[docs/deployment-architecture.md](docs/deployment-architecture.md), and
-[docs/disaster-recovery.md](docs/disaster-recovery.md).
+## 🚀 Deployment Readiness
+
+Deployment follows a validated workflow: validate, stage, smoke test, promote, and monitor.
+
+- **Deployment Runbook**: [docs/deployment.md](docs/deployment.md) for supported operational commands
+- **Production Checklist**: [docs/production-checklist.md](docs/production-checklist.md) for pre-release quality gates
+- **Environment Specs**: [docs/environment.md](docs/environment.md) for strict production environment contracts
+- **Deployment Topology**: [docs/deployment-architecture.md](docs/deployment-architecture.md) for multi-tier runtime architecture
+- **Disaster Recovery**: [docs/disaster-recovery.md](docs/disaster-recovery.md) for failover & recovery procedures
 
 ---
 
