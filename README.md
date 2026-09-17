@@ -262,15 +262,15 @@ To prevent premature access, insider leaks, or unauthorized downloads, the **10-
 
 ## 👥 Demo Personas & Role-Based Access (RBAC)
 
-The pre-seeded database includes 5 distinct operational personas to demonstrate end-to-end segregation of duties:
+The pre-seeded database includes 4 distinct operational personas to demonstrate end-to-end segregation of duties:
 
 | Persona / Role | Demo Email | Demo Password | Core Responsibilities |
 |:---|:---|:---|:---|
-| **Central Authority** | `authority@veriq.local` | `password123` | Upload question papers, define exam schedules, bind examination centers, configure time-windows. |
-| **Exam Controller** | `controller@veriq.local` | `password123` | Perform independent cryptographic verification, multi-sign approval, and publish papers to blockchain. |
-| **Centre Superintendent** | `superintendent.delhi@veriq.local` | `password123` | Execute time-locked decryption & paper release at assigned center terminal within the permitted window. |
-| **Auditor / Inspector** | `auditor@veriq.local` | `password123` | Verify bit-level document hashes against on-chain Merkle roots, inspect non-repudiable audit logs. |
-| **Security Operations (SecOps)** | `secops@veriq.local` | `password123` | Real-time threat telemetry monitor, incident triage, live anomaly feed, emergency paper revocation. |
+| **Super Admin** (`SUPER_ADMIN`) | `admin@veriq.local` | `password123` | Full governance, examination scheduling, paper approvals, security monitoring, and cryptographic audit oversight. |
+| **Paper Setter** (`PAPER_SETTER`) | `setter@veriq.local` | `password123` | Examination question paper authoring, AES-256-GCM encryption, SHA-256 hashing, and custody submission. |
+| **Centre Admin** (`CENTRE_ADMIN`) | `centre@veriq.local` | `password123` | Assigned examination oversight, terminal device authorizations, local release scheduling, and incident triage. |
+| **Invigilator** (`INVIGILATOR`) | `invigilator@veriq.local` | `password123` | Proctoring hall operations, terminal hardware validation, time-locked paper verification, and integrity checks. |
+
 
 ---
 
@@ -328,14 +328,16 @@ Paradox-Hack-2-Ignite/
 │   │   ├── schemas/               # Pydantic v2 validation & serialization schemas
 │   │   └── services/              # 10-Gate Engine, AES-GCM Crypto, Blockchain Anchor
 │   ├── scripts/                   # Database seeding and migration utilities
-│   ├── storage/                   # Encrypted off-chain paper repository (/storage/encrypted)
+│   ├── storage/                   # Encrypted off-chain paper repository (backend/storage/encrypted_papers)
 │   └── tests/                     # Automated pytest test suite
 │
 ├── frontend/                      # React 19 + TypeScript + Vite SPA
 │   ├── src/
-│   │   ├── components/            # UI Kit, Layout, Navbar, Modals, HashViewer, GateStatus
-│   │   ├── pages/                 # Dashboard, Papers, Release, Verify, SecOps, Blockchain
-│   │   ├── services/              # Axios API client with token interceptors
+│   │   ├── components/            # UI Kit, Layout (Modular Sidebar, Topbar), Modals, HashViewer
+│   │   ├── config/                # Centralized role and navigation configurations
+│   │   ├── types/                 # Strongly typed domain models (auth, papers, exams, etc.)
+│   │   ├── pages/                 # Role Dashboards, Papers, Release, Verify, SecOps, Blockchain
+│   │   ├── services/              # Axios API client with token interceptors & domain services
 │   │   └── store/                 # State management & authentication context
 │   └── index.html
 │
@@ -444,6 +446,16 @@ VeriQ provides interactive API documentation generated directly from Pydantic sc
 | **Audit & SecOps** | `/api/v1/audit` | Immutable audit trail querying, threat telemetry, and emergency locks. |
 
 Access full interactive Swagger UI at `http://localhost:8000/docs` or ReDoc at `http://localhost:8000/redoc`.
+
+## Deployment Readiness
+
+Deployment follows a validate, stage, smoke test, promote, and monitor workflow.
+Use [docs/deployment.md](docs/deployment.md) for supported commands and
+[docs/production-checklist.md](docs/production-checklist.md) for release gates.
+The environment contract, runtime topology, and recovery procedure are in
+[docs/environment.md](docs/environment.md),
+[docs/deployment-architecture.md](docs/deployment-architecture.md), and
+[docs/disaster-recovery.md](docs/disaster-recovery.md).
 
 ---
 

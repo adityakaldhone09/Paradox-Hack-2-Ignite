@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from uuid import uuid4
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -38,12 +39,37 @@ app = FastAPI(
 # CORS Middleware - strict origins with credentials support
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
-    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
+    allow_origins=(
+        settings.CORS_ORIGINS
+        or ([] if settings.APP_ENV.lower() in ("production", "prod") else [
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:5173",
+        ])
+    ),
+    allow_origin_regex=(
+        r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
+        if settings.APP_ENV.lower() not in ("production", "prod")
+        else None
+    ),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.middleware("http")
+async def request_context_middleware(request: Request, call_next):
+    request_id = request.headers.get("X-Request-ID") or str(uuid4())
+    request.state.request_id = request_id
+    response = await call_next(request)
+    response.headers["X-Request-ID"] = request_id
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    if settings.APP_ENV.lower() in ("production", "prod"):
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
 
 # Centralized Exception Handler
 @app.exception_handler(RequestValidationError)
@@ -57,7 +83,10 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 async def generic_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"error": "Internal Server Error", "message": str(exc)},
+        content={
+            "error": "Internal Server Error",
+            "request_id": getattr(request.state, "request_id", None),
+        },
     )
 
 # Routers
@@ -98,14 +127,14 @@ async def health_database():
             await conn.execute(text("SELECT 1"))
         return {"status": "ok", "database": "connected"}
     except Exception as e:
-        return {"status": "error", "database": str(e)}
+        return {"status": "error", "database": "unavailable"}
 
 @app.get("/health/blockchain")
 @app.get("/api/v1/health/blockchain")
 async def health_blockchain():
     from app.services.blockchain_service import blockchain_service
     status = await blockchain_service.get_network_status()
-    return {"status": "ok", "blockchain": status["network"], "mode": "development_mock"}
+    return {"status": "ok", "blockchain": status["network"], "mode": settings.BLOCKCHAIN_MODE}
 
 @app.get("/health/storage")
 @app.get("/api/v1/health/storage")
@@ -114,7 +143,7 @@ async def health_storage():
     from app.core.config import settings
     exists = os.path.isdir(settings.STORAGE_DIR)
     count = len([f for f in os.listdir(settings.STORAGE_DIR) if f.endswith('.enc')]) if exists else 0
-    return {"status": "ok" if exists else "warning", "storage_dir": settings.STORAGE_DIR, "encrypted_files": count}
+    return {"status": "ok" if exists else "warning", "encrypted_files": count}
 
 @app.get("/")
 async def root():

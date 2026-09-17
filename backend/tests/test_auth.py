@@ -7,7 +7,7 @@ def test_password_hashing():
     assert not verify_password("WrongPassword", hashed)
 
 def test_jwt_tokens():
-    payload = {"sub": "user_123", "email": "test@veriq.local", "role": "EXAM_AUTHORITY"}
+    payload = {"sub": "user_123", "email": "test@veriq.local", "role": "SUPER_ADMIN"}
     token = create_access_token(payload)
     decoded = decode_token(token)
     assert decoded is not None

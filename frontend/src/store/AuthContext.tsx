@@ -1,18 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { authApi, clearApiCache } from '../services/apiClient';
+import { UserRole, User } from '../types';
+import { getRoleDashboardUrl } from '../config/roleConfig';
 
-export type UserRole = 'SUPER_ADMIN' | 'PAPER_SETTER' | 'CENTRE_ADMIN' | 'INVIGILATOR';
-
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: UserRole;
-  centre_id?: string;
-  is_active: boolean;
-  created_at?: string;
-}
+export type { UserRole, User };
+export { getRoleDashboardUrl };
 
 interface AuthContextType {
   user: User | null;
@@ -31,21 +24,6 @@ const DEMO_ROLE_CREDENTIALS: Record<UserRole, { email: string; name: string }> =
   PAPER_SETTER: { email: 'setter@veriq.local', name: 'Prof. Ananya Sen' },
   CENTRE_ADMIN: { email: 'centre@veriq.local', name: 'Suresh Kulkarni' },
   INVIGILATOR: { email: 'invigilator@veriq.local', name: 'Rohit Verma' },
-};
-
-export const getRoleDashboardUrl = (role?: string): string => {
-  switch (role) {
-    case 'SUPER_ADMIN':
-      return '/dashboard/admin';
-    case 'PAPER_SETTER':
-      return '/dashboard/paper-setter';
-    case 'CENTRE_ADMIN':
-      return '/dashboard/centre';
-    case 'INVIGILATOR':
-      return '/dashboard/invigilator';
-    default:
-      return '/dashboard/admin';
-  }
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
