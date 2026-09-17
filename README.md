@@ -447,6 +447,16 @@ VeriQ provides interactive API documentation generated directly from Pydantic sc
 
 Access full interactive Swagger UI at `http://localhost:8000/docs` or ReDoc at `http://localhost:8000/redoc`.
 
+## Deployment Readiness
+
+Deployment follows a validate, stage, smoke test, promote, and monitor workflow.
+Use [docs/deployment.md](docs/deployment.md) for supported commands and
+[docs/production-checklist.md](docs/production-checklist.md) for release gates.
+The environment contract, runtime topology, and recovery procedure are in
+[docs/environment.md](docs/environment.md),
+[docs/deployment-architecture.md](docs/deployment-architecture.md), and
+[docs/disaster-recovery.md](docs/disaster-recovery.md).
+
 ---
 
 ## 🗺️ Delivery Roadmap
