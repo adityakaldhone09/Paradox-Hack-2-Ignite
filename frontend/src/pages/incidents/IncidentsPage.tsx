@@ -10,7 +10,7 @@ import {
   Lock,
   Boxes
 } from 'lucide-react';
-import { incidentApi } from '../../services/apiClient';
+import { incidentApi, getCachedApiResponse } from '../../services/apiClient';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -19,7 +19,7 @@ import { HashViewer } from '../../components/ui/HashViewer';
 import { toast } from 'sonner';
 
 export const IncidentsPage: React.FC = () => {
-  const [incidents, setIncidents] = useState<any[]>([]);
+  const [incidents, setIncidents] = useState<any[]>(() => getCachedApiResponse('/incidents') || []);
   const [typeFilter, setTypeFilter] = useState('');
   const [severityFilter, setSeverityFilter] = useState('');
   const [selectedIncident, setSelectedIncident] = useState<any>(null);

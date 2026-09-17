@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { useAuth, UserRole } from '../../store/AuthContext';
 import { useTheme } from '../../store/ThemeContext';
-import { demoApi } from '../../services/apiClient';
+import { demoApi, examApi, paperApi, centreApi, securityApi, blockchainApi } from '../../services/apiClient';
 import { CommandPalette } from '../ui/CommandPalette';
 import { toast } from 'sonner';
 
@@ -38,6 +38,23 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout, switchRole } = useAuth();
+
+  // Background pre-warming of critical page datasets for zero-latency instant transitions
+  useEffect(() => {
+    if (!user) return;
+    const prewarm = async () => {
+      try {
+        await Promise.allSettled([
+          examApi.list(),
+          paperApi.list(),
+          centreApi.list(),
+          securityApi.getSummary(),
+          blockchainApi.getStatus(),
+        ]);
+      } catch {}
+    };
+    prewarm();
+  }, [user?.role]);
   const { theme, toggleTheme } = useTheme();
 
   // Role-Aware Navigation Config
@@ -235,7 +252,11 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
               <span className="text-xs text-neutral-400 font-medium hidden md:inline">Role Persona:</span>
               <select
                 value={user?.role || 'SUPER_ADMIN'}
-                onChange={(e) => switchRole(e.target.value as UserRole)}
+                onChange={async (e) => {
+                  const newRole = e.target.value as UserRole;
+                  await switchRole(newRole);
+                  navigate('/dashboard');
+                }}
                 className="bg-white dark:bg-[#111113] border border-neutral-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-neutral-100 rounded-xl px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-neutral-900 dark:focus:ring-white font-medium"
               >
                 <option value="SUPER_ADMIN">Super Admin (Dr. Rajesh Sharma)</option>

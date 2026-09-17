@@ -9,7 +9,7 @@ import {
   XCircle,
   Laptop
 } from 'lucide-react';
-import { centreApi, deviceApi } from '../../services/apiClient';
+import { centreApi, deviceApi, getCachedApiResponse } from '../../services/apiClient';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { StatusBadge } from '../../components/ui/StatusBadge';
@@ -17,15 +17,21 @@ import { HashViewer } from '../../components/ui/HashViewer';
 import { toast } from 'sonner';
 
 export const CentresPage: React.FC = () => {
-  const [centres, setCentres] = useState<any[]>([]);
-  const [devices, setDevices] = useState<any[]>([]);
+  const [centres, setCentres] = useState<any[]>(() => getCachedApiResponse('/centres') || []);
+  const [devices, setDevices] = useState<any[]>(() => getCachedApiResponse('/devices') || []);
   const [search, setSearch] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [isLoading, setIsLoading] = useState(() => !getCachedApiResponse('/centres'));
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const loadData = async () => {
     try {
       const [cRes, dRes] = await Promise.all([
-        centreApi.list({ search: search || undefined }),
+        centreApi.list({ search: debouncedSearch || undefined }),
         deviceApi.list(),
       ]);
       setCentres(cRes.data);
@@ -39,7 +45,7 @@ export const CentresPage: React.FC = () => {
 
   useEffect(() => {
     loadData();
-  }, [search]);
+  }, [debouncedSearch]);
 
   const toggleCentreAuth = async (id: string, isCurrentlyAuth: boolean) => {
     try {

@@ -191,11 +191,10 @@ export const LandingPage: React.FC = () => {
     <div className="min-h-screen bg-white dark:bg-[#0A0A0B] text-neutral-900 dark:text-neutral-100 selection:bg-neutral-900 selection:text-white dark:selection:bg-white dark:selection:text-neutral-950 transition-colors duration-200">
       {/* 1. Sticky Navigation Bar */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
-          isScrolled
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${isScrolled
             ? 'glass-panel-nav py-3.5 shadow-xs'
             : 'bg-transparent py-5'
-        }`}
+          }`}
       >
         <div className="max-w-6xl mx-auto px-6 flex items-center justify-between">
           {/* Logo */}
@@ -312,10 +311,7 @@ export const LandingPage: React.FC = () => {
       <section className="relative min-h-[90vh] flex flex-col justify-center items-center px-6 pt-28 pb-16 overflow-hidden bg-tech-grid text-center">
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Subtitle tag */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-[#111113]/80 backdrop-blur-sm text-xs font-medium text-neutral-600 dark:text-neutral-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span>Problem Statement WB-03 • Examination Paper Chain of Custody</span>
-          </div>
+
 
           {/* Primary Editorial Headline */}
           <h1 className="text-[clamp(2.75rem,7vw,5.5rem)] font-bold tracking-tight text-neutral-950 dark:text-white leading-[1.05]">
@@ -368,13 +364,12 @@ export const LandingPage: React.FC = () => {
                   <div
                     key={stg.title}
                     onClick={() => setHeroLoopStep(idx)}
-                    className={`cursor-pointer p-2.5 rounded-xl border text-center transition-all ${
-                      isCurrent
+                    className={`cursor-pointer p-2.5 rounded-xl border text-center transition-all ${isCurrent
                         ? 'border-neutral-900 dark:border-white bg-[#F7F7F5] dark:bg-neutral-800 shadow-xs'
                         : isPast
-                        ? 'border-neutral-200 dark:border-neutral-800 opacity-90'
-                        : 'border-transparent opacity-40 hover:opacity-70'
-                    }`}
+                          ? 'border-neutral-200 dark:border-neutral-800 opacity-90'
+                          : 'border-transparent opacity-40 hover:opacity-70'
+                      }`}
                   >
                     <Icon className={`w-4 h-4 mx-auto mb-1 ${isCurrent ? 'text-neutral-950 dark:text-white' : 'text-neutral-400'}`} />
                     <span className="text-[10px] font-medium block truncate">{stg.title.split(' ')[0]}</span>
@@ -456,11 +451,10 @@ export const LandingPage: React.FC = () => {
                 <div
                   key={stg.num}
                   onClick={() => setActiveStoryStage(idx)}
-                  className={`cursor-pointer p-4 sm:p-5 rounded-2xl border transition-all text-left ${
-                    isActive
+                  className={`cursor-pointer p-4 sm:p-5 rounded-2xl border transition-all text-left ${isActive
                       ? 'border-neutral-900 dark:border-white bg-[#F7F7F5] dark:bg-neutral-800/80 shadow-xs'
                       : 'border-transparent hover:border-neutral-200 dark:hover:border-neutral-800'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs font-mono font-bold text-neutral-400">{stg.num} {stg.name.toUpperCase()}</span>
@@ -587,21 +581,19 @@ export const LandingPage: React.FC = () => {
           <div className="inline-flex items-center p-1 rounded-xl bg-neutral-200/80 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700">
             <button
               onClick={() => setIsTampered(false)}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                !isTampered
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${!isTampered
                   ? 'bg-white dark:bg-[#111113] text-neutral-950 dark:text-white shadow-xs'
                   : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-white'
-              }`}
+                }`}
             >
               Intact Original Document
             </button>
             <button
               onClick={() => setIsTampered(true)}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                isTampered
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${isTampered
                   ? 'bg-red-600 text-white shadow-xs'
                   : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-white'
-              }`}
+                }`}
             >
               Simulate 1-Byte Tamper
             </button>
@@ -611,11 +603,10 @@ export const LandingPage: React.FC = () => {
           <div className="rounded-2xl border border-neutral-200/90 dark:border-neutral-800 bg-white dark:bg-[#111113] p-6 shadow-xs text-left space-y-4">
             <div className="flex items-center justify-between text-xs">
               <span className="font-mono text-neutral-400 text-[11px]">HASH COMPARISON ENGINE</span>
-              <span className={`font-mono text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
-                isTampered
+              <span className={`font-mono text-[11px] font-bold px-2.5 py-0.5 rounded-full ${isTampered
                   ? 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-200 dark:border-red-800'
                   : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'
-              }`}>
+                }`}>
                 {isTampered ? 'HASH MISMATCH' : 'MATCH CONFIRMED'}
               </span>
             </div>
@@ -630,11 +621,10 @@ export const LandingPage: React.FC = () => {
 
               <div className="p-3 rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-200/80 dark:border-neutral-800">
                 <span className="text-neutral-400 block text-[10px]">DOWNLOADED ARTIFACT DIGEST:</span>
-                <span className={`truncate block mt-0.5 ${
-                  isTampered
+                <span className={`truncate block mt-0.5 ${isTampered
                     ? 'text-red-600 dark:text-red-400 line-through font-bold'
                     : 'text-neutral-900 dark:text-neutral-100'
-                }`}>
+                  }`}>
                   {isTampered
                     ? 'D71F409C3270E3C1D9B3E7F41A862B904C51E06D2891F7A3B4E601289C32'
                     : 'A89D214F8B92A170E3C1D9B3E7F41A862B904C51E06D2891F7A3B4E60128F8A1'}
@@ -642,11 +632,10 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            <div className={`p-3.5 rounded-xl border flex items-center gap-3 text-xs ${
-              isTampered
+            <div className={`p-3.5 rounded-xl border flex items-center gap-3 text-xs ${isTampered
                 ? 'border-red-200 dark:border-red-900/60 bg-red-50/50 dark:bg-red-950/20 text-red-800 dark:text-red-300'
                 : 'border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300'
-            }`}>
+              }`}>
               {isTampered ? (
                 <AlertOctagon className="w-5 h-5 shrink-0 text-red-600 dark:text-red-400" />
               ) : (
@@ -690,11 +679,10 @@ export const LandingPage: React.FC = () => {
             <button
               key={r.id}
               onClick={() => setActiveRole(r.id)}
-              className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-all ${
-                activeRole === r.id
+              className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-all ${activeRole === r.id
                   ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 font-semibold shadow-xs'
                   : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
-              }`}
+                }`}
             >
               {r.label}
             </button>

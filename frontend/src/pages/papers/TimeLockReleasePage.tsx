@@ -8,7 +8,7 @@ import {
   Server,
   Zap,
 } from 'lucide-react';
-import { paperApi, centreApi, accessApi, deviceApi, demoApi } from '../../services/apiClient';
+import { paperApi, centreApi, accessApi, deviceApi, demoApi, getCachedApiResponse } from '../../services/apiClient';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { CountdownTimer } from '../../components/ui/CountdownTimer';
@@ -16,16 +16,18 @@ import { PaperSelector } from '../../components/ui/PaperSelector';
 import { toast } from 'sonner';
 
 export const TimeLockReleasePage: React.FC = () => {
-  const [papers, setPapers] = useState<any[]>([]);
-  const [centres, setCentres] = useState<any[]>([]);
-  const [devices, setDevices] = useState<any[]>([]);
-  const [selectedPaperId, setSelectedPaperId] = useState('');
-  const [selectedCentreId, setSelectedCentreId] = useState('');
+  const cachedPapers = getCachedApiResponse<any[]>('/papers') || [];
+  const cachedCentres = getCachedApiResponse<any[]>('/centres') || [];
+  const [papers, setPapers] = useState<any[]>(() => cachedPapers);
+  const [centres, setCentres] = useState<any[]>(() => cachedCentres);
+  const [devices, setDevices] = useState<any[]>(() => getCachedApiResponse<any[]>('/devices') || []);
+  const [selectedPaperId, setSelectedPaperId] = useState(() => cachedPapers[0]?.id || '');
+  const [selectedCentreId, setSelectedCentreId] = useState(() => cachedCentres[0]?.id || '');
   const [selectedDeviceId, setSelectedDeviceId] = useState('auto');
   const [serverTime, setServerTime] = useState(new Date().toLocaleTimeString());
   const [accessResult, setAccessResult] = useState<any>(null);
   const [isAttempting, setIsAttempting] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => cachedPapers.length === 0);
 
   useEffect(() => {
     const timer = setInterval(() => {

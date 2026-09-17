@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { authApi } from '../services/apiClient';
+import { authApi, clearApiCache } from '../services/apiClient';
 
 export type UserRole = 'SUPER_ADMIN' | 'PAPER_SETTER' | 'CENTRE_ADMIN' | 'INVIGILATOR';
 
@@ -51,17 +51,30 @@ export const getRoleDashboardUrl = (role?: string): string => {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const saved = localStorage.getItem('veriq_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('veriq_access_token'));
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(() => {
+    const hasToken = !!localStorage.getItem('veriq_access_token');
+    const hasUser = !!localStorage.getItem('veriq_user');
+    return hasToken && !hasUser;
+  });
 
   const fetchUser = async () => {
     try {
       const res = await authApi.getMe();
       setUser(res.data);
+      localStorage.setItem('veriq_user', JSON.stringify(res.data));
     } catch {
       setUser(null);
       localStorage.removeItem('veriq_access_token');
+      localStorage.removeItem('veriq_user');
       setToken(null);
     } finally {
       setIsLoading(false);
@@ -82,6 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await authApi.login({ email, password });
       const { access_token, user: userData } = res.data;
       localStorage.setItem('veriq_access_token', access_token);
+      localStorage.setItem('veriq_user', JSON.stringify(userData));
       setToken(access_token);
       setUser(userData);
       return userData;
@@ -117,6 +131,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const creds = DEMO_ROLE_CREDENTIALS[role];
     if (creds) {
       try {
+        clearApiCache();
         const u = await login(creds.email, 'password123');
         toast.success(`Switched persona to ${role.replace('_', ' ')} (${u.name})`);
       } catch (e: any) {
@@ -126,7 +141,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = (showToast = true) => {
+    clearApiCache();
     localStorage.removeItem('veriq_access_token');
+    localStorage.removeItem('veriq_user');
     setToken(null);
     setUser(null);
     if (showToast) {

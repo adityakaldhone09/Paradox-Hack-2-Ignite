@@ -47,29 +47,46 @@ async def list_papers(
     res = await db.execute(query)
     papers = res.scalars().all()
 
+    if not papers:
+        return []
+
+    paper_ids = [p.id for p in papers]
+    exam_ids = list({p.exam_id for p in papers if p.exam_id})
+
+    # Batch get exam names
+    exam_names = {}
+    if exam_ids:
+        e_res = await db.execute(select(Examination.id, Examination.name).where(Examination.id.in_(exam_ids)))
+        exam_names = {row[0]: row[1] for row in e_res.all()}
+
+    # Batch get assigned centre IDs
+    a_res = await db.execute(
+        select(PaperCentreAssignment.paper_id, PaperCentreAssignment.centre_id)
+        .where(PaperCentreAssignment.paper_id.in_(paper_ids))
+    )
+    assigned_by_paper = {}
+    for pid, cid in a_res.all():
+        assigned_by_paper.setdefault(pid, []).append(cid)
+
+    # Batch get latest blockchain transactions
+    tx_res = await db.execute(
+        select(BlockchainTransaction)
+        .where(BlockchainTransaction.paper_id.in_(paper_ids))
+        .order_by(BlockchainTransaction.block_number.desc())
+    )
+    latest_tx_by_paper = {}
+    for tx in tx_res.scalars().all():
+        if tx.paper_id and tx.paper_id not in latest_tx_by_paper:
+            latest_tx_by_paper[tx.paper_id] = tx
+
     output = []
     for p in papers:
-        # Get exam name
-        e_res = await db.execute(select(Examination.name).where(Examination.id == p.exam_id))
-        exam_name = e_res.scalar_one_or_none()
-
-        # Get assigned centre IDs
-        a_res = await db.execute(select(PaperCentreAssignment.centre_id).where(PaperCentreAssignment.paper_id == p.id))
-        assigned_centres = a_res.scalars().all()
-
-        # Get latest blockchain tx
-        tx_res = await db.execute(
-            select(BlockchainTransaction)
-            .where(BlockchainTransaction.paper_id == p.id)
-            .order_by(BlockchainTransaction.block_number.desc())
-        )
-        latest_tx = tx_res.scalars().first()
-
+        latest_tx = latest_tx_by_paper.get(p.id)
         output.append(PaperResponse(
             id=p.id,
             paper_id=p.paper_id,
             exam_id=p.exam_id,
-            exam_name=exam_name,
+            exam_name=exam_names.get(p.exam_id),
             title=p.title,
             file_name=p.file_name,
             file_size=p.file_size,
@@ -84,7 +101,7 @@ async def list_papers(
             approved_at=p.approved_at,
             blockchain_tx_hash=latest_tx.tx_hash if latest_tx else None,
             blockchain_block_number=latest_tx.block_number if latest_tx else None,
-            assigned_centres=list(assigned_centres),
+            assigned_centres=assigned_by_paper.get(p.id, []),
             revocation_reason=p.revocation_reason
         ))
     return output

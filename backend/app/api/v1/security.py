@@ -61,10 +61,31 @@ async def get_security_summary(user: User = Depends(get_current_user), db: Async
 @router.get("/heatmap")
 async def get_centre_heatmap(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     centres = (await db.execute(select(Centre))).scalars().all()
+    if not centres:
+        return []
+
+    c_ids = [c.id for c in centres]
+
+    # Batch count incidents per centre
+    inc_res = await db.execute(
+        select(Incident.centre_id, func.count(Incident.id))
+        .where(Incident.centre_id.in_(c_ids))
+        .group_by(Incident.centre_id)
+    )
+    inc_counts = dict(inc_res.all())
+
+    # Batch count blocked access events per centre
+    blocked_res = await db.execute(
+        select(AccessEvent.centre_id, func.count(AccessEvent.id))
+        .where(AccessEvent.centre_id.in_(c_ids), AccessEvent.allowed == False)
+        .group_by(AccessEvent.centre_id)
+    )
+    blocked_counts = dict(blocked_res.all())
+
     heatmap = []
     for c in centres:
-        inc_count = (await db.execute(select(func.count(Incident.id)).where(Incident.centre_id == c.id))).scalar_one() or 0
-        blocked_count = (await db.execute(select(func.count(AccessEvent.id)).where(AccessEvent.centre_id == c.id, AccessEvent.allowed == False))).scalar_one() or 0
+        inc_count = inc_counts.get(c.id, 0)
+        blocked_count = blocked_counts.get(c.id, 0)
         
         score = (inc_count * 25) + (blocked_count * 15)
         risk = "HIGH" if score >= 50 else ("MEDIUM" if score >= 20 else "LOW")
