@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_
 from app.core.config import settings
 from app.db.session import get_db
-from app.models.entities import Paper, Examination, PaperCentreAssignment, Centre, BlockchainTransaction, User, Incident
+from app.models.entities import Paper, Examination, PaperCentreAssignment, Centre, BlockchainTransaction, User, Incident, utc_now
 from app.schemas.schemas import PaperResponse, PaperAssignCentreRequest, PaperVerifyRequest, PaperRevokeRequest
 from app.services.hashing_service import hashing_service
 from app.services.encryption_service import encryption_service
@@ -23,6 +23,7 @@ async def list_papers(
     search: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
     exam_id: Optional[str] = Query(None),
+    created_by: Optional[str] = Query(None),
     db: AsyncSession = Depends(get_db)
 ):
     query = select(Paper)
@@ -38,6 +39,8 @@ async def list_papers(
         query = query.where(Paper.status == status)
     if exam_id:
         query = query.where(or_(Paper.exam_id == exam_id, Paper.exam_id == select(Examination.id).where(Examination.exam_id == exam_id).scalar_subquery()))
+    if created_by:
+        query = query.where(Paper.created_by == created_by)
 
     query = query.order_by(Paper.created_at.desc())
     res = await db.execute(query)
@@ -91,7 +94,7 @@ async def upload_paper(
     exam_id: str = Form(...),
     title: str = Form(...),
     version: str = Form("1.0"),
-    user: User = Depends(require_roles(["SUPER_ADMIN", "EXAM_AUTHORITY", "PAPER_SETTER"])),
+    user: User = Depends(require_roles(["SUPER_ADMIN", "PAPER_SETTER"])),
     db: AsyncSession = Depends(get_db)
 ):
     # 1. Validate Exam
@@ -136,7 +139,7 @@ async def upload_paper(
         version=version,
         status="DRAFT",
         created_by=user.email,
-        created_at=datetime.now(timezone.utc)
+        created_at=utc_now()
     )
     db.add(paper)
     await db.flush()
@@ -267,10 +270,50 @@ async def get_paper(id: str, db: AsyncSession = Depends(get_db)):
         ]
     }
 
+@router.post("/{id}/submit")
+async def submit_paper_for_approval(
+    id: str,
+    user: User = Depends(require_roles(["SUPER_ADMIN", "PAPER_SETTER"])),
+    db: AsyncSession = Depends(get_db)
+):
+    """Paper Setter submits a DRAFT paper for approval (DRAFT → SUBMITTED)"""
+    paper = (await db.execute(select(Paper).where(or_(Paper.id == id, Paper.paper_id == id)))).scalars().first()
+    if not paper:
+        raise HTTPException(status_code=404, detail="Paper not found")
+    if paper.status != "DRAFT":
+        raise HTTPException(status_code=400, detail=f"Only DRAFT papers can be submitted. Current status: {paper.status}")
+    if paper.created_by != user.email and user.role != "SUPER_ADMIN":
+        raise HTTPException(status_code=403, detail="You can only submit papers you created")
+
+    paper.status = "SUBMITTED"
+
+    bc_tx = await blockchain_service.record_transaction(
+        event_type="PAPER_SUBMITTED",
+        paper_id=paper.id,
+        actor_id=user.email,
+        payload_data={"paper_id": paper.paper_id, "submitted_by": user.email}
+    )
+    db_tx = BlockchainTransaction(
+        tx_hash=bc_tx["tx_hash"],
+        block_number=bc_tx["block_number"],
+        event_type="PAPER_SUBMITTED",
+        paper_id=paper.id,
+        actor_id=user.email,
+        payload_hash=bc_tx["payload_hash"],
+        previous_hash=bc_tx["previous_hash"],
+        signature=bc_tx["signature"],
+        timestamp=datetime.fromisoformat(bc_tx["timestamp"]),
+        status="CONFIRMED"
+    )
+    db.add(db_tx)
+    await db.commit()
+    return {"message": "Paper submitted for approval", "status": paper.status, "tx_hash": bc_tx["tx_hash"]}
+
+
 @router.post("/{id}/approve")
 async def approve_paper(
     id: str,
-    user: User = Depends(require_roles(["SUPER_ADMIN", "EXAM_AUTHORITY"])),
+    user: User = Depends(require_roles(["SUPER_ADMIN"])),
     db: AsyncSession = Depends(get_db)
 ):
     paper = (await db.execute(select(Paper).where(or_(Paper.id == id, Paper.paper_id == id)))).scalars().first()
@@ -278,10 +321,12 @@ async def approve_paper(
         raise HTTPException(status_code=404, detail="Paper not found")
     if paper.status == "REVOKED":
         raise HTTPException(status_code=400, detail="Cannot approve revoked paper")
+    if paper.status not in ("DRAFT", "SUBMITTED"):
+        raise HTTPException(status_code=400, detail=f"Paper is already {paper.status}")
 
     paper.status = "APPROVED"
     paper.approved_by = user.email
-    paper.approved_at = datetime.now(timezone.utc)
+    paper.approved_at = utc_now()
     
     # Generate cryptographic signature of approval
     approval_payload = f"{paper.id}:{paper.sha256_hash}:{user.email}:{paper.approved_at.isoformat()}"
@@ -321,7 +366,7 @@ async def approve_paper(
 async def assign_centre_to_paper(
     id: str,
     req: PaperAssignCentreRequest,
-    user: User = Depends(require_roles(["SUPER_ADMIN", "EXAM_AUTHORITY"])),
+    user: User = Depends(require_roles(["SUPER_ADMIN"])),
     db: AsyncSession = Depends(get_db)
 ):
     paper = (await db.execute(select(Paper).where(or_(Paper.id == id, Paper.paper_id == id)))).scalars().first()
@@ -390,13 +435,14 @@ async def assign_centre_to_paper(
         "message": f"Paper successfully assigned to Centre {centre.name}",
         "paper_id": paper.paper_id,
         "centre_id": centre.centre_id,
+        "status": paper.status,
         "tx_hash": bc_tx["tx_hash"]
     }
 
 @router.post("/{id}/release")
 async def release_paper(
     id: str,
-    user: User = Depends(require_roles(["SUPER_ADMIN", "EXAM_AUTHORITY"])),
+    user: User = Depends(require_roles(["SUPER_ADMIN"])),
     db: AsyncSession = Depends(get_db)
 ):
     paper = (await db.execute(select(Paper).where(or_(Paper.id == id, Paper.paper_id == id)))).scalars().first()
@@ -457,7 +503,9 @@ async def verify_paper_integrity(
     except Exception as e:
         calculated_hash = "tampered_corrupt_payload_hash"
 
-    if simulate_tamper:
+    if req and req.candidate_hash:
+        calculated_hash = req.candidate_hash
+    elif simulate_tamper:
         # In tamper simulation, alter the calculated hash
         calculated_hash = "f" * 64
 
@@ -507,6 +555,7 @@ async def verify_paper_integrity(
 
     return {
         "verified": is_match,
+        "is_authentic": is_match,
         "status": "VERIFIED_VALID" if is_match else "INTEGRITY_FAILURE",
         "title": paper.title,
         "paper_id": paper.paper_id,
@@ -520,7 +569,7 @@ async def verify_paper_integrity(
 async def revoke_paper(
     id: str,
     req: PaperRevokeRequest,
-    user: User = Depends(require_roles(["SUPER_ADMIN", "EXAM_AUTHORITY"])),
+    user: User = Depends(require_roles(["SUPER_ADMIN"])),
     db: AsyncSession = Depends(get_db)
 ):
     paper = (await db.execute(select(Paper).where(or_(Paper.id == id, Paper.paper_id == id)))).scalars().first()

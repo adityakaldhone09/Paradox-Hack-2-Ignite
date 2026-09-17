@@ -1,0 +1,64 @@
+/**
+ * VeriQ Custom Utilities
+ */
+
+/* Clean dot grid for subtle technical backgrounds */
+.bg-tech-grid {
+  background-size: 32px 32px;
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+}
+
+.dark .bg-tech-grid {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+}
+
+/* Subtle linear grid */
+.bg-linear-grid {
+  background-size: 48px 48px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+}
+
+.dark .bg-linear-grid {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+/* Glass panel (used selectively for sticky header and modal only) */
+.glass-panel-nav {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(229, 231, 235, 0.8);
+}
+
+.dark .glass-panel-nav {
+  background: rgba(10, 10, 11, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(39, 39, 42, 0.8);
+}
+
+/* Text balance and truncation helper */
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Monospace font standard class */
+.font-technical {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  letter-spacing: -0.02em;
+}
+
+/* Selection */
+::selection {
+  background: rgba(37, 99, 235, 0.18);
+  color: #111111;
+}
+
+.dark ::selection {
+  background: rgba(59, 130, 246, 0.28);
+  color: #FFFFFF;
+}

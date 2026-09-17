@@ -57,7 +57,7 @@ async def list_centres(
 @router.post("", response_model=CentreResponse, status_code=status.HTTP_201_CREATED)
 async def create_centre(
     req: CentreCreate,
-    user: User = Depends(require_roles(["SUPER_ADMIN", "EXAM_AUTHORITY"])),
+    user: User = Depends(require_roles(["SUPER_ADMIN"])),
     db: AsyncSession = Depends(get_db)
 ):
     existing = await db.execute(select(Centre).where(or_(Centre.centre_id == req.centre_id, Centre.code == req.code)))
@@ -127,7 +127,7 @@ async def get_centre(id: str, db: AsyncSession = Depends(get_db)):
 @router.post("/{id}/authorize")
 async def authorize_centre(
     id: str,
-    user: User = Depends(require_roles(["SUPER_ADMIN", "EXAM_AUTHORITY"])),
+    user: User = Depends(require_roles(["SUPER_ADMIN"])),
     db: AsyncSession = Depends(get_db)
 ):
     centre = (await db.execute(select(Centre).where(or_(Centre.id == id, Centre.centre_id == id)))).scalars().first()
@@ -141,7 +141,7 @@ async def authorize_centre(
 @router.post("/{id}/revoke")
 async def revoke_centre(
     id: str,
-    user: User = Depends(require_roles(["SUPER_ADMIN", "EXAM_AUTHORITY"])),
+    user: User = Depends(require_roles(["SUPER_ADMIN"])),
     db: AsyncSession = Depends(get_db)
 ):
     centre = (await db.execute(select(Centre).where(or_(Centre.id == id, Centre.centre_id == id)))).scalars().first()

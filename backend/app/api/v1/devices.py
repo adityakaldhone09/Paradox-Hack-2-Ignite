@@ -1,6 +1,5 @@
-from datetime import datetime, timezone
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_
 from app.db.session import get_db
@@ -11,8 +10,18 @@ from app.api.deps import get_current_user, require_roles
 router = APIRouter(prefix="/devices", tags=["Device Authorization"])
 
 @router.get("", response_model=List[DeviceResponse])
-async def list_devices(db: AsyncSession = Depends(get_db)):
-    res = await db.execute(select(AuthorizedDevice).order_by(AuthorizedDevice.registered_at.desc()))
+async def list_devices(
+    centre_id: Optional[str] = Query(None),
+    db: AsyncSession = Depends(get_db)
+):
+    query = select(AuthorizedDevice)
+    if centre_id:
+        centre = (await db.execute(select(Centre).where(or_(Centre.id == centre_id, Centre.centre_id == centre_id)))).scalars().first()
+        target_id = centre.id if centre else centre_id
+        query = query.where(AuthorizedDevice.centre_id == target_id)
+
+    query = query.order_by(AuthorizedDevice.registered_at.desc())
+    res = await db.execute(query)
     devs = res.scalars().all()
     return [
         DeviceResponse(
@@ -33,7 +42,7 @@ async def list_devices(db: AsyncSession = Depends(get_db)):
 @router.post("", response_model=DeviceResponse, status_code=status.HTTP_201_CREATED)
 async def register_device(
     req: DeviceCreate,
-    user: User = Depends(require_roles(["SUPER_ADMIN", "EXAM_AUTHORITY", "CENTRE_ADMIN"])),
+    user: User = Depends(require_roles(["SUPER_ADMIN", "CENTRE_ADMIN"])),
     db: AsyncSession = Depends(get_db)
 ):
     centre = (await db.execute(select(Centre).where(or_(Centre.id == req.centre_id, Centre.centre_id == req.centre_id)))).scalars().first()
@@ -75,7 +84,7 @@ async def register_device(
 @router.post("/{id}/authorize")
 async def authorize_device(
     id: str,
-    user: User = Depends(require_roles(["SUPER_ADMIN", "EXAM_AUTHORITY", "CENTRE_ADMIN"])),
+    user: User = Depends(require_roles(["SUPER_ADMIN", "CENTRE_ADMIN"])),
     db: AsyncSession = Depends(get_db)
 ):
     dev = (await db.execute(select(AuthorizedDevice).where(or_(AuthorizedDevice.id == id, AuthorizedDevice.device_id == id)))).scalars().first()
@@ -88,7 +97,7 @@ async def authorize_device(
 @router.post("/{id}/revoke")
 async def revoke_device(
     id: str,
-    user: User = Depends(require_roles(["SUPER_ADMIN", "EXAM_AUTHORITY", "CENTRE_ADMIN"])),
+    user: User = Depends(require_roles(["SUPER_ADMIN", "CENTRE_ADMIN"])),
     db: AsyncSession = Depends(get_db)
 ):
     dev = (await db.execute(select(AuthorizedDevice).where(or_(AuthorizedDevice.id == id, AuthorizedDevice.device_id == id)))).scalars().first()

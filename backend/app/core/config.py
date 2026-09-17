@@ -3,8 +3,12 @@ from typing import List
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# Resolve .env from the project root (3 levels up: core → app → backend → project_root)
+_PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+_ENV_FILE = os.path.join(_PROJECT_ROOT, ".env")
+
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=_ENV_FILE, extra="ignore")
 
     APP_NAME: str = "VeriQ"
     APP_ENV: str = "development"

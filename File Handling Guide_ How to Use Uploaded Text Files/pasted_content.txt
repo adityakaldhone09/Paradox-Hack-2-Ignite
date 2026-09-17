@@ -1,0 +1,2189 @@
+# VERIQ — FRONTEND-ONLY CREATION & REDESIGN MASTER PROMPT
+
+You are a senior **frontend architect, UI/UX designer, motion designer, and design-system engineer**.
+
+You are working on the existing **VeriQ** project.
+
+## CRITICAL SCOPE RULE
+
+This task is **FRONTEND ONLY**.
+
+You are allowed to:
+
+* create frontend files
+* modify frontend files
+* create frontend components
+* create frontend pages
+* create frontend hooks
+* create frontend stores
+* create frontend API client wrappers
+* create frontend types
+* create frontend styles
+* create frontend animations
+* create frontend assets
+* create frontend routing
+* create frontend authentication UI
+* create frontend role-based UI guards
+* create frontend mock/demo data where required
+
+You MUST NOT modify:
+
+* `backend/`
+* `blockchain/`
+* database schemas
+* backend authentication logic
+* backend API implementation
+* backend environment files
+* server-side code
+* blockchain smart contracts
+* Prisma/Drizzle/SQLAlchemy models
+* Docker backend configuration
+
+Do not create backend files.
+
+Do not redesign the backend.
+
+Use the existing backend/API contracts as they currently exist.
+
+If an API is unavailable, create a clean frontend service abstraction or mock adapter without changing the backend.
+
+---
+
+# 1. PROJECT
+
+## Name
+
+**VeriQ**
+
+## Tagline
+
+> **Secure Every Question Paper. Verify Every Action.**
+
+## Product
+
+Secure examination paper distribution and blockchain-backed chain-of-custody platform.
+
+The frontend should communicate:
+
+* security
+* trust
+* precision
+* simplicity
+* institutional credibility
+* modern technology
+
+---
+
+# 2. FRONTEND OBJECTIVE
+
+The current frontend should be completely redesigned visually.
+
+The final UI should look like:
+
+**Apple-inspired minimalism**
+
+*
+
+**Linear/Vercel-style product interface**
+
+*
+
+**modern enterprise security platform**
+
+*
+
+**clean institutional software**
+
+Do NOT make it look like:
+
+* a college project
+* a generic admin template
+* an overly colorful dashboard
+* a cyberpunk website
+* a crypto trading dashboard
+
+---
+
+# 3. FRONTEND DIRECTORY
+
+Create/refactor ONLY:
+
+```text
+frontend/
+│
+├── public/
+│   ├── favicon.svg
+│   └── assets/
+│
+├── src/
+│   ├── assets/
+│   │
+│   ├── components/
+│   │   ├── ui/
+│   │   ├── layout/
+│   │   ├── landing/
+│   │   ├── dashboard/
+│   │   ├── examinations/
+│   │   ├── papers/
+│   │   ├── centres/
+│   │   ├── devices/
+│   │   ├── security/
+│   │   ├── incidents/
+│   │   ├── blockchain/
+│   │   ├── audit/
+│   │   ├── auth/
+│   │   └── shared/
+│   │
+│   ├── pages/
+│   │   ├── landing/
+│   │   ├── auth/
+│   │   ├── dashboard/
+│   │   ├── examinations/
+│   │   ├── papers/
+│   │   ├── centres/
+│   │   ├── devices/
+│   │   ├── security/
+│   │   ├── incidents/
+│   │   ├── blockchain/
+│   │   ├── audit/
+│   │   └── settings/
+│   │
+│   ├── hooks/
+│   ├── services/
+│   ├── stores/
+│   ├── types/
+│   ├── utils/
+│   ├── lib/
+│   ├── routes/
+│   ├── config/
+│   ├── styles/
+│   ├── App.tsx
+│   └── main.tsx
+│
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
+├── tailwind.config.ts
+├── postcss.config.js
+└── .env.example
+```
+
+If these files already exist, refactor them instead of unnecessarily duplicating them.
+
+---
+
+# 4. FRONTEND TECHNOLOGY
+
+Use the existing project stack wherever already installed.
+
+Preferred:
+
+* React
+* Vite
+* TypeScript
+* Tailwind CSS
+* Framer Motion
+* Lucide React
+* Wouter
+* TanStack Query
+* Axios
+* React Hook Form
+* Zod
+* Recharts
+* Sonner
+* next-themes
+
+Do not migrate frameworks.
+
+Do not replace the routing library without a strong reason.
+
+---
+
+# 5. FOUR VALID ROLES
+
+The frontend must recognize exactly:
+
+```text
+SUPER_ADMIN
+PAPER_SETTER
+CENTRE_ADMIN
+INVIGILATOR
+```
+
+Remove obsolete visible role references such as:
+
+```text
+REGIONAL_COORDINATOR
+AUDITOR
+EXAM_AUTHORITY
+SECURITY_ADMIN
+```
+
+Do not invent additional roles.
+
+---
+
+# 6. ROLE CONFIGURATION
+
+Create one centralized frontend configuration:
+
+```text
+src/config/roles.ts
+```
+
+Example structure:
+
+```ts
+export const roleConfig = {
+  SUPER_ADMIN: {
+    label: "Super Admin",
+    dashboard: "/dashboard/admin",
+    permissions: [...]
+  },
+
+  PAPER_SETTER: {
+    label: "Paper Setter",
+    dashboard: "/dashboard/paper-setter",
+    permissions: [...]
+  },
+
+  CENTRE_ADMIN: {
+    label: "Centre Admin",
+    dashboard: "/dashboard/centre",
+    permissions: [...]
+  },
+
+  INVIGILATOR: {
+    label: "Invigilator",
+    dashboard: "/dashboard/invigilator",
+    permissions: [...]
+  }
+};
+```
+
+Use this configuration for:
+
+* sidebar
+* dashboard
+* role badge
+* profile
+* route guards
+* page visibility
+
+Do not duplicate role definitions across components.
+
+---
+
+# 7. DESIGN SYSTEM
+
+Create a centralized design system.
+
+Recommended files:
+
+```text
+src/styles/
+├── globals.css
+├── tokens.css
+├── animations.css
+└── utilities.css
+```
+
+Use CSS variables/design tokens.
+
+---
+
+# 8. LIGHT THEME
+
+The default theme MUST be light.
+
+Use:
+
+```text
+Background     #FFFFFF
+Soft background #F7F7F5
+Surface         #FAFAFA
+Primary text    #111111
+Secondary text  #6B7280
+Border          #E7E7E7
+Accent          #2563EB
+Success         #16A34A
+Warning         #D97706
+Danger          #DC2626
+```
+
+The exact values may be refined slightly for visual harmony.
+
+Do not use every status color everywhere.
+
+---
+
+# 9. DARK THEME
+
+Support dark mode.
+
+Use:
+
+```text
+Background     #0B0B0C
+Surface        #121214
+Elevated       #18181B
+Border         #27272A
+Primary text   #F5F5F5
+Secondary text #A1A1AA
+```
+
+The application must look equally polished in both modes.
+
+---
+
+# 10. MINIMAL DESIGN PRINCIPLES
+
+Follow:
+
+> **Less UI chrome, more hierarchy.**
+
+Use:
+
+* whitespace
+* typography
+* subtle borders
+* restrained shadows
+* clear layout
+* meaningful icons
+
+Avoid:
+
+* excessive cards
+* excessive gradients
+* excessive glassmorphism
+* giant shadows
+* neon
+* unnecessary badges
+* visual clutter
+
+---
+
+# 11. TYPOGRAPHY
+
+Use:
+
+**Inter**, **Geist**, or **Manrope**.
+
+Headings:
+
+* large
+* bold
+* tight tracking
+
+Body:
+
+* readable
+* relaxed line-height
+
+Technical information:
+
+* monospace
+
+Use monospace for:
+
+* transaction hashes
+* paper IDs
+* block numbers
+* cryptographic hashes
+
+---
+
+# 12. GLOBAL ANIMATION SYSTEM
+
+Use Framer Motion.
+
+Create reusable variants in:
+
+```text
+src/lib/motion.ts
+```
+
+Include:
+
+```text
+fadeIn
+fadeUp
+fadeDown
+fadeLeft
+fadeRight
+scaleIn
+staggerContainer
+staggerItem
+slideIn
+```
+
+Timing:
+
+```text
+fast     180ms
+normal   300ms
+slow     600ms
+```
+
+Prefer:
+
+```text
+easeOut
+easeInOut
+```
+
+Avoid excessive spring animations.
+
+---
+
+# 13. REDUCED MOTION
+
+Respect:
+
+```text
+prefers-reduced-motion
+```
+
+When enabled:
+
+* remove parallax
+* remove looping background animation
+* reduce movement
+* use opacity transitions
+* preserve important state feedback
+
+---
+
+# 14. LANDING PAGE FILES
+
+Create:
+
+```text
+src/pages/landing/LandingPage.tsx
+```
+
+and:
+
+```text
+src/components/landing/
+├── Navbar.tsx
+├── Hero.tsx
+├── TrustStrip.tsx
+├── FeatureSection.tsx
+├── ProductStory.tsx
+├── SecurityArchitecture.tsx
+├── ChainOfCustody.tsx
+├── TamperDetection.tsx
+├── RoleOverview.tsx
+├── FinalCTA.tsx
+└── Footer.tsx
+```
+
+---
+
+# 15. LANDING PAGE STRUCTURE
+
+Use:
+
+```text
+Navbar
+ ↓
+Hero
+ ↓
+Trust Strip
+ ↓
+Features
+ ↓
+Sticky Product Story
+ ↓
+Security Architecture
+ ↓
+Chain of Custody
+ ↓
+Tamper Detection
+ ↓
+Roles
+ ↓
+Final CTA
+ ↓
+Footer
+```
+
+Keep the page concise.
+
+---
+
+# 16. HERO
+
+Headline:
+
+> **Secure every question paper. Verify every action.**
+
+Supporting text:
+
+> VeriQ protects examination papers with cryptographic security, controlled access, and blockchain-backed chain of custody.
+
+Buttons:
+
+```text
+Explore VeriQ
+Sign In
+```
+
+Do not overload the hero with information.
+
+---
+
+# 17. HERO VISUAL
+
+Create an animated UI visualization.
+
+Show:
+
+```text
+Question Paper
+      ↓
+Encrypted
+      ↓
+SHA-256 Verified
+      ↓
+Authorized
+      ↓
+Released
+      ↓
+Blockchain Recorded
+```
+
+Animate using:
+
+* opacity
+* translate
+* scale
+* SVG line drawing
+* subtle glow
+* checkmark animation
+
+Do NOT use external stock images.
+
+Build the visual with React/CSS/SVG/Lucide.
+
+---
+
+# 18. HERO BACKGROUND
+
+Use:
+
+* white background
+* subtle grid
+* extremely low-opacity technical lines
+* subtle radial gradient
+
+Optional slow movement.
+
+Do not use an aggressive hacker/cyber background.
+
+---
+
+# 19. NAVBAR
+
+Create a minimal sticky navbar.
+
+Left:
+
+```text
+VeriQ
+```
+
+Center/right:
+
+```text
+Product
+Security
+Architecture
+Features
+```
+
+Actions:
+
+```text
+Sign In
+Get Started
+```
+
+On scroll:
+
+* transparent → translucent
+* blur
+* subtle border
+
+Transition duration:
+
+```text
+300ms
+```
+
+---
+
+# 20. TRUST STRIP
+
+Create a lightweight horizontal strip:
+
+```text
+Encrypted
+Tamper-evident
+Time-controlled
+Role-based
+Auditable
+```
+
+Use simple icons.
+
+---
+
+# 21. FEATURE SECTION
+
+Create six minimal feature blocks:
+
+```text
+Cryptographic Integrity
+Secure Encryption
+Time-Locked Access
+Centre Authorization
+Blockchain Audit
+Security Monitoring
+```
+
+Each:
+
+* icon
+* title
+* short description
+
+Animate on viewport entry.
+
+---
+
+# 22. STICKY SCROLL STORY
+
+Create a signature interaction.
+
+Desktop:
+
+Left side:
+
+```text
+01 Create
+02 Protect
+03 Authorize
+04 Release
+05 Verify
+06 Audit
+```
+
+Right side:
+
+Sticky animated product visualization.
+
+As the user scrolls:
+
+* active step changes
+* illustration changes
+* description changes
+* progress line animates
+
+Use:
+
+```text
+position: sticky
+```
+
+and Framer Motion.
+
+---
+
+# 23. MOBILE BEHAVIOR
+
+On mobile, replace sticky desktop storytelling with:
+
+```text
+step card
+ ↓
+visual
+ ↓
+step card
+ ↓
+visual
+```
+
+or a swipeable horizontal section.
+
+Do not create unusable desktop-style sticky layouts on mobile.
+
+---
+
+# 24. HORIZONTAL SCROLL STORY
+
+Create one horizontal-scroll section.
+
+Sequence:
+
+```text
+Create
+→ Encrypt
+→ Hash
+→ Authorize
+→ Release
+→ Verify
+→ Audit
+```
+
+Desktop:
+
+scroll-driven horizontal movement.
+
+Mobile:
+
+native horizontal swipe.
+
+Do not overuse horizontal scrolling.
+
+---
+
+# 25. CHAIN OF CUSTODY
+
+Create:
+
+```text
+Created
+ ↓
+Approved
+ ↓
+Encrypted
+ ↓
+Assigned
+ ↓
+Released
+ ↓
+Accessed
+ ↓
+Verified
+```
+
+Each event:
+
+* icon
+* event name
+* timestamp
+* actor
+* status
+
+Animate the vertical line as the section appears.
+
+---
+
+# 26. TAMPER DETECTION
+
+Create a visual comparison.
+
+Original:
+
+```text
+SHA-256
+A89D21...F8A1
+
+VERIFIED
+```
+
+Modified:
+
+```text
+SHA-256
+D71F40...9A31
+
+MISMATCH
+```
+
+Sequence:
+
+```text
+MATCH
+ ↓
+DOCUMENT MODIFIED
+ ↓
+MISMATCH
+ ↓
+SECURITY ALERT
+```
+
+Use restrained warning styling.
+
+---
+
+# 27. SECURITY ARCHITECTURE
+
+Show:
+
+```text
+                VeriQ
+                  │
+       ┌──────────┼──────────┐
+       ↓          ↓          ↓
+ Encryption   Authorization Integrity
+       │          │          │
+       └──────────┼──────────┘
+                  ↓
+          Blockchain Audit
+```
+
+Use SVG/HTML, not an image.
+
+Animate connecting paths.
+
+---
+
+# 28. ROLE OVERVIEW
+
+Show only:
+
+```text
+Super Admin
+Paper Setter
+Centre Admin
+Invigilator
+```
+
+Keep it minimal.
+
+Each role should explain one responsibility.
+
+Example:
+
+```text
+Super Admin
+System-wide control and security oversight.
+```
+
+---
+
+# 29. FINAL CTA
+
+Large whitespace.
+
+Headline:
+
+> **Secure your examination workflow.**
+
+Buttons:
+
+```text
+Enter VeriQ
+Sign In
+```
+
+---
+
+# 30. AUTHENTICATION UI
+
+Create/refine:
+
+```text
+src/pages/auth/
+├── SignInPage.tsx
+├── SignUpPage.tsx
+├── ForgotPasswordPage.tsx
+├── ResetPasswordPage.tsx
+└── UnauthorizedPage.tsx
+```
+
+Components:
+
+```text
+src/components/auth/
+├── AuthLayout.tsx
+├── AuthForm.tsx
+├── PasswordField.tsx
+├── RoleSelector.tsx
+└── AuthStatus.tsx
+```
+
+---
+
+# 31. SIGN-IN DESIGN
+
+Minimal white layout.
+
+Show:
+
+```text
+VeriQ
+
+Welcome back
+
+Secure access to your VeriQ workspace.
+
+Email
+[______________________]
+
+Password
+[______________________]
+
+Forgot password?
+
+[ Sign In ]
+
+Protected workspace
+```
+
+Include:
+
+* password visibility
+* loading
+* validation
+* error states
+* success transition
+
+---
+
+# 32. ROLE SELECTOR
+
+Only show:
+
+```text
+Super Admin
+Paper Setter
+Centre Admin
+Invigilator
+```
+
+Use cards or a clean segmented selector.
+
+Each role should have:
+
+* icon
+* title
+* one-line description
+
+Do not expose technical permission strings such as `CENTRE_ADMIN`.
+
+Display:
+
+> Centre Admin
+
+---
+
+# 33. SIGN-UP DESIGN
+
+Preferred wording:
+
+> **Request access to VeriQ**
+
+not generic:
+
+> Create an account
+
+Because VeriQ is an institutional platform.
+
+Provide:
+
+* name
+* email
+* password
+* role
+* optional centre/institution field depending on selected role
+
+UI only.
+
+Use existing backend API if available.
+
+Do NOT modify backend signup logic.
+
+---
+
+# 34. FORGOT PASSWORD
+
+Create:
+
+```text
+Forgot your password?
+
+Enter your registered email and we'll send
+instructions to reset your password.
+
+[ Email ]
+
+[ Send reset link ]
+```
+
+Include success/error states.
+
+---
+
+# 35. UNAUTHORIZED PAGE
+
+Use:
+
+```text
+403
+
+Access restricted.
+
+Your account doesn't have permission
+to access this page.
+
+[ Return to dashboard ]
+```
+
+Use subtle animation.
+
+---
+
+# 36. APP SHELL
+
+Create/refactor:
+
+```text
+src/components/layout/
+├── AppShell.tsx
+├── Sidebar.tsx
+├── Topbar.tsx
+├── UserMenu.tsx
+├── Breadcrumbs.tsx
+└── MobileNav.tsx
+```
+
+App shell must be minimal.
+
+---
+
+# 37. SIDEBAR
+
+Create role-based navigation.
+
+## Super Admin
+
+```text
+Overview
+Examinations
+Papers
+Centres
+Devices
+
+Security
+Incidents
+Blockchain
+
+Audit
+Users
+Settings
+```
+
+## Paper Setter
+
+```text
+Overview
+My Examinations
+My Papers
+Upload Paper
+Versions
+Chain of Custody
+Security Events
+Profile
+```
+
+## Centre Admin
+
+```text
+Overview
+Assigned Exams
+Assigned Papers
+Devices
+Access History
+Security
+Incidents
+Profile
+```
+
+## Invigilator
+
+```text
+Overview
+Active Exams
+Assigned Papers
+Verification
+Report Incident
+Profile
+```
+
+Hide inaccessible sections.
+
+---
+
+# 38. DASHBOARD REDESIGN
+
+Do not create a wall of cards.
+
+Use:
+
+### Header
+
+Title + context + one primary action.
+
+### Metrics
+
+4–6 important metrics.
+
+### Main workspace
+
+One major data visualization/table.
+
+### Secondary
+
+Security activity / recent events.
+
+---
+
+# 39. METRIC DESIGN
+
+Use minimal metric blocks.
+
+Example:
+
+```text
+SECURED PAPERS
+
+128
+
++12 this cycle
+```
+
+No giant colorful cards.
+
+Use subtle animation for numbers.
+
+---
+
+# 40. TABLE DESIGN
+
+Use:
+
+* whitespace
+* thin separators
+* subtle hover
+* clean status indicators
+
+Use monospace only for technical IDs.
+
+---
+
+# 41. SECURITY STATUS DESIGN
+
+Use small status indicators:
+
+```text
+● Verified
+● Pending
+● Blocked
+● Released
+```
+
+with subtle background tints.
+
+Don't use huge colored containers.
+
+---
+
+# 42. PAPER UPLOAD UI
+
+Create/refine:
+
+```text
+src/components/papers/PaperUpload.tsx
+```
+
+Drag/drop interface.
+
+Workflow:
+
+```text
+Uploading
+ ↓
+Validating
+ ↓
+Encrypting
+ ↓
+Hashing
+ ↓
+Registering
+ ↓
+Secured
+```
+
+Use progress animation.
+
+Final:
+
+```text
+✓ Paper secured
+✓ Integrity hash generated
+✓ Blockchain event registered
+```
+
+Connect to existing upload API.
+
+If unavailable, use a frontend mock service without changing backend.
+
+---
+
+# 43. PAPER DETAIL
+
+Create:
+
+```text
+src/components/papers/PaperSecuritySummary.tsx
+src/components/papers/PaperMetadata.tsx
+src/components/papers/PaperActions.tsx
+```
+
+Show:
+
+```text
+Paper ID
+Subject
+Version
+Status
+SHA-256
+Encryption
+Release time
+Assigned centres
+```
+
+Actions should depend on role.
+
+---
+
+# 44. TIME-LOCKED RELEASE
+
+Create:
+
+```text
+src/components/papers/ReleaseCountdown.tsx
+```
+
+Display:
+
+```text
+RELEASE WINDOW
+
+00:14:21
+
+LOCKED
+
+Available at 10:00 AM
+```
+
+At release:
+
+```text
+RELEASED
+
+ACCESS AVAILABLE
+```
+
+Use smooth state transition.
+
+The frontend must never be the sole authority for release.
+
+---
+
+# 45. BLOCKCHAIN PAGE
+
+Create:
+
+```text
+src/pages/blockchain/BlockchainPage.tsx
+```
+
+Visualize:
+
+* network status
+* recent events
+* transaction count
+* latest block
+
+Transaction table:
+
+```text
+Transaction
+Event
+Paper
+Actor
+Timestamp
+Status
+```
+
+Transaction detail:
+
+```text
+Transaction Hash
+Block
+Event
+Paper ID
+Timestamp
+Payload Hash
+Signature
+```
+
+Use monospace typography.
+
+---
+
+# 46. SECURITY PAGE
+
+Create:
+
+```text
+src/pages/security/SecurityPage.tsx
+```
+
+Sections:
+
+```text
+Security Overview
+Threat Activity
+Recent Events
+High-Risk Events
+```
+
+Do not create a scary red interface.
+
+---
+
+# 47. INCIDENT PAGE
+
+Use:
+
+```text
+src/pages/incidents/IncidentsPage.tsx
+src/components/incidents/IncidentTimeline.tsx
+src/components/incidents/IncidentCard.tsx
+```
+
+Example:
+
+```text
+Early access attempt
+
+Centre C102
+09:42 AM
+
+BLOCKED
+```
+
+Make severity understandable.
+
+---
+
+# 48. AUDIT PAGE
+
+Create a clean verification workflow:
+
+```text
+Enter Paper ID
+        ↓
+Verify
+        ↓
+Read blockchain record
+        ↓
+Compare hash
+        ↓
+Check status
+        ↓
+Verified
+```
+
+Animate every state.
+
+---
+
+# 49. BLOCKCHAIN VERIFICATION ANIMATION
+
+Use:
+
+```text
+Submitting
+ ↓
+Processing
+ ↓
+Confirmed
+ ↓
+Verified
+```
+
+Each state should transition automatically.
+
+Keep duration short.
+
+---
+
+# 50. GLOBAL UI COMPONENTS
+
+Create/reuse:
+
+```text
+Button
+IconButton
+Input
+PasswordInput
+Select
+Card
+Panel
+Badge
+StatusBadge
+Table
+Dialog
+Modal
+Tooltip
+Tabs
+Skeleton
+Progress
+Timeline
+Countdown
+EmptyState
+ErrorState
+PageHeader
+SectionHeader
+```
+
+Make these visually consistent.
+
+---
+
+# 51. BUTTONS
+
+Primary:
+
+* dark/strong accent
+* simple
+* compact
+
+Secondary:
+
+* white/light surface
+* subtle border
+
+Ghost:
+
+* transparent
+
+Hover:
+
+```text
+translateY(-1px)
+opacity/shadow transition
+```
+
+Duration:
+
+```text
+300ms
+```
+
+---
+
+# 52. INPUTS
+
+Minimal.
+
+Use:
+
+* clear labels
+* subtle borders
+* visible focus
+* accessible error states
+
+Focus:
+
+```text
+border + subtle ring
+```
+
+Do not use aggressive glow.
+
+---
+
+# 53. CARDS
+
+Cards should use:
+
+* white/off-white surfaces
+* subtle border
+* minimal shadow
+
+Not:
+
+* huge shadows
+* colorful gradients
+* excessive glassmorphism
+
+---
+
+# 54. GLASSMORPHISM
+
+Use only where useful:
+
+* navbar
+* floating elements
+* hero visualization
+
+Do NOT apply glass effect to the entire UI.
+
+---
+
+# 55. SPECIAL EFFECTS
+
+Use tasteful effects:
+
+### Hero
+
+Very subtle radial movement.
+
+### Blockchain
+
+Animated connection lines.
+
+### Hash verification
+
+Scanning line.
+
+### Security alert
+
+Controlled pulse.
+
+### Buttons
+
+Micro movement.
+
+### Timeline
+
+Progressive line drawing.
+
+### Background
+
+Very subtle grid.
+
+Avoid constant animation.
+
+---
+
+# 56. PAGE TRANSITIONS
+
+Use Framer Motion route/page transitions:
+
+```text
+opacity: 0 → 1
+y: 8 → 0
+```
+
+Keep them around 200–300ms.
+
+---
+
+# 57. LANDING SCROLL ANIMATIONS
+
+Use `whileInView`.
+
+All sections should reveal naturally.
+
+Use:
+
+```tsx
+viewport={{ once: true, amount: 0.2 }}
+```
+
+Avoid animations firing repeatedly.
+
+---
+
+# 58. MOBILE NAVIGATION
+
+Create a responsive mobile drawer.
+
+Animation:
+
+```text
+x: -100% → 0
+```
+
+Backdrop:
+
+```text
+opacity: 0 → 1
+```
+
+Close when navigating.
+
+---
+
+# 59. THEME SWITCHING
+
+Create:
+
+```text
+ThemeToggle.tsx
+```
+
+Support:
+
+* light
+* dark
+* system
+
+Default to light.
+
+Persist preference.
+
+Avoid theme flash during startup.
+
+---
+
+# 60. TOAST SYSTEM
+
+Use Sonner or the existing toast solution.
+
+Examples:
+
+```text
+Paper secured successfully.
+Integrity verified.
+Access blocked by release policy.
+Blockchain event confirmed.
+Incident recorded.
+Signed out securely.
+```
+
+---
+
+# 61. LOADING STATES
+
+Create reusable:
+
+```text
+Skeleton
+Spinner
+PageLoader
+InlineLoader
+BlockchainLoader
+UploadProgress
+```
+
+Never show a blank page while data is loading.
+
+---
+
+# 62. ERROR STATES
+
+Use calm professional messaging.
+
+Example:
+
+```text
+Unable to load this data.
+
+Check your connection and try again.
+
+[ Retry ]
+```
+
+Only security incidents should receive stronger warning visuals.
+
+---
+
+# 63. FRONTEND AUTH STATE
+
+Create or refine:
+
+```text
+src/stores/authStore.ts
+src/hooks/useAuth.ts
+src/components/auth/ProtectedRoute.tsx
+src/components/auth/RoleGuard.tsx
+```
+
+Use the existing authentication API.
+
+Frontend should:
+
+* know current user
+* know current role
+* redirect based on role
+* protect routes
+* clear state on logout
+
+Backend remains the authoritative security layer.
+
+---
+
+# 64. FRONTEND AUTH ROUTES
+
+Implement:
+
+```text
+/
+/signin
+/signup
+/forgot-password
+/reset-password
+/unauthorized
+
+/dashboard/*
+/examinations/*
+/papers/*
+/centres/*
+/devices/*
+/security/*
+/incidents/*
+/blockchain/*
+/audit/*
+/settings/*
+```
+
+Use the existing router when possible.
+
+---
+
+# 65. ROLE DASHBOARD ROUTES
+
+Use:
+
+```text
+/dashboard/admin
+/dashboard/paper-setter
+/dashboard/centre
+/dashboard/invigilator
+```
+
+Role-based redirect after login.
+
+---
+
+# 66. API INTEGRATION
+
+Do not change backend code.
+
+Use existing API hooks if present.
+
+If the existing project already contains:
+
+```text
+@workspace/api-client-react
+```
+
+preserve it.
+
+Create frontend adapters only when necessary.
+
+---
+
+# 67. FRONTEND SERVICE ORGANIZATION
+
+Create:
+
+```text
+src/services/
+├── authApi.ts
+├── examApi.ts
+├── paperApi.ts
+├── centreApi.ts
+├── deviceApi.ts
+├── securityApi.ts
+├── incidentApi.ts
+├── blockchainApi.ts
+└── auditApi.ts
+```
+
+Do not duplicate business logic.
+
+---
+
+# 68. FRONTEND TYPES
+
+Create:
+
+```text
+src/types/
+├── auth.ts
+├── roles.ts
+├── examinations.ts
+├── papers.ts
+├── centres.ts
+├── devices.ts
+├── security.ts
+├── incidents.ts
+├── blockchain.ts
+└── audit.ts
+```
+
+Use backend API response types where available.
+
+---
+
+# 69. MOCK DATA
+
+Only create mock data if an API is unavailable.
+
+Keep it under:
+
+```text
+src/lib/mock/
+```
+
+Clearly label mock/demo data.
+
+Never present fake metrics as real production information.
+
+---
+
+# 70. ACCESSIBILITY
+
+Implement:
+
+* semantic HTML
+* keyboard navigation
+* focus states
+* accessible forms
+* aria labels
+* screen-reader-friendly status
+* reduced motion
+* contrast
+
+---
+
+# 71. PERFORMANCE
+
+Do:
+
+* lazy load large page components
+* animate transform/opacity
+* avoid huge background assets
+* memoize expensive derived UI only where useful
+* avoid unnecessary global state
+* avoid excessive re-renders
+
+Do not use:
+
+* huge videos
+* massive particle systems
+* continuous expensive canvas animation
+
+---
+
+# 72. RESPONSIVE BREAKPOINTS
+
+Support:
+
+```text
+390px
+768px
+1024px
+1280px
+1440px+
+```
+
+Test:
+
+* mobile
+* tablet
+* laptop
+* desktop
+
+---
+
+# 73. LANDING PAGE QUALITY CHECK
+
+The landing page must answer in under 10 seconds:
+
+### What is VeriQ?
+
+Secure examination paper distribution.
+
+### Why does it matter?
+
+Prevents uncontrolled access and makes critical actions verifiable.
+
+### How?
+
+Encryption + authorization + cryptographic verification + blockchain audit.
+
+### What should I do?
+
+Explore or sign in.
+
+---
+
+# 74. DASHBOARD QUALITY CHECK
+
+The dashboard must answer immediately:
+
+### What is happening?
+
+### Is anything wrong?
+
+### What needs attention?
+
+### What can I do next?
+
+Avoid unnecessary information.
+
+---
+
+# 75. IMPORTANT BRAND CONSISTENCY
+
+Every visible reference should say:
+
+**VeriQ**
+
+Never:
+
+**ExamChain**
+
+Never:
+
+**EXAM-CHAIN**
+
+Never:
+
+**Exam Chain**
+
+unless it appears inside an academic/problem-statement reference that genuinely needs the term.
+
+---
+
+# 76. VISUAL COPY
+
+Use:
+
+### Main
+
+> Secure every question paper. Verify every action.
+
+### Supporting
+
+> Secure examination paper distribution with cryptographic protection, controlled access, and blockchain-backed chain of custody.
+
+### Security
+
+> Every critical action leaves a verifiable trail.
+
+### Final CTA
+
+> Secure your examination workflow.
+
+---
+
+# 77. FILE CREATION ORDER
+
+Create/refactor files in this order:
+
+### Phase 1
+
+Global styles + design tokens.
+
+### Phase 2
+
+UI component system.
+
+### Phase 3
+
+Landing page.
+
+### Phase 4
+
+Authentication pages.
+
+### Phase 5
+
+App shell.
+
+### Phase 6
+
+Role-aware navigation.
+
+### Phase 7
+
+Dashboard layouts.
+
+### Phase 8
+
+Paper/examination pages.
+
+### Phase 9
+
+Security/blockchain/audit pages.
+
+### Phase 10
+
+Responsive refinement.
+
+### Phase 11
+
+Motion refinement.
+
+### Phase 12
+
+Final cleanup.
+
+---
+
+# 78. DO NOT STOP AT VISUAL MOCKUPS
+
+Where existing API functionality exists, wire the redesigned frontend to it.
+
+The following must remain functional from the frontend:
+
+```text
+Sign in
+Logout
+Role redirect
+Dashboard loading
+Examination listing
+Paper listing
+Paper upload
+Paper verification
+Centre listing
+Security events
+Incidents
+Blockchain transactions
+Audit verification
+```
+
+If an API doesn't exist, create the UI and adapter without modifying the backend.
+
+---
+
+# 79. FINAL BUILD CHECK
+
+Run frontend checks only.
+
+```bash
+npm install
+npm run typecheck
+npm run build
+```
+
+Fix:
+
+* TypeScript errors
+* broken imports
+* route errors
+* CSS errors
+* animation errors
+* responsive overflow
+* missing components
+
+Do not modify backend files while resolving frontend errors.
+
+---
+
+# 80. FINAL VISUAL ACCEPTANCE CRITERIA
+
+The redesigned frontend must be:
+
+### Minimal
+
+No unnecessary decoration.
+
+### White-first
+
+Light mode should be the default visual identity.
+
+### Professional
+
+Suitable for an institutional enterprise product.
+
+### Modern
+
+Feels like a contemporary SaaS product.
+
+### Animated
+
+Motion communicates state and interaction.
+
+### Responsive
+
+Works across desktop/tablet/mobile.
+
+### Consistent
+
+Same design language across every page.
+
+### Secure-looking
+
+Trustworthy without falling into cyberpunk clichés.
+
+---
+
+# 81. FINAL SIGNATURE EXPERIENCE
+
+The most memorable frontend interactions should be:
+
+```text
+Landing Hero
+      ↓
+Security Flow Animation
+      ↓
+Sticky Product Story
+      ↓
+Chain-of-Custody Animation
+      ↓
+Tamper Detection
+      ↓
+Sign In
+      ↓
+Role Dashboard
+```
+
+These areas deserve the most design polish.
+
+---
+
+# 82. FINAL COMMAND
+
+Inspect the existing `frontend/` directory first.
+
+Then perform a **frontend-only redesign and file restructuring**.
+
+Do not touch backend files.
+
+Do not touch blockchain files.
+
+Do not change database files.
+
+Do not replace the backend authentication system.
+
+Use existing API contracts.
+
+Create the new frontend design system.
+
+Refactor existing frontend components.
+
+Create missing frontend pages/components.
+
+Implement the four-role UI.
+
+Implement responsive design.
+
+Implement light/dark mode.
+
+Implement tasteful Framer Motion animations.
+
+Fix all frontend build errors.
+
+The final product should feel:
+
+> **Minimal. White. Precise. Calm. Secure. Professional.**
+
+### FINAL BRAND
+
+# VeriQ
+
+> **Secure every question paper. Verify every action.**

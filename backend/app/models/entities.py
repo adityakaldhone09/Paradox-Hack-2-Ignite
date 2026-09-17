@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from sqlalchemy import (
     Column, String, Boolean, DateTime, Integer, Text, ForeignKey, Table, Enum
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
 from app.db.session import Base
 
 def generate_uuid() -> str:
@@ -11,6 +11,18 @@ def generate_uuid() -> str:
 
 def utc_now() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
+
+def normalize_utc_datetime(val):
+    if val is None:
+        return None
+    if isinstance(val, str):
+        try:
+            val = datetime.fromisoformat(val.replace("Z", "+00:00"))
+        except Exception:
+            return utc_now()
+    if isinstance(val, datetime):
+        return val.astimezone(timezone.utc).replace(tzinfo=None) if val.tzinfo else val
+    return val
 
 class User(Base):
     __tablename__ = "users"
@@ -75,6 +87,10 @@ class Paper(Base):
     blockchain_transactions = relationship("BlockchainTransaction", back_populates="paper", cascade="all, delete-orphan")
     incidents = relationship("Incident", back_populates="paper")
 
+    @validates("release_time", "created_at", "approved_at")
+    def validate_paper_datetimes(self, key, value):
+        return normalize_utc_datetime(value)
+
 class Centre(Base):
     __tablename__ = "centres"
 
@@ -83,7 +99,7 @@ class Centre(Base):
     name = Column(String(255), nullable=False)
     city = Column(String(100), nullable=False)
     state = Column(String(100), nullable=False)
-    code = Column(String(50), unique=True, nullable=False)
+    code = Column(String(50), unique=True, nullable=False) # Internal registration code
     is_authorized = Column(Boolean, default=True)
     status = Column(String(50), default="ACTIVE") # ACTIVE, FLAGGED, SUSPENDED
     created_at = Column(DateTime, default=utc_now)
@@ -98,17 +114,21 @@ class AuthorizedDevice(Base):
     __tablename__ = "authorized_devices"
 
     id = Column(String(36), primary_key=True, default=generate_uuid)
-    device_id = Column(String(100), unique=True, index=True, nullable=False)
-    device_fingerprint = Column(String(255), nullable=False) # Hardware/browser hash
+    device_id = Column(String(100), unique=True, index=True, nullable=False) # e.g. DEV-C101-01
+    device_fingerprint = Column(String(128), unique=True, nullable=False) # SHA-256 of hardware traits
     centre_id = Column(String(36), ForeignKey("centres.id", ondelete="CASCADE"), nullable=False)
-    device_name = Column(String(255), nullable=False)
-    os = Column(String(100), default="Windows 11")
+    device_name = Column(String(100), default="Exam Terminal")
+    os = Column(String(50), default="Ubuntu 22.04 LTS")
     ip_address = Column(String(50), default="127.0.0.1")
-    status = Column(String(50), default="AUTHORIZED") # AUTHORIZED, PENDING, REVOKED
+    status = Column(String(50), default="ACTIVE") # ACTIVE, SUSPENDED, DECOMMISSIONED
     registered_at = Column(DateTime, default=utc_now)
     last_seen = Column(DateTime, default=utc_now)
 
     centre = relationship("Centre", back_populates="devices")
+
+    @validates("registered_at", "last_seen")
+    def validate_device_datetimes(self, key, value):
+        return normalize_utc_datetime(value)
 
 class PaperCentreAssignment(Base):
     __tablename__ = "paper_centre_assignments"
@@ -123,6 +143,10 @@ class PaperCentreAssignment(Base):
 
     paper = relationship("Paper", back_populates="assignments")
     centre = relationship("Centre", back_populates="assignments")
+
+    @validates("release_window_start", "release_window_end", "created_at")
+    def validate_assignment_datetimes(self, key, value):
+        return normalize_utc_datetime(value)
 
 class AccessEvent(Base):
     __tablename__ = "access_events"
@@ -143,6 +167,10 @@ class AccessEvent(Base):
     centre = relationship("Centre", back_populates="access_events")
     user = relationship("User", back_populates="access_events")
 
+    @validates("timestamp")
+    def validate_timestamp(self, key, value):
+        return normalize_utc_datetime(value)
+
 class BlockchainTransaction(Base):
     __tablename__ = "blockchain_transactions"
 
@@ -162,6 +190,10 @@ class BlockchainTransaction(Base):
     raw_event_data = Column(Text, nullable=True)
 
     paper = relationship("Paper", back_populates="blockchain_transactions")
+
+    @validates("timestamp")
+    def validate_timestamp(self, key, value):
+        return normalize_utc_datetime(value)
 
 class Incident(Base):
     __tablename__ = "incidents"
@@ -184,6 +216,10 @@ class Incident(Base):
     centre = relationship("Centre", back_populates="incidents")
     user = relationship("User", back_populates="incidents")
 
+    @validates("timestamp")
+    def validate_timestamp(self, key, value):
+        return normalize_utc_datetime(value)
+
 class AuditLog(Base):
     __tablename__ = "audit_logs"
 
@@ -196,4 +232,8 @@ class AuditLog(Base):
     resource_id = Column(String(255), nullable=False)
     result = Column(String(50), nullable=False) # SUCCESS, FAILURE, BLOCKED
     request_id = Column(String(50), nullable=True)
+
+    @validates("timestamp")
+    def validate_timestamp(self, key, value):
+        return normalize_utc_datetime(value)
     details = Column(Text, nullable=True)

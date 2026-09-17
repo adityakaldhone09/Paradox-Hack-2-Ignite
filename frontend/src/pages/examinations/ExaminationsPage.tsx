@@ -76,11 +76,11 @@ export const ExaminationsPage: React.FC = () => {
       {/* Title & Action */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-            <GraduationCap className="w-6 h-6 text-brand-400" />
+          <h1 className="text-2xl font-bold text-neutral-950 dark:text-white tracking-tight flex items-center gap-2">
+            <GraduationCap className="w-6 h-6 text-brand-600 dark:text-brand-400" />
             Examination Management
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
             Configure examination schedules, security classification levels, and assigned question papers.
           </p>
         </div>
