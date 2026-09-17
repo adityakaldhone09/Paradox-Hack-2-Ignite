@@ -2,20 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Lock,
-  Unlock,
   Clock,
   ShieldAlert,
   CheckCircle2,
-  AlertTriangle,
-  Building2,
   Server,
-  Zap
+  Zap,
 } from 'lucide-react';
 import { paperApi, centreApi, accessApi, deviceApi, demoApi } from '../../services/apiClient';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { CountdownTimer } from '../../components/ui/CountdownTimer';
-import { StatusBadge } from '../../components/ui/StatusBadge';
+import { PaperSelector } from '../../components/ui/PaperSelector';
 import { toast } from 'sonner';
 
 export const TimeLockReleasePage: React.FC = () => {
@@ -28,6 +25,7 @@ export const TimeLockReleasePage: React.FC = () => {
   const [serverTime, setServerTime] = useState(new Date().toLocaleTimeString());
   const [accessResult, setAccessResult] = useState<any>(null);
   const [isAttempting, setIsAttempting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -50,6 +48,8 @@ export const TimeLockReleasePage: React.FC = () => {
       if (cRes.data.length > 0) setSelectedCentreId(cRes.data[0].id);
     } catch (err) {
       console.error('Error loading timelock papers', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -119,62 +119,46 @@ export const TimeLockReleasePage: React.FC = () => {
   const targetRelease = selectedPaper?.release_time || new Date(Date.now() + 7200 * 1000).toISOString();
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-8 max-w-4xl mx-auto text-left">
       {/* Title */}
-      <div className="text-center space-y-2">
-        <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center justify-center gap-2">
-          <Lock className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+      <div className="text-center space-y-1.5 pb-3 border-b border-neutral-200/80 dark:border-neutral-800">
+        <h1 className="text-2xl font-bold text-neutral-950 dark:text-white tracking-tight flex items-center justify-center gap-2.5">
+          <Lock className="w-5 h-5 text-neutral-900 dark:text-white" />
           Time-Locked Examination Paper Release Engine
         </h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+        <p className="text-xs text-neutral-500 dark:text-neutral-400 max-w-lg mx-auto">
           Cryptographic release keys remain time-locked by server consensus until the verified start of the examination window.
         </p>
       </div>
 
       {/* Clock & Paper Selection */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="p-5 border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-4">
+        <Card className="p-6 border border-neutral-200/80 dark:border-neutral-800 bg-white dark:bg-[#111113] flex flex-col justify-between space-y-4">
           <div>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
-              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Server Synchronized Clock</span>
-              <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-semibold font-mono">
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-100 dark:border-neutral-800 text-xs">
+              <span className="text-neutral-500">Server Synchronized Clock</span>
+              <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-mono text-[11px] font-medium">
                 <Server className="w-3.5 h-3.5" /> NTP Synced
               </div>
             </div>
-            <div className="text-3xl font-mono font-black text-slate-900 dark:text-white tracking-tight mt-4 text-center">
+            <div className="text-3xl font-mono font-extrabold text-neutral-950 dark:text-white tracking-tight mt-5 text-center">
               {serverTime}
             </div>
           </div>
 
-          <div className="space-y-3 pt-3 border-t border-slate-200 dark:border-slate-800 text-xs">
+          <div className="space-y-3 pt-3 border-t border-neutral-100 dark:border-neutral-800 text-xs">
             <div>
-              <label className="block text-slate-700 dark:text-slate-300 mb-1 font-semibold">Select Examination Paper *</label>
-              <select
-                value={selectedPaperId}
-                onChange={(e) => {
-                  setSelectedPaperId(e.target.value);
-                  setAccessResult(null);
-                }}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-brand-500"
-              >
-                {papers.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.paper_id} — {p.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-slate-700 dark:text-slate-300 mb-1 font-semibold">Select Examination Centre *</label>
+              <label className="block text-neutral-700 dark:text-neutral-300 mb-1.5 font-medium">
+                Select Examination Centre
+              </label>
               <select
                 value={selectedCentreId}
                 onChange={(e) => setSelectedCentreId(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-brand-500"
+                className="w-full bg-neutral-50 dark:bg-[#18181B] border border-neutral-200 dark:border-neutral-800 rounded-xl p-2.5 text-xs text-neutral-900 dark:text-white outline-none"
               >
                 {centres.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.centre_id} — {c.name}
+                    {c.centre_id} — {c.name} ({c.city})
                   </option>
                 ))}
               </select>
@@ -200,76 +184,93 @@ export const TimeLockReleasePage: React.FC = () => {
         </Card>
 
         {/* Live Countdown Card */}
-        <Card className="p-5 border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+        <Card className="p-6 border border-neutral-200/80 dark:border-neutral-800 bg-white dark:bg-[#111113] flex flex-col justify-between">
           <div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-3">
-              <Clock className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-              Target Release Window
-            </h3>
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-100 dark:border-neutral-800 text-xs mb-4">
+              <span className="text-neutral-500">Target Release Window</span>
+              <Clock className="w-3.5 h-3.5 text-neutral-400" />
+            </div>
             <CountdownTimer targetDate={targetRelease} />
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 text-center mt-3">
-              Scheduled Release: {new Date(targetRelease).toLocaleString()}
+            <p className="text-[11px] font-mono text-neutral-400 text-center mt-3">
+              Scheduled: {new Date(targetRelease).toLocaleString()}
             </p>
           </div>
 
-          <div className="space-y-2 pt-4 border-t border-slate-200 dark:border-slate-800">
+          <div className="space-y-2 pt-4 border-t border-neutral-100 dark:border-neutral-800">
             <Button
+              variant="primary"
+              size="md"
               onClick={handleAttemptAccess}
               isLoading={isAttempting}
-              className="w-full"
+              className="w-full h-10 text-xs font-medium"
             >
-              <Lock className="w-4 h-4" /> Request Authorized Decryption
+              <Lock className="w-3.5 h-3.5 mr-1" /> Request Authorized Decryption
             </Button>
             <Button
               variant="outline"
+              size="md"
               onClick={handleSimulateEarlyAccess}
               disabled={isAttempting}
-              className="w-full border-amber-300 dark:border-amber-500/40 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10"
+              className="w-full h-10 text-xs font-medium border-amber-200 dark:border-amber-900/60 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/20"
               title="Simulate accessing prior to the designated release window"
             >
-              <Zap className="w-4 h-4" /> Test Early Access Block Scenario
+              <Zap className="w-3.5 h-3.5 mr-1 text-amber-500" /> Test Early Access Block Scenario
             </Button>
           </div>
         </Card>
       </div>
+
+      {/* Modern Paper Selector */}
+      <PaperSelector
+        papers={papers}
+        selectedPaperId={selectedPaperId}
+        onSelect={(id) => {
+          setSelectedPaperId(id);
+          setAccessResult(null);
+        }}
+        isLoading={isLoading}
+      />
 
       {/* Access Evaluation Result Display */}
       {accessResult && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
           className={`p-6 rounded-2xl border ${
             accessResult.allowed
-              ? 'bg-emerald-50/60 dark:bg-emerald-500/5 border-emerald-200 dark:border-emerald-500/30'
-              : 'bg-rose-50/60 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/40 animate-pulse-subtle'
-          } space-y-4 shadow-xl`}
+              ? 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-200/80 dark:border-emerald-800/60'
+              : 'bg-rose-50/40 dark:bg-rose-950/20 border-rose-200/80 dark:border-rose-800/60'
+          } space-y-4 shadow-xs`}
         >
-          <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-              accessResult.allowed ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400'
+          <div className="flex items-center gap-3.5">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+              accessResult.allowed
+                ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400'
+                : 'bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400'
             }`}>
-              {accessResult.allowed ? <CheckCircle2 className="w-6 h-6" /> : <ShieldAlert className="w-6 h-6" />}
+              {accessResult.allowed ? <CheckCircle2 className="w-5 h-5" /> : <ShieldAlert className="w-5 h-5" />}
             </div>
             <div>
-              <h3 className={`text-lg font-bold ${accessResult.allowed ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400'}`}>
-                {accessResult.allowed ? 'ACCESS GRANTED' : '🚨 ACCESS BLOCKED'}
+              <h3 className={`text-base font-bold ${accessResult.allowed ? 'text-emerald-800 dark:text-emerald-300' : 'text-rose-800 dark:text-rose-300'}`}>
+                {accessResult.allowed ? 'ACCESS GRANTED' : 'ACCESS BLOCKED'}
               </h3>
-              <p className="text-xs text-slate-700 dark:text-slate-300">{accessResult.message}</p>
+              <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-0.5">{accessResult.message}</p>
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-xs space-y-2 shadow-xs">
-            <div className="flex justify-between items-center text-slate-500 dark:text-slate-400">
+          <div className="p-4 rounded-xl bg-white dark:bg-[#111113] border border-neutral-200 dark:border-neutral-800 text-xs space-y-2 shadow-2xs">
+            <div className="flex justify-between items-center text-neutral-500">
               <span>Denial / Authorization Code:</span>
-              <span className="font-mono font-bold text-slate-900 dark:text-slate-200">{accessResult.reason}</span>
+              <span className="font-mono font-semibold text-neutral-900 dark:text-neutral-200">{accessResult.reason}</span>
             </div>
-            <div className="flex justify-between items-center text-slate-500 dark:text-slate-400">
+            <div className="flex justify-between items-center text-neutral-500">
               <span>Ledger Transaction Anchor:</span>
-              <span className="font-mono text-brand-600 dark:text-brand-400">{accessResult.tx_hash || 'N/A'}</span>
+              <span className="font-mono text-neutral-800 dark:text-neutral-300">{accessResult.tx_hash || 'Recorded in Block'}</span>
             </div>
             {!accessResult.allowed && (
-              <p className="text-[11px] text-amber-400/90 pt-1 border-t border-slate-800/80">
-                Notice: Security Incident has been automatically dispatched and anchored to the audit ledger.
+              <p className="text-[11px] text-amber-600 dark:text-amber-400 pt-1 border-t border-neutral-100 dark:border-neutral-800">
+                Notice: Security Incident has been automatically recorded to the audit ledger.
               </p>
             )}
           </div>

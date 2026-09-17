@@ -21,7 +21,12 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Optional: Auto redirect or handle refresh
+      // Clear stale auth and redirect to sign-in
+      localStorage.removeItem('veriq_access_token');
+      localStorage.removeItem('veriq_refresh_token');
+      if (!window.location.pathname.startsWith('/signin')) {
+        window.location.href = '/signin';
+      }
     }
     return Promise.reject(error);
   }
@@ -46,11 +51,13 @@ export const examApi = {
 
 export const paperApi = {
   list: (params?: any) => apiClient.get('/papers', { params }),
+  listMine: (email: string) => apiClient.get('/papers', { params: { created_by: email } }),
   get: (id: string) => apiClient.get(`/papers/${id}`),
   upload: (formData: FormData) =>
     apiClient.post('/papers/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
+  submit: (id: string) => apiClient.post(`/papers/${id}/submit`),
   approve: (id: string) => apiClient.post(`/papers/${id}/approve`),
   assignCentre: (id: string, data: any) => apiClient.post(`/papers/${id}/assign-centre`, data),
   release: (id: string) => apiClient.post(`/papers/${id}/release`),
@@ -74,7 +81,7 @@ export const centreApi = {
 };
 
 export const deviceApi = {
-  list: () => apiClient.get('/devices'),
+  list: (params?: any) => apiClient.get('/devices', { params }),
   create: (data: any) => apiClient.post('/devices', data),
   authorize: (id: string) => apiClient.post(`/devices/${id}/authorize`),
   revoke: (id: string) => apiClient.post(`/devices/${id}/revoke`),
@@ -107,6 +114,21 @@ export const auditApi = {
 };
 
 export const demoApi = {
-  simulate: (eventType: string) => apiClient.post('/demo/simulate', { event_type: eventType }),
+  simulate: (eventType: string, paperId?: string, centreId?: string) =>
+    apiClient.post('/demo/simulate', { event_type: eventType, paper_id: paperId, centre_id: centreId }),
   simulateEvent: (eventType: string) => apiClient.post('/demo/simulate', { event_type: eventType }),
+};
+
+export const userApi = {
+  list: (params?: any) => apiClient.get('/users', { params }),
+  create: (data: any) => apiClient.post('/users', data),
+  update: (id: string, data: any) => apiClient.patch(`/users/${id}`, data),
+  deactivate: (id: string) => apiClient.delete(`/users/${id}`),
+};
+
+export const healthApi = {
+  check: () => apiClient.get('/health'),
+  database: () => apiClient.get('/health/database'),
+  blockchain: () => apiClient.get('/health/blockchain'),
+  storage: () => apiClient.get('/health/storage'),
 };

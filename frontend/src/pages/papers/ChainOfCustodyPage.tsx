@@ -1,23 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   GitCommit,
   Boxes,
   CheckCircle2,
-  AlertTriangle,
   Lock,
   Building2,
-  UserCheck,
-  Cpu,
-  Calendar,
   KeyRound,
-  ShieldAlert
+  ShieldAlert,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { paperApi } from '../../services/apiClient';
 import { Card } from '../../components/ui/Card';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { HashViewer } from '../../components/ui/HashViewer';
+import { PaperSelector } from '../../components/ui/PaperSelector';
 
 export const ChainOfCustodyPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -27,6 +26,7 @@ export const ChainOfCustodyPage: React.FC = () => {
   const [selectedPaperId, setSelectedPaperId] = useState(initialPaperId);
   const [custodyData, setCustodyData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [expandedEvents, setExpandedEvents] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const loadList = async () => {
@@ -59,6 +59,10 @@ export const ChainOfCustodyPage: React.FC = () => {
     fetchCustody();
   }, [selectedPaperId]);
 
+  const toggleExpand = (id: string) => {
+    setExpandedEvents((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
   const getEventIcon = (type: string) => {
     switch (type) {
       case 'PAPER_CREATED':
@@ -79,111 +83,125 @@ export const ChainOfCustodyPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-8 max-w-4xl mx-auto text-left">
       {/* Title */}
-      <div className="text-center space-y-2">
-        <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center justify-center gap-2">
-          <GitCommit className="w-6 h-6 text-brand-600 dark:text-brand-400" />
+      <div className="text-center space-y-1.5 pb-3 border-b border-neutral-200/80 dark:border-neutral-800">
+        <h1 className="text-2xl font-bold text-neutral-950 dark:text-white tracking-tight flex items-center justify-center gap-2.5">
+          <GitCommit className="w-5 h-5 text-neutral-900 dark:text-white" />
           Blockchain-Backed Chain of Custody
         </h1>
-        <p className="text-sm text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
+        <p className="text-xs text-neutral-500 dark:text-neutral-400 max-w-lg mx-auto">
           Every document lifecycle state, authority signature, centre assignment, and access attempt is immutably sequenced on the ledger.
         </p>
       </div>
 
-      {/* Selector */}
-      <Card className="p-4 border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="w-full sm:w-auto flex-1">
-          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-400 mb-1">Select Examination Paper</label>
-          <select
-            value={selectedPaperId}
-            onChange={(e) => setSelectedPaperId(e.target.value)}
-            className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-brand-500 font-medium"
-          >
-            {papers.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.paper_id} — {p.title}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {custodyData && (
-          <div className="flex items-center gap-4 text-xs">
-            <div>
-              <span className="text-slate-500 block">Total Events:</span>
-              <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{custodyData.total_custody_events}</span>
-            </div>
-            <div>
-              <span className="text-slate-500 block">Status:</span>
-              <StatusBadge status={custodyData.current_status} />
-            </div>
-          </div>
-        )}
-      </Card>
+      {/* Modern Paper Selector */}
+      <PaperSelector
+        papers={papers}
+        selectedPaperId={selectedPaperId}
+        onSelect={setSelectedPaperId}
+        isLoading={papers.length === 0 && isLoading}
+      />
 
       {/* Vertical Interactive Timeline */}
       {isLoading ? (
-        <div className="p-8 text-center text-slate-500 text-xs">Loading ledger event chain...</div>
+        <div className="p-12 text-center text-neutral-400 text-xs font-mono">
+          Loading immutable ledger event chain...
+        </div>
       ) : (
-        <div className="relative border-l-2 border-slate-200 dark:border-slate-800 ml-4 md:ml-8 space-y-6 py-2">
+        <div className="relative border-l border-neutral-200 dark:border-neutral-800 ml-4 md:ml-8 space-y-5 py-2">
           {custodyData?.events?.map((evt: any, idx: number) => {
             const Icon = getEventIcon(evt.event_type);
             const isDenied = evt.event_type.includes('DENIED') || evt.event_type.includes('INCIDENT');
+            const eventKey = evt.event_id || `evt-${idx}`;
+            const isExpanded = !!expandedEvents[eventKey];
 
             return (
               <motion.div
-                key={evt.event_id || idx}
-                initial={{ opacity: 0, x: -15 }}
+                key={eventKey}
+                initial={{ opacity: 0, x: -12 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: idx * 0.08 }}
+                transition={{ duration: 0.25, delay: idx * 0.05 }}
                 className="relative pl-6 md:pl-8 group"
               >
                 {/* Node marker icon */}
-                <div className={`absolute -left-[17px] top-1.5 w-8 h-8 rounded-full flex items-center justify-center border-2 ${
-                  isDenied
-                    ? 'bg-rose-50 dark:bg-rose-950 border-rose-500 text-rose-600 dark:text-rose-400'
-                    : 'bg-white dark:bg-slate-900 border-brand-500 text-brand-600 dark:text-brand-400'
-                } shadow-md transition-transform group-hover:scale-110`}>
-                  <Icon className="w-4 h-4" />
+                <div
+                  className={`absolute -left-[14px] top-2 w-7 h-7 rounded-full flex items-center justify-center border transition-all ${
+                    isDenied
+                      ? 'bg-rose-50 dark:bg-rose-950/60 border-rose-400 text-rose-600 dark:text-rose-400'
+                      : 'bg-white dark:bg-[#111113] border-neutral-300 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200'
+                  } shadow-xs group-hover:scale-105`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
                 </div>
 
                 {/* Event Card */}
-                <div className="p-4 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800/90 shadow-sm dark:shadow-none group-hover:border-slate-300 dark:group-hover:border-slate-700 transition-all space-y-2">
+                <div
+                  onClick={() => toggleExpand(eventKey)}
+                  className="cursor-pointer p-5 rounded-2xl bg-white dark:bg-[#111113] border border-neutral-200/80 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 shadow-xs transition-all space-y-2.5"
+                >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                     <div className="flex items-center gap-2">
-                      <span className={`font-mono text-xs font-bold ${isDenied ? 'text-rose-600 dark:text-rose-400' : 'text-brand-600 dark:text-brand-400'}`}>
+                      <span className={`font-mono text-xs font-bold ${isDenied ? 'text-rose-600 dark:text-rose-400' : 'text-neutral-950 dark:text-white'}`}>
                         {evt.event_type}
                       </span>
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-mono">
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 font-mono">
                         Block #{evt.block_number}
                       </span>
                     </div>
-                    <span className="text-[11px] text-slate-500 font-mono">
-                      {new Date(evt.timestamp).toLocaleString()}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs pt-1 text-slate-600 dark:text-slate-400">
-                    <div>
-                      <span className="text-slate-500">Actor:</span>{' '}
-                      <span className="text-slate-800 dark:text-slate-200 font-medium">{evt.actor}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-500">Centre:</span>{' '}
-                      <span className="text-slate-800 dark:text-slate-200 font-medium">{evt.centre}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-500">Device:</span>{' '}
-                      <span className="font-mono text-slate-700 dark:text-slate-300">{evt.device}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] text-neutral-400 font-mono">
+                        {new Date(evt.timestamp).toLocaleString()}
+                      </span>
+                      {isExpanded ? (
+                        <ChevronUp className="w-3.5 h-3.5 text-neutral-400" />
+                      ) : (
+                        <ChevronDown className="w-3.5 h-3.5 text-neutral-400" />
+                      )}
                     </div>
                   </div>
 
-                  {/* Cryptographic Transaction Hash */}
-                  <div className="pt-2 border-t border-slate-200 dark:border-slate-800/80 flex items-center justify-between text-[11px]">
-                    <span className="text-slate-500">Transaction ID:</span>
-                    <HashViewer hash={evt.tx_hash} truncate={true} prefixLen={12} suffixLen={8} />
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs pt-1 text-neutral-600 dark:text-neutral-400">
+                    <div>
+                      <span className="text-neutral-400">Actor:</span>{' '}
+                      <span className="text-neutral-800 dark:text-neutral-200 font-medium">{evt.actor}</span>
+                    </div>
+                    <div>
+                      <span className="text-neutral-400">Centre:</span>{' '}
+                      <span className="text-neutral-800 dark:text-neutral-200 font-medium">{evt.centre}</span>
+                    </div>
+                    <div>
+                      <span className="text-neutral-400">Terminal:</span>{' '}
+                      <span className="font-mono text-neutral-700 dark:text-neutral-300">{evt.device}</span>
+                    </div>
                   </div>
+
+                  {/* Expandable Cryptographic Details */}
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.18 }}
+                        className="pt-3 border-t border-neutral-100 dark:border-neutral-800 space-y-2 text-xs"
+                      >
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="text-neutral-400">Transaction ID:</span>
+                          <HashViewer hash={evt.tx_hash} truncate={true} prefixLen={12} suffixLen={8} />
+                        </div>
+                        {evt.payload_hash && (
+                          <div className="flex items-center justify-between text-[11px]">
+                            <span className="text-neutral-400">Payload State Hash:</span>
+                            <HashViewer hash={evt.payload_hash} truncate={true} prefixLen={12} suffixLen={8} />
+                          </div>
+                        )}
+                        <div className="text-[11px] text-neutral-400 font-mono">
+                          Anchored Status: Verified in Merkle Patricia Trie • Irreversible
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </motion.div>
             );

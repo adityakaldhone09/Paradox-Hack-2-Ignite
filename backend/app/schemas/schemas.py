@@ -105,6 +105,7 @@ class PaperAssignCentreRequest(BaseModel):
 
 class PaperVerifyRequest(BaseModel):
     file_bytes_base64: Optional[str] = None # Or verify currently stored file
+    candidate_hash: Optional[str] = None
     simulate_tamper: bool = False
 
 class PaperRevokeRequest(BaseModel):

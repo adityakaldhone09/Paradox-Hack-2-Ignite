@@ -6,46 +6,55 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: {
-          DEFAULT: '#090d16',
-          secondary: '#0f172a',
-          card: '#111827',
-          surface: '#172033',
-        },
-        border: {
-          DEFAULT: '#1e293b',
-          subtle: '#2a374d',
-          glow: '#06b6d4',
+        // Semantic Apple/VeriQ Surface Colors
+        veriq: {
+          bg: 'var(--bg-primary)',
+          secondary: 'var(--bg-secondary)',
+          surface: 'var(--bg-surface)',
+          card: 'var(--bg-card)',
+          subtle: 'var(--bg-subtle)',
+          border: 'var(--border-primary)',
+          'border-subtle': 'var(--border-secondary)',
+          text: 'var(--text-primary)',
+          muted: 'var(--text-secondary)',
         },
         brand: {
-          50: '#ecfeff',
-          100: '#cffafe',
-          400: '#22d3ee',
-          500: '#06b6d4',
-          600: '#0891b2',
-          700: '#0e7490',
+          50: '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          400: '#60a5fa',
+          500: '#2563eb',
+          600: '#1d4ed8',
+          700: '#1e40af',
+          800: '#1e3a8a',
+          900: '#172554',
+          DEFAULT: '#2563eb',
         },
         security: {
           verified: '#10b981',
           warning: '#f59e0b',
           critical: '#ef4444',
-          info: '#3b82f6',
-          locked: '#8b5cf6',
+          info: '#2563eb',
+          neutral: '#6b7280',
         }
       },
       fontFamily: {
-        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Fira Code', 'Courier New', 'monospace'],
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
+        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
       },
-      animation: {
-        'pulse-subtle': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'glow-pulse': 'glow 2s ease-in-out infinite alternate',
+      borderRadius: {
+        sm: 'var(--radius-sm)',
+        md: 'var(--radius-md)',
+        lg: 'var(--radius-lg)',
+        xl: 'var(--radius-xl)',
+        '2xl': 'var(--radius-2xl)',
       },
-      keyframes: {
-        glow: {
-          '0%': { boxShadow: '0 0 5px rgba(6, 182, 212, 0.2)' },
-          '100%': { boxShadow: '0 0 20px rgba(6, 182, 212, 0.6)' },
-        }
+      boxShadow: {
+        subtle: 'var(--shadow-subtle)',
+        card: 'var(--shadow-card)',
+        hover: 'var(--shadow-hover)',
+        elevated: 'var(--shadow-elevated)',
       }
     },
   },

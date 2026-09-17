@@ -20,11 +20,12 @@ import {
   Zap,
   Moon,
   Sun,
-  Laptop
+  Search,
 } from 'lucide-react';
 import { useAuth, UserRole } from '../../store/AuthContext';
 import { useTheme } from '../../store/ThemeContext';
 import { demoApi } from '../../services/apiClient';
+import { CommandPalette } from '../ui/CommandPalette';
 import { toast } from 'sonner';
 
 interface AppShellProps {
@@ -44,42 +45,42 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
     switch (role) {
       case 'PAPER_SETTER':
         return [
-          { label: 'Paper Workspace', path: '/dashboard', icon: LayoutDashboard },
+          { label: 'Overview', path: '/dashboard', icon: LayoutDashboard },
           { label: 'My Papers', path: '/papers', icon: FileText },
           { label: 'Examinations', path: '/examinations', icon: GraduationCap },
-          { label: 'Integrity Check', path: '/verify', icon: CheckCircle2 },
+          { label: 'Verify Integrity', path: '/verify', icon: CheckCircle2 },
           { label: 'Chain of Custody', path: '/custody', icon: GitCommit },
         ];
       case 'CENTRE_ADMIN':
         return [
-          { label: 'Centre Console', path: '/dashboard', icon: LayoutDashboard },
+          { label: 'Overview', path: '/dashboard', icon: LayoutDashboard },
           { label: 'Assigned Exams', path: '/examinations', icon: GraduationCap },
           { label: 'Assigned Papers', path: '/papers', icon: FileText },
+          { label: 'Devices & Terminals', path: '/centres', icon: Building2 },
           { label: 'Time-Lock Release', path: '/timelock', icon: Lock },
-          { label: 'Devices & Terminals', path: '/centres', icon: Laptop },
           { label: 'Verify Paper', path: '/verify', icon: CheckCircle2 },
-          { label: 'Centre Incidents', path: '/incidents', icon: AlertTriangle },
+          { label: 'Incidents', path: '/incidents', icon: AlertTriangle },
         ];
       case 'INVIGILATOR':
         return [
-          { label: 'Proctor Console', path: '/dashboard', icon: LayoutDashboard },
-          { label: 'Active Examinations', path: '/examinations', icon: GraduationCap },
+          { label: 'Overview', path: '/dashboard', icon: LayoutDashboard },
+          { label: 'Active Exams', path: '/examinations', icon: GraduationCap },
           { label: 'Paper Verification', path: '/verify', icon: CheckCircle2 },
           { label: 'Time-Lock Access', path: '/timelock', icon: Lock },
         ];
       case 'SUPER_ADMIN':
       default:
         return [
-          { label: 'Command Center', path: '/dashboard', icon: LayoutDashboard },
+          { label: 'Overview', path: '/dashboard', icon: LayoutDashboard },
           { label: 'Examinations', path: '/examinations', icon: GraduationCap },
           { label: 'Question Papers', path: '/papers', icon: FileText },
+          { label: 'Centres & Devices', path: '/centres', icon: Building2 },
           { label: 'Integrity Verification', path: '/verify', icon: CheckCircle2 },
           { label: 'Time-Lock Release', path: '/timelock', icon: Lock },
           { label: 'Chain of Custody', path: '/custody', icon: GitCommit },
-          { label: 'Blockchain Explorer', path: '/blockchain', icon: Boxes },
-          { label: 'Centres & Devices', path: '/centres', icon: Building2 },
           { label: 'Security Operations', path: '/security-ops', icon: ShieldAlert },
           { label: 'Incident Alerts', path: '/incidents', icon: AlertTriangle },
+          { label: 'Blockchain Explorer', path: '/blockchain', icon: Boxes },
           { label: 'Auditor Portal', path: '/audit', icon: FileCheck },
         ];
     }
@@ -87,13 +88,23 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
 
   const navItems = getNavItems(user?.role);
 
+  const formatRole = (role?: string) => {
+    switch (role) {
+      case 'SUPER_ADMIN': return 'Super Admin';
+      case 'PAPER_SETTER': return 'Paper Setter';
+      case 'CENTRE_ADMIN': return 'Centre Admin';
+      case 'INVIGILATOR': return 'Invigilator';
+      default: return 'Operator';
+    }
+  };
+
   const triggerSimulation = async (eventType: string, label: string) => {
     setIsSimulating(true);
     try {
       const res = await demoApi.simulateEvent(eventType);
-      toast.error(`🚨 Security Event Triggered: ${label}`, {
-        description: res.data?.description || `Recorded in Block #${res.data?.block_number}`,
-        duration: 6000,
+      toast.error(`Security Event: ${label}`, {
+        description: res.data?.description || `Recorded in Ledger Block #${res.data?.block_number}`,
+        duration: 5000,
       });
       window.dispatchEvent(new Event('veriQ_refresh_data'));
     } catch (err: any) {
@@ -109,50 +120,54 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-hidden font-sans transition-colors duration-200">
-      {/* Sidebar */}
+    <div className="flex h-screen bg-neutral-50/50 dark:bg-[#0A0A0B] text-neutral-900 dark:text-neutral-100 overflow-hidden transition-colors duration-200">
+      {/* ⌘K Command Palette */}
+      <CommandPalette />
+
+      {/* Minimal Sidebar */}
       <motion.aside
         initial={false}
-        animate={{ width: isCollapsed ? '72px' : '260px' }}
-        transition={{ duration: 0.25, ease: 'easeInOut' }}
-        className="relative flex flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-20 select-none shadow-xs"
+        animate={{ width: isCollapsed ? '70px' : '250px' }}
+        transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+        className="relative flex flex-col bg-white dark:bg-[#111113] border-r border-neutral-200 dark:border-neutral-800 z-20 select-none shadow-xs"
       >
-        {/* Logo / Brand Header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-800">
-          <Link to="/" className="flex items-center gap-3 overflow-hidden">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-600 flex items-center justify-center shadow-md shadow-indigo-500/25 shrink-0">
-              <Shield className="w-5 h-5 text-white font-bold" />
+        {/* Brand Header */}
+        <div className="h-16 flex items-center justify-between px-4 border-b border-neutral-200 dark:border-neutral-800">
+          <Link to="/" className="flex items-center gap-2.5 overflow-hidden">
+            <div className="w-8 h-8 rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-950 flex items-center justify-center shrink-0">
+              <Shield className="w-4 h-4" />
             </div>
             {!isCollapsed && (
               <div className="flex flex-col">
-                <span className="font-extrabold tracking-tight text-lg leading-none text-slate-900 dark:text-white">
+                <span className="font-bold tracking-tight text-sm text-neutral-950 dark:text-white">
                   VeriQ
                 </span>
-                <span className="text-[10px] tracking-wider text-indigo-600 dark:text-indigo-400 font-semibold uppercase mt-0.5">
-                  WB-03 Certified
+                <span className="text-[10px] font-mono text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
+                  WB-03 Secure
                 </span>
               </div>
             )}
           </Link>
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
           >
             {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
           </button>
         </div>
 
-        {/* Role Badge Indicator */}
+        {/* Human-Readable Role Badge */}
         {!isCollapsed && (
-          <div className="px-4 pt-3 pb-1">
-            <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/80">
-              {user?.role?.replace('_', ' ') || 'AUTHENTICATED'}
+          <div className="px-4 pt-4 pb-2">
+            <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-0.5 rounded-md bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              {formatRole(user?.role)}
             </span>
           </div>
         )}
 
-        {/* Navigation Links */}
-        <nav className="flex-1 py-3 px-3 space-y-1 overflow-y-auto custom-scrollbar">
+        {/* Navigation List */}
+        <nav className="flex-1 py-2 px-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
@@ -162,34 +177,34 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
                 to={item.path}
                 className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                   isActive
-                    ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 shadow-2xs font-semibold'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                    ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 font-semibold shadow-xs'
+                    : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800/60'
                 }`}
                 title={isCollapsed ? item.label : undefined}
               >
-                <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'}`} />
+                <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-current' : 'text-neutral-500'}`} />
                 {!isCollapsed && <span className="truncate">{item.label}</span>}
               </Link>
             );
           })}
         </nav>
 
-        {/* Current User & Logout */}
-        <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center text-xs font-bold text-indigo-700 dark:text-indigo-300 shrink-0">
+        {/* User Account & Logout */}
+        <div className="p-3 border-t border-neutral-200 dark:border-neutral-800 bg-neutral-50/60 dark:bg-neutral-900/40">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center text-xs font-semibold text-neutral-700 dark:text-neutral-300 shrink-0">
               {user?.name?.charAt(0) || 'U'}
             </div>
             {!isCollapsed && (
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{user?.name || 'Operator'}</p>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate">{user?.email}</p>
+                <p className="text-xs font-semibold text-neutral-900 dark:text-neutral-200 truncate">{user?.name || 'Operator'}</p>
+                <p className="text-[10px] text-neutral-400 font-mono truncate">{user?.email}</p>
               </div>
             )}
             {!isCollapsed && (
               <button
                 onClick={handleLogout}
-                className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
+                className="p-1.5 text-neutral-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-neutral-200/60 dark:hover:bg-neutral-800 transition-colors"
                 title="Sign Out"
               >
                 <LogOut className="w-4 h-4" />
@@ -202,75 +217,75 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Top Header Bar */}
-        <header className="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md flex items-center justify-between px-6 z-10">
-          {/* Quick 4-Role Switcher */}
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:inline">Active Persona:</span>
-            <select
-              value={user?.role || 'SUPER_ADMIN'}
-              onChange={(e) => switchRole(e.target.value as UserRole)}
-              className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold"
-            >
-              <option value="SUPER_ADMIN">Super Admin (Dr. Rajesh Sharma)</option>
-              <option value="PAPER_SETTER">Paper Setter (Prof. Ananya Sen)</option>
-              <option value="CENTRE_ADMIN">Centre Admin (Suresh Kulkarni - C101)</option>
-              <option value="INVIGILATOR">Invigilator (Rohit Verma - C101)</option>
-            </select>
-          </div>
-
-          {/* Theme Switcher & Simulation Quick Buttons */}
-          <div className="flex items-center gap-3">
-            {/* Theme Toggle */}
+        <header className="h-16 border-b border-neutral-200 dark:border-neutral-800 bg-white/90 dark:bg-[#0A0A0B]/90 backdrop-blur-md flex items-center justify-between px-6 z-10">
+          {/* Persona Switcher & ⌘K Search button */}
+          <div className="flex items-center gap-4">
             <button
-              onClick={toggleTheme}
-              aria-label="Toggle Theme"
-              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-colors"
+              onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-xs text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors shadow-2xs"
             >
-              {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-400" />}
+              <Search className="w-3.5 h-3.5 text-neutral-400" />
+              <span className="hidden sm:inline">Search VeriQ...</span>
+              <kbd className="hidden sm:inline font-mono text-[10px] px-1.5 py-0.5 rounded bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-500">
+                ⌘K
+              </kbd>
             </button>
 
-            {/* Hackathon Simulation Quick Triggers */}
-            <div className="flex items-center gap-1.5 hidden md:flex">
-              <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1 mr-1">
-                <Zap className="w-3.5 h-3.5" />
-                Stress Test:
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-neutral-400 font-medium hidden md:inline">Role Persona:</span>
+              <select
+                value={user?.role || 'SUPER_ADMIN'}
+                onChange={(e) => switchRole(e.target.value as UserRole)}
+                className="bg-white dark:bg-[#111113] border border-neutral-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-neutral-100 rounded-xl px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-neutral-900 dark:focus:ring-white font-medium"
+              >
+                <option value="SUPER_ADMIN">Super Admin (Dr. Rajesh Sharma)</option>
+                <option value="PAPER_SETTER">Paper Setter (Prof. Ananya Sen)</option>
+                <option value="CENTRE_ADMIN">Centre Admin (Suresh Kulkarni - C101)</option>
+                <option value="INVIGILATOR">Invigilator (Rohit Verma - C101)</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Theme Toggle & Simulation Triggers */}
+          <div className="flex items-center gap-3">
+            {/* Simulation triggers with restrained colors */}
+            <div className="hidden lg:flex items-center gap-1.5">
+              <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider flex items-center gap-1 mr-1">
+                <Zap className="w-3 h-3 text-neutral-500" />
+                Simulate:
               </span>
               <button
                 onClick={() => triggerSimulation('EARLY_ACCESS', 'Early Access Blocked')}
                 disabled={isSimulating}
-                className="px-2 py-1 text-xs font-medium rounded-md bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/60 transition-colors"
+                className="px-2.5 py-1 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#111113] text-neutral-700 dark:text-neutral-300 hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors shadow-2xs"
               >
                 Early Access
               </button>
               <button
                 onClick={() => triggerSimulation('DOCUMENT_TAMPERING', 'Hash Mismatch')}
                 disabled={isSimulating}
-                className="px-2 py-1 text-xs font-medium rounded-md bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900/60 transition-colors"
+                className="px-2.5 py-1 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#111113] text-neutral-700 dark:text-neutral-300 hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors shadow-2xs"
               >
                 Tamper Hash
               </button>
-              <button
-                onClick={() => triggerSimulation('DEVICE_MISMATCH', 'Rogue Hardware')}
-                disabled={isSimulating}
-                className="px-2 py-1 text-xs font-medium rounded-md bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/60 transition-colors"
-              >
-                Rogue Device
-              </button>
             </div>
+
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              aria-label="Toggle Theme"
+              className="p-2 rounded-xl text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white bg-white dark:bg-[#111113] border border-neutral-200 dark:border-neutral-800 transition-colors shadow-2xs"
+            >
+              {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-400" />}
+            </button>
           </div>
         </header>
 
-        {/* Dynamic Page View */}
-        <main className="flex-1 overflow-y-auto custom-scrollbar p-6 bg-slate-50/60 dark:bg-slate-950">
-          <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
-            className="max-w-7xl mx-auto space-y-6"
-          >
+        {/* Scrollable Dashboard Workspace */}
+        <main className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
+          <div className="max-w-7xl mx-auto space-y-6">
             {children}
-          </motion.div>
+          </div>
         </main>
       </div>
     </div>

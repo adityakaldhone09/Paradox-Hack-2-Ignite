@@ -25,7 +25,7 @@ class AccessControlService:
             return False, "PAPER_REVOKED", {"message": f"Examination paper {paper.paper_id} has been revoked: {paper.revocation_reason}"}
 
         # 2. Check User Role authorization
-        allowed_roles = ["SUPER_ADMIN", "EXAM_AUTHORITY", "CENTRE_ADMIN", "INVIGILATOR"]
+        allowed_roles = ["SUPER_ADMIN", "PAPER_SETTER", "CENTRE_ADMIN", "INVIGILATOR"]
         if user.role not in allowed_roles:
             return False, "ROLE_INSUFFICIENT", {"message": f"User role {user.role} is not permitted to access active question papers"}
 

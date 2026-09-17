@@ -17,6 +17,7 @@ from app.api.v1.security import router as security_router
 from app.api.v1.incidents import router as incidents_router
 from app.api.v1.audit import router as audit_router
 from app.api.v1.demo import router as demo_router
+from app.api.v1.users import router as users_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -70,6 +71,7 @@ app.include_router(security_router, prefix="/api/v1")
 app.include_router(incidents_router, prefix="/api/v1")
 app.include_router(audit_router, prefix="/api/v1")
 app.include_router(demo_router, prefix="/api/v1")
+app.include_router(users_router, prefix="/api/v1")
 
 @app.get("/api/v1/healthz")
 async def health_check():
@@ -79,6 +81,39 @@ async def health_check():
         "version": "1.0.0",
         "security_pipeline": "AES-256-GCM + SHA-256 + Blockchain-Anchored"
     }
+
+@app.get("/health")
+@app.get("/api/v1/health")
+async def health_root():
+    return {"status": "ok", "service": "VeriQ"}
+
+@app.get("/health/database")
+@app.get("/api/v1/health/database")
+async def health_database():
+    try:
+        from app.db.session import engine
+        from sqlalchemy import text
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
+        return {"status": "ok", "database": "connected"}
+    except Exception as e:
+        return {"status": "error", "database": str(e)}
+
+@app.get("/health/blockchain")
+@app.get("/api/v1/health/blockchain")
+async def health_blockchain():
+    from app.services.blockchain_service import blockchain_service
+    status = await blockchain_service.get_network_status()
+    return {"status": "ok", "blockchain": status["network"], "mode": "development_mock"}
+
+@app.get("/health/storage")
+@app.get("/api/v1/health/storage")
+async def health_storage():
+    import os
+    from app.core.config import settings
+    exists = os.path.isdir(settings.STORAGE_DIR)
+    count = len([f for f in os.listdir(settings.STORAGE_DIR) if f.endswith('.enc')]) if exists else 0
+    return {"status": "ok" if exists else "warning", "storage_dir": settings.STORAGE_DIR, "encrypted_files": count}
 
 @app.get("/")
 async def root():

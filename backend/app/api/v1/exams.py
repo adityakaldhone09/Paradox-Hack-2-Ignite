@@ -70,7 +70,7 @@ async def list_examinations(
 @router.post("", response_model=ExamResponse, status_code=status.HTTP_201_CREATED)
 async def create_examination(
     req: ExamCreate,
-    user: User = Depends(require_roles(["SUPER_ADMIN", "EXAM_AUTHORITY"])),
+    user: User = Depends(require_roles(["SUPER_ADMIN"])),
     db: AsyncSession = Depends(get_db)
 ):
     existing = await db.execute(select(Examination).where(Examination.exam_id == req.exam_id))
