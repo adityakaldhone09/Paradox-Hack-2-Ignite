@@ -1,6 +1,6 @@
 /**
  * VeriQ Motion & Keyframe Animations
- * High-performance, GPU-accelerated micro-interactions
+ * High-performance, GPU-accelerated micro-interactions & security aesthetics
  */
 
 @keyframes subtle-fade-in {
@@ -62,6 +62,87 @@
   }
 }
 
+/* Shimmer animation for loading skeletons */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ──────────────────────────────────────────────────
+ * VeriQ Matrix Security Fall Animation
+ * GPU-accelerated translate3d with restrained opacity
+ * ────────────────────────────────────────────────── */
+@keyframes veriq-matrix-fall {
+  from {
+    transform: translate3d(0, -110%, 0);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.35;
+  }
+  75% {
+    opacity: 0.25;
+  }
+  to {
+    transform: translate3d(0, 110%, 0);
+    opacity: 0;
+  }
+}
+
+.matrix-column {
+  position: relative;
+  display: block;
+  height: 100%;
+  overflow: hidden;
+  writing-mode: vertical-lr;
+  font-size: 13px;
+  line-height: 1.15;
+  letter-spacing: 2px;
+  font-weight: 600;
+  color: transparent;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(96, 165, 250, 0.85) 12%,
+    rgba(59, 130, 246, 0.7) 30%,
+    rgba(34, 211, 238, 0.55) 50%,
+    rgba(99, 102, 241, 0.35) 75%,
+    transparent 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation-name: veriq-matrix-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  opacity: 0.32;
+  will-change: transform, opacity;
+  user-select: none;
+  pointer-events: none;
+}
+
+.matrix-fade {
+  background:
+    linear-gradient(
+      to right,
+      rgba(5, 8, 22, 0.96),
+      transparent 25%,
+      transparent 75%,
+      rgba(5, 8, 22, 0.96)
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(5, 8, 22, 0.85),
+      transparent 25%,
+      transparent 75%,
+      rgba(5, 8, 22, 0.92)
+    );
+}
+
 .animate-fade-in {
   animation: subtle-fade-in 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -74,7 +155,11 @@
   animation: ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
-/* Icon Interactive Micro-interactions (Section 23, 24) */
+.animate-shimmer {
+  animation: shimmer 1.8s infinite;
+}
+
+/* Icon Interactive Micro-interactions */
 .icon-interactive {
   transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), color 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -88,22 +173,31 @@
   color: #3B82F6;
 }
 
-/* Smooth Interactive Card Lift (Section 30) */
+/* Smooth Interactive Card Lift */
 .card-interactive {
-  transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 280ms cubic-bezier(0.16, 1, 0.3, 1), border-color 280ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 240ms cubic-bezier(0.16, 1, 0.3, 1), border-color 240ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card-interactive:hover {
-  transform: translateY(-4px) scale(1.015);
-  box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.08), 0 4px 8px -2px rgba(0, 0, 0, 0.04);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
 }
 
 .dark .card-interactive:hover {
-  box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 14px 28px -6px rgba(0, 0, 0, 0.6);
 }
 
-/* Reduced motion media query */
+/* Reduced motion accessibility enforcement */
 @media (prefers-reduced-motion: reduce) {
+  .matrix-column {
+    animation: none !important;
+    opacity: 0.12 !important;
+  }
+  .animate-shimmer,
+  .animate-scan,
+  .animate-ping-slow {
+    animation: none !important;
+  }
   *,
   *::before,
   *::after {
