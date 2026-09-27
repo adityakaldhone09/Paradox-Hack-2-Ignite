@@ -12,6 +12,8 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { HashViewer } from '../../components/ui/HashViewer';
 import { PaperSelector } from '../../components/ui/PaperSelector';
+import { VerificationStatus } from '../../components/ui/VerificationStatus';
+import { PageTransition } from '../../components/ui/PageTransition';
 import { toast } from 'sonner';
 
 export const VerifyIntegrityPage: React.FC = () => {
@@ -76,7 +78,7 @@ export const VerifyIntegrityPage: React.FC = () => {
   const selectedPaper = papers.find((p) => p.id === selectedPaperId || p.paper_id === selectedPaperId);
 
   return (
-    <div className="space-y-8 max-w-2xl mx-auto text-left">
+    <PageTransition className="space-y-8 max-w-2xl mx-auto text-left">
       {/* Page Header */}
       <div className="text-center space-y-1.5 pb-3 border-b border-neutral-200/80 dark:border-neutral-800">
         <h1 className="text-2xl font-bold text-neutral-950 dark:text-white tracking-tight flex items-center justify-center gap-2.5">
@@ -102,8 +104,15 @@ export const VerifyIntegrityPage: React.FC = () => {
         continueLoading={isVerifying}
       />
 
+      {/* Verifying Status Progress Feedback */}
+      {isVerifying && (
+        <div className="flex justify-center">
+          <VerificationStatus status="verifying" />
+        </div>
+      )}
+
       {/* Tamper Simulation Test Trigger */}
-      {selectedPaper && (
+      {selectedPaper && !isVerifying && (
         <div className="flex justify-center pt-1">
           <button
             type="button"
@@ -122,34 +131,22 @@ export const VerifyIntegrityPage: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: 0.25 }}
           className={`p-6 rounded-2xl border ${
             verificationResult.verified
               ? 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-200/80 dark:border-emerald-800/60'
               : 'bg-rose-50/40 dark:bg-rose-950/20 border-rose-200/80 dark:border-rose-800/60'
           } space-y-5 shadow-xs`}
         >
-          {/* Status Banner */}
-          <div className="flex items-center gap-3.5">
-            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
-              verificationResult.verified
-                ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400'
-                : 'bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400'
-            }`}>
-              {verificationResult.verified ? (
-                <CheckCircle2 className="w-5 h-5" />
-              ) : (
-                <AlertOctagon className="w-5 h-5" />
-              )}
-            </div>
-            <div>
-              <h2 className={`text-base font-bold tracking-tight ${
-                verificationResult.verified ? 'text-emerald-800 dark:text-emerald-300' : 'text-rose-800 dark:text-rose-300'
-              }`}>
-                {verificationResult.verified ? 'DOCUMENT VERIFIED' : 'DOCUMENT INTEGRITY FAILURE'}
-              </h2>
-              <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-0.5">{verificationResult.message}</p>
-            </div>
+          {/* Status Banner with VerificationStatus Micro-animation */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <VerificationStatus
+              status={verificationResult.verified ? 'verified' : 'tampered'}
+              message={verificationResult.message}
+            />
+            <span className="text-[11px] font-mono px-2.5 py-1 rounded-md bg-white/80 dark:bg-[#111113] border border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400 w-fit">
+              {verificationResult.verified ? 'SHA-256 MATCH' : 'HASH MISMATCH'}
+            </span>
           </div>
 
           {/* Hash Comparison Table */}
@@ -179,6 +176,6 @@ export const VerifyIntegrityPage: React.FC = () => {
           </div>
         </motion.div>
       )}
-    </div>
+    </PageTransition>
   );
 };

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ChevronDown, Check, FileText, Clock, AlertCircle } from 'lucide-react';
 import { Button } from './Button';
+import { MotionButton } from './MotionButton';
 
 export interface PaperItem {
   id: string;
@@ -251,15 +252,15 @@ export const PaperSelector: React.FC<PaperSelectorProps> = ({
 
             {onContinue && (
               <div className="pt-2">
-                <Button
+                <MotionButton
                   variant="primary"
                   size="md"
                   onClick={onContinue}
                   isLoading={continueLoading}
-                  className="w-full h-10 text-xs font-medium"
+                  className="w-full h-10 text-xs font-semibold"
                 >
                   {continueLabel}
-                </Button>
+                </MotionButton>
               </div>
             )}
           </motion.div>
