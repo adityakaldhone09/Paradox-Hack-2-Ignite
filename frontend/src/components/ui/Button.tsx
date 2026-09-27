@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, HTMLMotionProps } from 'framer-motion';
+import { motion, HTMLMotionProps, useReducedMotion } from 'framer-motion';
 import { Loader2, Check } from 'lucide-react';
 
 interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
@@ -20,6 +20,7 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props
 }) => {
+  const shouldReduceMotion = useReducedMotion();
   const baseStyles = 'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-150 select-none outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-white focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none';
 
   const sizeStyles = {
@@ -29,7 +30,6 @@ export const Button: React.FC<ButtonProps> = ({
   }[size];
 
   const variantStyles = {
-    // Charcoal primary with pure white text
     primary: 'bg-[#111111] text-white hover:bg-[#222222] dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-100 shadow-xs hover:shadow-sm hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99]',
     accent: 'bg-blue-600 text-white hover:bg-blue-700 shadow-xs hover:shadow-sm hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99]',
     secondary: 'bg-[#F7F7F5] dark:bg-neutral-800/80 text-neutral-800 dark:text-neutral-100 border border-neutral-200 dark:border-neutral-700/80 hover:bg-neutral-200/70 dark:hover:bg-neutral-700 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99]',
@@ -43,7 +43,7 @@ export const Button: React.FC<ButtonProps> = ({
 
   return (
     <motion.button
-      whileTap={isDisabled ? {} : { scale: 0.99 }}
+      whileTap={isDisabled || shouldReduceMotion ? {} : { scale: 0.99 }}
       disabled={isDisabled}
       className={`${baseStyles} ${sizeStyles} ${variantStyles} ${className}`}
       {...props}
