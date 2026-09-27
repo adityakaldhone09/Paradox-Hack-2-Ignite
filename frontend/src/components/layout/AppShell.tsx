@@ -4,6 +4,7 @@ import { examApi, paperApi, centreApi, securityApi, blockchainApi } from '../../
 import { CommandPalette } from '../ui/CommandPalette';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
+import { PageTransition } from '../ui/PageTransition';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -69,9 +70,9 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         <Topbar onOpenMobileMenu={() => setMobileOpen(true)} />
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 custom-scrollbar print:overflow-visible print:p-0 print:m-0">
-          <div className="max-w-7xl mx-auto space-y-6 print:max-w-none print:m-0 print:p-0">
+          <PageTransition className="max-w-7xl mx-auto space-y-6 print:max-w-none print:m-0 print:p-0">
             {children}
-          </div>
+          </PageTransition>
         </main>
       </div>
     </div>

@@ -5,9 +5,23 @@ const PRODUCTION_BACKEND_URL = 'https://paradox-hack-2-ignite.onrender.com';
 
 const resolveApiBase = (): string => {
   const envUrl = (import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || '').trim();
+  const isLocalHost =
+    typeof window !== 'undefined' &&
+    window.location.hostname &&
+    ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+  if (isLocalHost) {
+    if (envUrl && !envUrl.includes('onrender.com')) {
+      return envUrl.replace(/\/+$/, '');
+    }
+    // Default to local Vite proxy
+    return '';
+  }
+
   if (envUrl) {
     return envUrl.replace(/\/+$/, '');
   }
+
   // If running in production or on any remote deployed domain (not local dev), route to deployed backend
   if (
     import.meta.env.PROD ||

@@ -33,6 +33,27 @@ const IncidentsPage = lazy(() => import('./pages/incidents/IncidentsPage').then(
 const SecurityOpsPage = lazy(() => import('./pages/security/SecurityOpsPage').then((m) => ({ default: m.SecurityOpsPage })));
 const AuditorPortalPage = lazy(() => import('./pages/audit/AuditorPortalPage').then((m) => ({ default: m.AuditorPortalPage })));
 
+import { LoadingSkeleton } from './components/ui/LoadingSkeleton';
+
+const WorkspaceFallback = () => (
+  <div className="space-y-6 max-w-7xl mx-auto p-2 sm:p-4 animate-fade-in">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-neutral-200/80 dark:border-neutral-800">
+      <div className="space-y-2">
+        <LoadingSkeleton variant="rectangular" width={220} height={28} />
+        <LoadingSkeleton variant="rectangular" width={320} height={16} />
+      </div>
+      <LoadingSkeleton variant="rectangular" width={120} height={40} />
+    </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <LoadingSkeleton variant="card" height={100} />
+      <LoadingSkeleton variant="card" height={100} />
+      <LoadingSkeleton variant="card" height={100} />
+      <LoadingSkeleton variant="card" height={100} />
+    </div>
+    <LoadingSkeleton variant="card" height={260} />
+  </div>
+);
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -68,7 +89,7 @@ export const App: React.FC = () => {
                 element={
                   <ProtectedRoute>
                     <AppShell>
-                      <Suspense fallback={<div className="flex min-h-[300px] items-center justify-center text-xs text-neutral-400">Loading workspace…</div>}>
+                      <Suspense fallback={<WorkspaceFallback />}>
                         <Routes>
                           {/* Auto-Routing Dashboard */}
                           <Route path="/dashboard" element={<DashboardPage />} />
