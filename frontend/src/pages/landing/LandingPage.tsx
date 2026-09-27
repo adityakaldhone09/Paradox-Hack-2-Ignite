@@ -31,6 +31,9 @@ import { useTheme } from '../../store/ThemeContext';
 import { useAuth } from '../../store/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { VeriQLogo } from '../../components/ui/VeriQLogo';
+import { MatrixBackground } from '../../components/ui/MatrixBackground';
+import { AnimatedArrowButton } from '../../components/ui/AnimatedArrowButton';
+import { Reveal } from '../../components/ui/Reveal';
 
 export const LandingPage: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -385,39 +388,50 @@ export const LandingPage: React.FC = () => {
       {/* Supporting text: 18px–21px desktop, max-width 680–760px */}
       {/* ────────────────────────────────────────── */}
       <section className="relative min-h-[92vh] flex flex-col justify-center items-center px-6 pt-32 pb-20 overflow-hidden bg-tech-grid text-center">
-        <div className="max-w-4xl mx-auto space-y-6">
-          {/* Subtle Institutional Security Eyebrow */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800/80 border border-neutral-200 dark:border-neutral-700/80 text-neutral-600 dark:text-neutral-300 text-xs font-medium">
-            <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-            <span>Decentralized Chain of Custody System</span>
-          </div>
+        {/* Restrained Matrix-style cybersecurity background */}
+        <MatrixBackground density="medium" className="opacity-20 dark:opacity-30" overlayOpacity={0.88} />
+
+        <div className="relative z-20 max-w-4xl mx-auto space-y-6">
+          <Reveal delay={0.05}>
+            {/* Subtle Institutional Security Eyebrow */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800/80 border border-neutral-200 dark:border-neutral-700/80 text-neutral-600 dark:text-neutral-300 text-xs font-medium">
+              <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+              <span>Decentralized Chain of Custody System</span>
+            </div>
+          </Reveal>
 
           {/* Primary Editorial Headline: clamp(3.5rem, 7vw, 7rem) */}
-          <h1 className="text-[clamp(3.5rem,7vw,7rem)] font-bold tracking-tight text-neutral-950 dark:text-white leading-[1.04]">
-            Secure every<br className="hidden sm:inline" /> question paper.{' '}
-            <span className="text-neutral-400 dark:text-neutral-500 font-normal block sm:inline">
-              Verify every action.
-            </span>
-          </h1>
+          <Reveal delay={0.1}>
+            <h1 className="text-[clamp(3.5rem,7vw,7rem)] font-bold tracking-tight text-neutral-950 dark:text-white leading-[1.04]">
+              Secure every<br className="hidden sm:inline" /> question paper.{' '}
+              <span className="text-neutral-400 dark:text-neutral-500 font-normal block sm:inline">
+                Verify every action.
+              </span>
+            </h1>
+          </Reveal>
 
           {/* Supporting Statement: 18px – 21px desktop, max-width 720px */}
-          <p className="text-lg sm:text-xl md:text-[20px] text-neutral-600 dark:text-neutral-300 max-w-[720px] mx-auto font-normal leading-relaxed text-balance">
-            VeriQ eliminates institutional paper leaks using isolated encryption, hardware triple-binding, time-lock gates, and immutable blockchain proofs.
-          </p>
+          <Reveal delay={0.15}>
+            <p className="text-lg sm:text-xl md:text-[20px] text-neutral-600 dark:text-neutral-300 max-w-[720px] mx-auto font-normal leading-relaxed text-balance">
+              VeriQ eliminates institutional paper leaks using isolated encryption, hardware triple-binding, time-lock gates, and immutable blockchain proofs.
+            </p>
+          </Reveal>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-3">
-            <a href="#how-it-works">
-              <Button variant="primary" size="lg" className="w-full sm:w-auto px-7 py-3 text-base">
-                Explore How It Works
-              </Button>
-            </a>
-            <Link to="/signin">
-              <Button variant="secondary" size="lg" className="w-full sm:w-auto px-7 py-3 text-base">
-                Sign In to Workspace
-              </Button>
-            </Link>
-          </div>
+          <Reveal delay={0.2}>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-3">
+              <a href="#how-it-works">
+                <AnimatedArrowButton variant="primary" size="lg" className="w-56 h-12">
+                  Explore VeriQ
+                </AnimatedArrowButton>
+              </a>
+              <Link to="/signin">
+                <Button variant="secondary" size="lg" className="w-full sm:w-auto px-7 py-3 text-sm font-semibold rounded-full h-12">
+                  Sign In to Workspace
+                </Button>
+              </Link>
+            </div>
+          </Reveal>
         </div>
 
         {/* ────────────────────────────────────────── */}
@@ -879,25 +893,31 @@ export const LandingPage: React.FC = () => {
       {/* ────────────────────────────────────────── */}
       {/* 10. FINAL CALL TO ACTION */}
       {/* ────────────────────────────────────────── */}
-      <section className="py-28 px-6 max-w-4xl mx-auto text-center space-y-6 border-t border-neutral-200/80 dark:border-neutral-800/80">
-        <h2 className="text-4xl sm:text-6xl font-bold tracking-tight text-neutral-950 dark:text-white leading-tight">
-          Secure your examination workflow.
-        </h2>
-        <p className="text-lg text-neutral-600 dark:text-neutral-400 max-w-xl mx-auto">
-          Protect the paper. Control access. Verify every critical action.
-        </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-3">
-          <Link to="/signin">
-            <Button variant="primary" size="lg" className="w-full sm:w-auto px-8 py-3 text-base">
-              Enter VeriQ
-            </Button>
-          </Link>
-          <Link to="/signup">
-            <Button variant="secondary" size="lg" className="w-full sm:w-auto px-8 py-3 text-base">
-              Sign In
-            </Button>
-          </Link>
-        </div>
+      <section className="relative py-24 px-6 max-w-4xl mx-auto text-center space-y-6 border-t border-neutral-200/80 dark:border-neutral-800/80">
+        <Reveal delay={0.05}>
+          <h2 className="text-4xl sm:text-6xl font-bold tracking-tight text-neutral-950 dark:text-white leading-tight">
+            Secure your examination workflow.
+          </h2>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <p className="text-lg text-neutral-600 dark:text-neutral-400 max-w-xl mx-auto">
+            Protect the paper. Control access. Verify every critical action.
+          </p>
+        </Reveal>
+        <Reveal delay={0.15}>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-3">
+            <Link to="/signin">
+              <AnimatedArrowButton variant="primary" size="lg" className="w-52 h-12">
+                Enter VeriQ
+              </AnimatedArrowButton>
+            </Link>
+            <Link to="/signup">
+              <Button variant="secondary" size="lg" className="w-full sm:w-auto px-7 py-3 text-sm font-semibold rounded-full h-12">
+                Sign In
+              </Button>
+            </Link>
+          </div>
+        </Reveal>
       </section>
 
       {/* ────────────────────────────────────────── */}

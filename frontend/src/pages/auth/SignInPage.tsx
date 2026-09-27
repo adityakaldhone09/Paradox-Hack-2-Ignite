@@ -17,6 +17,7 @@ import { useAuth, UserRole } from '../../store/AuthContext';
 import { useTheme } from '../../store/ThemeContext';
 import { Button } from '../../components/ui/Button';
 import { VeriQLogo } from '../../components/ui/VeriQLogo';
+import { MatrixBackground } from '../../components/ui/MatrixBackground';
 
 export const SignInPage: React.FC = () => {
   const { login, getDashboardUrl } = useAuth();
@@ -92,9 +93,12 @@ export const SignInPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0A0A0B] text-neutral-900 dark:text-neutral-100 flex flex-col justify-center py-8 px-4 sm:px-6 transition-colors duration-200 bg-tech-grid">
+    <div className="relative min-h-screen bg-white dark:bg-[#0A0A0B] text-neutral-900 dark:text-neutral-100 flex flex-col justify-center py-8 px-4 sm:px-6 transition-colors duration-200 overflow-hidden bg-tech-grid">
+      {/* Subtle restrained Matrix security background */}
+      <MatrixBackground density="low" className="opacity-10 dark:opacity-20" overlayOpacity={0.92} />
+
       {/* Top Controls: Home & Theme Toggle */}
-      <div className="fixed top-5 inset-x-5 max-w-4xl mx-auto flex items-center justify-between z-10 pointer-events-none">
+      <div className="fixed top-5 inset-x-5 max-w-4xl mx-auto flex items-center justify-between z-20 pointer-events-none">
         <Link
           to="/"
           className="pointer-events-auto group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-white bg-white/90 dark:bg-[#111113]/90 border border-neutral-200 dark:border-neutral-800 hover:bg-[#F7F7F5] dark:hover:bg-neutral-800 backdrop-blur-md transition-all shadow-xs"
@@ -111,7 +115,7 @@ export const SignInPage: React.FC = () => {
         </button>
       </div>
 
-      <div className="w-full max-w-[440px] mx-auto space-y-6">
+      <div className="relative z-10 w-full max-w-[440px] mx-auto space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <Link to="/" className="inline-flex items-center justify-center mb-1">
