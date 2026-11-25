@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Moon, Sun, Zap, Menu } from 'lucide-react';
 import { useAuth } from '../../store/AuthContext';
 import { useTheme } from '../../store/ThemeContext';
@@ -106,14 +107,26 @@ export const Topbar: React.FC<TopbarProps> = ({ onOpenMobileMenu }) => {
         </div>
 
         {/* Theme Toggle Button */}
-        <button
+        <motion.button
           type="button"
           onClick={toggleTheme}
+          whileTap={{ scale: 0.92 }}
           aria-label="Toggle Theme"
-          className="p-2 md:p-2.5 rounded-xl text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white bg-white dark:bg-[#111113] border border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors shadow-2xs"
+          className="relative p-2 md:p-2.5 rounded-xl text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white bg-white dark:bg-[#111113] border border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors shadow-2xs overflow-hidden"
         >
-          {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-400" />}
-        </button>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.span
+              key={theme}
+              initial={{ y: -10, opacity: 0, rotate: -45 }}
+              animate={{ y: 0, opacity: 1, rotate: 0 }}
+              exit={{ y: 10, opacity: 0, rotate: 45 }}
+              transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+              className="block"
+            >
+              {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-400" />}
+            </motion.span>
+          </AnimatePresence>
+        </motion.button>
 
         {/* User Quick Info Avatar Badge */}
         <div className="flex items-center gap-2 pl-2 border-l border-neutral-200 dark:border-neutral-800">

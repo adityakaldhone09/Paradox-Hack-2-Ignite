@@ -34,6 +34,10 @@ import { VeriQLogo } from '../../components/ui/VeriQLogo';
 import { MatrixBackground } from '../../components/ui/MatrixBackground';
 import { AnimatedArrowButton } from '../../components/ui/AnimatedArrowButton';
 import { Reveal } from '../../components/ui/Reveal';
+import { Spotlight } from '../../components/ui/Spotlight';
+import { BorderBeam } from '../../components/ui/BorderBeam';
+import { ScrambleText } from '../../components/ui/ScrambleText';
+import { ShimmerButton } from '../../components/ui/ShimmerButton';
 
 export const LandingPage: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -426,9 +430,9 @@ export const LandingPage: React.FC = () => {
                 </AnimatedArrowButton>
               </a>
               <Link to="/signin">
-                <Button variant="secondary" size="lg" className="w-full sm:w-auto px-7 py-3 text-sm font-semibold rounded-full h-12">
+                <ShimmerButton variant="dark" size="lg" className="w-full sm:w-auto px-7 rounded-full h-12">
                   Sign In to Workspace
-                </Button>
+                </ShimmerButton>
               </Link>
             </div>
           </Reveal>
@@ -440,7 +444,10 @@ export const LandingPage: React.FC = () => {
         {/* Hover reactions, animated connector, restrained semantic colors */}
         {/* ────────────────────────────────────────── */}
         <div className="mt-16 w-full max-w-4xl mx-auto px-2 sm:px-4">
-          <div className="rounded-3xl border border-neutral-200/90 dark:border-neutral-800 bg-white/95 dark:bg-[#111113]/95 p-6 sm:p-8 shadow-elevated text-left backdrop-blur-md">
+          <div className="relative overflow-hidden rounded-3xl border border-neutral-200/90 dark:border-neutral-800 bg-white/95 dark:bg-[#111113]/95 p-6 sm:p-8 shadow-elevated text-left backdrop-blur-md">
+            <BorderBeam size={240} duration={10} />
+            <Spotlight size={280} />
+            <div className="relative z-10">
             {/* Header with real-time status */}
             <div className="flex items-center justify-between pb-5 border-b border-neutral-100 dark:border-neutral-800 text-xs">
               <div className="flex items-center gap-2">
@@ -514,8 +521,11 @@ export const LandingPage: React.FC = () => {
 
               <div className="shrink-0 p-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-900/60 border border-neutral-100 dark:border-neutral-800 font-mono text-[11px] text-neutral-700 dark:text-neutral-300 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                <span>{lifecycleStages[activeLifecycleStage].status}</span>
+                <ScrambleText intervalMs={20} triggerKey={activeLifecycleStage}>
+                  {lifecycleStages[activeLifecycleStage].status}
+                </ScrambleText>
               </div>
+            </div>
             </div>
           </div>
         </div>
@@ -557,8 +567,9 @@ export const LandingPage: React.FC = () => {
             return (
               <div
                 key={s.step}
-                className="card-interactive p-6 rounded-3xl border border-neutral-200/90 dark:border-neutral-800 bg-white dark:bg-[#111113] shadow-xs space-y-3 hover:border-blue-300 dark:hover:border-blue-800 group"
+                className="relative overflow-hidden card-interactive p-6 rounded-3xl border border-neutral-200/90 dark:border-neutral-800 bg-white dark:bg-[#111113] shadow-xs space-y-3 hover:border-blue-300 dark:hover:border-blue-800 group"
               >
+                <Spotlight size={200} />
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-mono font-bold text-neutral-400 group-hover:text-blue-600 transition-colors">
                     {s.step}

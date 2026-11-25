@@ -2,10 +2,14 @@ import React from 'react';
 import { motion, HTMLMotionProps, useReducedMotion } from 'framer-motion';
 import { cn } from '../../lib/utils';
 import { motionTokens } from '../../lib/motion';
+import { Spotlight } from './Spotlight';
+import { BorderBeam } from './BorderBeam';
 
 export interface MotionCardProps extends HTMLMotionProps<'div'> {
   hoverable?: boolean;
   bordered?: boolean;
+  spotlight?: boolean;
+  borderBeam?: boolean;
   elevation?: 'flat' | 'raised' | 'elevated';
   children: React.ReactNode;
 }
@@ -14,6 +18,8 @@ export const MotionCard: React.FC<MotionCardProps> = ({
   children,
   hoverable = true,
   bordered = true,
+  spotlight = true,
+  borderBeam = false,
   elevation = 'raised',
   className = '',
   ...props
@@ -38,7 +44,7 @@ export const MotionCard: React.FC<MotionCardProps> = ({
           : undefined
       }
       className={cn(
-        'rounded-2xl bg-white dark:bg-[#111113] text-neutral-900 dark:text-neutral-100 p-6',
+        'relative overflow-hidden rounded-2xl bg-white dark:bg-[#111113] text-neutral-900 dark:text-neutral-100 p-6',
         'transition-colors duration-200',
         bordered && 'border border-neutral-200/80 dark:border-neutral-800/80',
         hoverable && 'hover:border-neutral-300 dark:hover:border-neutral-700/80',
@@ -47,7 +53,9 @@ export const MotionCard: React.FC<MotionCardProps> = ({
       )}
       {...props}
     >
-      {children}
+      {spotlight && hoverable && <Spotlight size={220} />}
+      {borderBeam && <BorderBeam size={160} duration={9} />}
+      <div className="relative z-10 h-full">{children}</div>
     </motion.div>
   );
 };

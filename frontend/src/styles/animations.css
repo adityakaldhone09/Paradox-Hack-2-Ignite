@@ -159,6 +159,16 @@
   animation: shimmer 1.8s infinite;
 }
 
+@keyframes border-beam {
+  100% {
+    offset-distance: 100%;
+  }
+}
+
+.animate-border-beam {
+  animation: border-beam var(--beam-duration, 8s) infinite linear;
+}
+
 /* Icon Interactive Micro-interactions */
 .icon-interactive {
   transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), color 200ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -195,7 +205,8 @@
   }
   .animate-shimmer,
   .animate-scan,
-  .animate-ping-slow {
+  .animate-ping-slow,
+  .animate-border-beam {
     animation: none !important;
   }
   *,

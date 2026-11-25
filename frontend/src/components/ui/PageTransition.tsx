@@ -20,11 +20,11 @@ export const PageTransition: React.FC<PageTransitionProps> = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -4 }}
+      initial={{ opacity: 0, y: 8, filter: 'blur(4px)' }}
+      animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+      exit={{ opacity: 0, y: -4, filter: 'blur(2px)' }}
       transition={{
-        duration: 0.24,
+        duration: 0.28,
         ease: easeApple,
       }}
       className={cn('w-full', className)}

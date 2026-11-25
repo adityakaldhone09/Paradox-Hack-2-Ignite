@@ -20,6 +20,10 @@ import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { HashViewer } from '../../../components/ui/HashViewer';
+import { Spotlight } from '../../../components/ui/Spotlight';
+import { NumberTicker } from '../../../components/ui/NumberTicker';
+import { ScrambleText } from '../../../components/ui/ScrambleText';
+import { staggerContainer, fadeUp } from '../../../lib/motion';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -137,24 +141,34 @@ export const SuperAdminDashboard: React.FC = () => {
       </div>
 
       {/* Typographic Metric Grid (Restrained, Apple/Linear style) */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-4">
-        {kpis.map((kpi) => (
-          <Link key={kpi.label} to={kpi.link} className="block group">
-            <div className="p-5 rounded-2xl bg-white dark:bg-[#111113] border border-neutral-200/80 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 shadow-xs hover:shadow-sm transition-all duration-200">
-              <div className="flex items-center justify-between text-neutral-400 text-xs font-mono uppercase tracking-wider mb-2">
-                <span>{kpi.label}</span>
-                <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <motion.div
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-4"
+      >
+        {kpis.map((kpi, idx) => (
+          <motion.div key={kpi.label} variants={fadeUp} custom={idx}>
+            <Link to={kpi.link} className="block group h-full">
+              <div className="relative overflow-hidden p-5 rounded-2xl bg-white dark:bg-[#111113] border border-neutral-200/80 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 shadow-xs hover:shadow-md transition-all duration-200 h-full">
+                <Spotlight size={180} />
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between text-neutral-400 text-xs font-mono uppercase tracking-wider mb-2">
+                    <span>{kpi.label}</span>
+                    <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                  </div>
+                  <div className="text-3xl font-extrabold text-neutral-950 dark:text-white tracking-tight">
+                    <NumberTicker value={Number(kpi.value) || 0} delay={idx * 0.04} />
+                  </div>
+                  <div className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                    {kpi.sub}
+                  </div>
+                </div>
               </div>
-              <div className="text-3xl font-extrabold text-neutral-950 dark:text-white tracking-tight">
-                {kpi.value}
-              </div>
-              <div className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-                {kpi.sub}
-              </div>
-            </div>
-          </Link>
+            </Link>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {/* Main Charts & Telemetry */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -211,7 +225,7 @@ export const SuperAdminDashboard: React.FC = () => {
         </Card>
 
         {/* Blockchain Network Telemetry Card */}
-        <Card className="p-6 bg-white dark:bg-[#111113] border border-neutral-200/80 dark:border-neutral-800 flex flex-col justify-between">
+        <Card borderBeam spotlight className="p-6 bg-white dark:bg-[#111113] border border-neutral-200/80 dark:border-neutral-800 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-4 border-b border-neutral-100 dark:border-neutral-800">
               <h2 className="text-sm font-bold text-neutral-950 dark:text-white flex items-center gap-2">
@@ -227,7 +241,7 @@ export const SuperAdminDashboard: React.FC = () => {
               <div className="flex justify-between items-center">
                 <span className="text-neutral-500">Ledger Block Height:</span>
                 <span className="font-mono font-bold text-neutral-950 dark:text-white">
-                  #{blockchainStatus?.block_height ?? 1489}
+                  #<ScrambleText intervalMs={25}>{String(blockchainStatus?.block_height ?? 1489)}</ScrambleText>
                 </span>
               </div>
               <div className="flex justify-between items-center">

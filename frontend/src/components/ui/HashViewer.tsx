@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import { ScrambleText } from './ScrambleText';
 
 interface HashViewerProps {
   hash: string;
@@ -39,7 +40,7 @@ export const HashViewer: React.FC<HashViewerProps> = ({
     <div className={`inline-flex items-center gap-2 group ${className}`}>
       {label && <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{label}:</span>}
       <code className="font-mono text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800/80 text-cyan-800 dark:text-brand-400 border border-cyan-200 dark:border-brand-500/20 tracking-wider">
-        {displayHash}
+        <ScrambleText intervalMs={22}>{displayHash}</ScrambleText>
       </code>
       <button
         onClick={copyToClipboard}
