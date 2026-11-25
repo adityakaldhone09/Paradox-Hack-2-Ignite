@@ -1,0 +1,13 @@
+{
+  "selectedDirection": "Direction B: Interactive Custody Pipeline",
+  "surface": "Landing Page Hero & Custody Flow",
+  "component": "CustodyPipelineFlow.tsx",
+  "decidedAt": "2026-11-25T16:30:00Z",
+  "rationale": "Visualizes the multi-party paper lifecycle as an animated 7-node cryptographic bus with interactive state inspection, dynamic hash decoding, and spatial non-repudiation guarantees.",
+  "tokens": {
+    "accent": "#2563EB",
+    "statusVerified": "#16A34A",
+    "borderRadius": "rounded-3xl",
+    "cardBackground": "bg-white/95 dark:bg-[#111113]/95"
+  }
+}

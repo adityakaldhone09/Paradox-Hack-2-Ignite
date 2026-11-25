@@ -38,6 +38,9 @@ import { Spotlight } from '../../components/ui/Spotlight';
 import { BorderBeam } from '../../components/ui/BorderBeam';
 import { ScrambleText } from '../../components/ui/ScrambleText';
 import { ShimmerButton } from '../../components/ui/ShimmerButton';
+import { CustodyPipelineFlow } from '../../components/ui/CustodyPipelineFlow';
+import { CryptographicTerminalSimulator } from '../../components/ui/CryptographicTerminalSimulator';
+import { EditorialTelemetryGrid } from '../../components/ui/EditorialTelemetryGrid';
 
 export const LandingPage: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -56,6 +59,9 @@ export const LandingPage: React.FC = () => {
 
   // 4-Role interactive experience active tab
   const [activeRole, setActiveRole] = useState<'super_admin' | 'paper_setter' | 'centre_admin' | 'invigilator'>('super_admin');
+
+  // 21st UI Explore Direction Switcher ('A' | 'B' | 'C')
+  const [heroDirection, setHeroDirection] = useState<'A' | 'B' | 'C'>('B');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -442,95 +448,87 @@ export const LandingPage: React.FC = () => {
         </div>
 
         {/* ────────────────────────────────────────── */}
-        {/* 3. ACTIVE LIFECYCLE COMPONENT (HERO-LEVEL VISUAL) */}
-        {/* Interactive 7 stages: Create, Encrypt, Hash, Authorize, Release, Verify, Audit */}
-        {/* Hover reactions, animated connector, restrained semantic colors */}
+        {/* 3. 21st UI EXPLORE DIRECTION SWITCHER & HERO SHOWCASE */}
+        {/* Compare Direction A (Terminal Simulator), Direction B (Custody Pipeline), Direction C (Editorial Telemetry) */}
         {/* ────────────────────────────────────────── */}
-        <div className="mt-16 w-full max-w-4xl mx-auto px-2 sm:px-4">
-          <div className="relative overflow-hidden rounded-3xl border border-neutral-200/90 dark:border-neutral-800 bg-white/95 dark:bg-[#111113]/95 p-6 sm:p-8 shadow-elevated text-left backdrop-blur-md">
-            <BorderBeam size={240} duration={10} />
-            <Spotlight size={280} />
-            <div className="relative z-10">
-            {/* Header with real-time status */}
-            <div className="flex items-center justify-between pb-5 border-b border-neutral-100 dark:border-neutral-800 text-xs">
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-neutral-400 dark:text-neutral-500 text-xs font-semibold">
-                  ARTIFACT // CSE-301-DATABASE-MANAGEMENT.pdf.enc
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 text-blue-600 dark:text-blue-400 font-mono text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-ping" />
-                  ACTIVE CUSTODY LIFECYCLE
-                </span>
-              </div>
-            </div>
-
-            {/* Stepper Visual Nodes (7 Steps) */}
-            <div className="relative pt-4 pb-2">
-              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2.5 relative z-10">
-                {lifecycleStages.map((stg, idx) => {
-                  const Icon = stg.icon;
-                  const isCurrent = activeLifecycleStage === idx;
-                  const isPast = activeLifecycleStage > idx;
-                  return (
-                    <div
-                      key={stg.id}
-                      onClick={() => setActiveLifecycleStage(idx)}
-                      className={`cursor-pointer p-3 rounded-2xl border text-center transition-all duration-300 ${
-                        isCurrent
-                          ? 'border-blue-600 dark:border-blue-500 bg-blue-50/60 dark:bg-blue-950/40 shadow-sm scale-102 ring-1 ring-blue-500/20'
-                          : isPast
-                          ? 'border-neutral-200/80 dark:border-neutral-800/80 bg-neutral-50/50 dark:bg-neutral-900/30 opacity-90'
-                          : 'border-neutral-100 dark:border-neutral-800/40 bg-neutral-50/20 dark:bg-neutral-900/10 opacity-50'
-                      }`}
-                    >
-                      <div
-                        className={`w-9 h-9 mx-auto mb-2 rounded-xl flex items-center justify-center transition-all duration-300 ${
-                          isCurrent
-                            ? 'bg-blue-600 text-white shadow-xs scale-105'
-                            : isPast
-                            ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200'
-                            : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-400'
-                        }`}
-                      >
-                        <Icon className="w-4 h-4" />
-                      </div>
-                      <span className="text-[10px] font-mono text-neutral-400 block">{stg.num}</span>
-                      <span className={`text-xs font-bold block truncate mt-0.5 ${isCurrent ? 'text-blue-600 dark:text-blue-400' : 'text-neutral-900 dark:text-neutral-100'}`}>
-                        {stg.title}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Active Stage Detailed Feedback Box */}
-            <div className="mt-6 pt-5 border-t border-neutral-100 dark:border-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-neutral-950 dark:text-white text-sm">
-                    {lifecycleStages[activeLifecycleStage].num}. {lifecycleStages[activeLifecycleStage].title} — {lifecycleStages[activeLifecycleStage].label}
-                  </span>
-                  <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300">
-                    {lifecycleStages[activeLifecycleStage].badge}
-                  </span>
-                </div>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed max-w-xl">
-                  {lifecycleStages[activeLifecycleStage].desc}
-                </p>
-              </div>
-
-              <div className="shrink-0 p-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-900/60 border border-neutral-100 dark:border-neutral-800 font-mono text-[11px] text-neutral-700 dark:text-neutral-300 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                <ScrambleText intervalMs={20} triggerKey={activeLifecycleStage}>
-                  {lifecycleStages[activeLifecycleStage].status}
-                </ScrambleText>
-              </div>
-            </div>
+        <div className="mt-14 w-full max-w-6xl mx-auto px-2 sm:px-4 space-y-4">
+          {/* Direction Pill Selector */}
+          <div className="flex items-center justify-center">
+            <div className="inline-flex items-center p-1 rounded-2xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200/80 dark:border-neutral-800 text-xs shadow-xs">
+              <span className="px-3 text-[11px] font-mono text-neutral-400 uppercase hidden sm:inline">
+                21st Direction:
+              </span>
+              <button
+                onClick={() => setHeroDirection('B')}
+                className={`px-3.5 py-1.5 rounded-xl font-medium transition-all ${
+                  heroDirection === 'B'
+                    ? 'bg-white dark:bg-[#18181B] text-neutral-950 dark:text-white shadow-xs font-semibold'
+                    : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200'
+                }`}
+              >
+                Direction B (Pipeline Flow)
+              </button>
+              <button
+                onClick={() => setHeroDirection('A')}
+                className={`px-3.5 py-1.5 rounded-xl font-medium transition-all ${
+                  heroDirection === 'A'
+                    ? 'bg-white dark:bg-[#18181B] text-neutral-950 dark:text-white shadow-xs font-semibold'
+                    : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200'
+                }`}
+              >
+                Direction A (Command Terminal)
+              </button>
+              <button
+                onClick={() => setHeroDirection('C')}
+                className={`px-3.5 py-1.5 rounded-xl font-medium transition-all ${
+                  heroDirection === 'C'
+                    ? 'bg-white dark:bg-[#18181B] text-neutral-950 dark:text-white shadow-xs font-semibold'
+                    : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200'
+                }`}
+              >
+                Direction C (Editorial Restraint)
+              </button>
             </div>
           </div>
+
+          {/* Active Direction Component Display */}
+          <AnimatePresence mode="wait">
+            {heroDirection === 'B' && (
+              <motion.div
+                key="direction-b"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25 }}
+              >
+                <CustodyPipelineFlow />
+              </motion.div>
+            )}
+
+            {heroDirection === 'A' && (
+              <motion.div
+                key="direction-a"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25 }}
+              >
+                <CryptographicTerminalSimulator />
+              </motion.div>
+            )}
+
+            {heroDirection === 'C' && (
+              <motion.div
+                key="direction-c"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25 }}
+              >
+                <EditorialTelemetryGrid />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </section>
 
