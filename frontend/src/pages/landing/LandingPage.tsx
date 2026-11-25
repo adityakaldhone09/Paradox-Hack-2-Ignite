@@ -304,6 +304,9 @@ export const LandingPage: React.FC = () => {
             <Link to="/verify" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
               Verify Paper
             </Link>
+            <Link to="/crowd-hero" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-semibold">
+              Crowd Hero Demo
+            </Link>
           </nav>
 
           {/* Action CTAs & Theme Toggle */}

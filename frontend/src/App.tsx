@@ -15,6 +15,7 @@ const ForgotPasswordPage = lazy(() => import('./pages/auth/ForgotPasswordPage').
 const ResetPasswordPage = lazy(() => import('./pages/auth/ResetPasswordPage').then((m) => ({ default: m.ResetPasswordPage })));
 const UnauthorizedPage = lazy(() => import('./pages/auth/UnauthorizedPage').then((m) => ({ default: m.UnauthorizedPage })));
 const LogoutPage = lazy(() => import('./pages/auth/LogoutPage').then((m) => ({ default: m.LogoutPage })));
+const CrowdHeroDemo = lazy(() => import('./components/ui/cold-email-crowd-hero-demo').then((m) => ({ default: m.default })));
 
 const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage').then((m) => ({ default: m.DashboardPage })));
 const SuperAdminDashboard = lazy(() => import('./pages/dashboard/roles/SuperAdminDashboard').then((m) => ({ default: m.SuperAdminDashboard })));
@@ -75,6 +76,7 @@ export const App: React.FC = () => {
             <Routes>
               {/* Public Standalone Pages (No Shell) */}
               <Route path="/" element={<Suspense fallback={<div className="flex min-h-screen items-center justify-center text-sm text-neutral-500">Loading VeriQ…</div>}><LandingPage /></Suspense>} />
+              <Route path="/crowd-hero" element={<Suspense fallback={<div className="flex min-h-screen items-center justify-center text-sm text-neutral-500">Loading Demo…</div>}><CrowdHeroDemo /></Suspense>} />
               <Route path="/signin" element={<Suspense fallback={<div className="flex min-h-screen items-center justify-center text-sm text-neutral-500">Loading VeriQ…</div>}><SignInPage /></Suspense>} />
               <Route path="/signup" element={<Suspense fallback={<div className="flex min-h-screen items-center justify-center text-sm text-neutral-500">Loading VeriQ…</div>}><SignUpPage /></Suspense>} />
               <Route path="/login" element={<Navigate to="/signin" replace />} />
